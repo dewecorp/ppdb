@@ -20,12 +20,12 @@ if ([string]::IsNullOrWhiteSpace($Branch)) {
 }
 $uname = git config --get user.name
 if ([string]::IsNullOrWhiteSpace($uname)) {
-    $uname = Read-Host "Masukkan Git user.name"
+    $uname = Read-Host "dewecorp"
     if (-not [string]::IsNullOrWhiteSpace($uname)) { git config user.name $uname }
 }
 $uemail = git config --get user.email
 if ([string]::IsNullOrWhiteSpace($uemail)) {
-    $uemail = Read-Host "Masukkan Git user.email"
+    $uemail = Read-Host "dewecorp@gmail.com"
     if (-not [string]::IsNullOrWhiteSpace($uemail)) { git config user.email $uemail }
 }
 $remotes = git remote
