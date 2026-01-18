@@ -96,6 +96,16 @@ $user = current_user();
             padding-top: 5.25rem;
         }
 
+        .topbar-user-name {
+            font-size: 1.15rem !important;
+            font-weight: 700 !important;
+            color: #374151 !important;
+        }
+
+        .img-profile {
+            border-radius: 0 !important;
+        }
+
         @media (max-width: 768px) {
             .topbar-fixed {
                 left: 0;
@@ -236,8 +246,8 @@ $user = current_user();
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span
-                                    class="mr-2 d-none d-lg-inline text-gray-600 small"><?= esc($user['username'] ?? 'Admin'); ?></span>
-                                <img class="img-profile rounded-circle"
+                                    class="mr-2 d-none d-lg-inline topbar-user-name"><?= esc($user['username'] ?? 'Admin'); ?></span>
+                                <img class="img-profile"
                                     src="<?= esc(isset($user['foto']) && $user['foto'] !== '' ? base_url('uploads/' . $user['foto']) : 'https://via.placeholder.com/60'); ?>">
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"

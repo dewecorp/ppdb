@@ -27,9 +27,11 @@ if (!$data) {
 $madrasah = [
     'nama' => 'MI SULTAN FATTAH SUKOSONO',
     'alamat' => '',
+    'logo' => '',
+    'nama_panitia' => '',
 ];
 
-if ($res = $mysqli->query('SELECT nama, alamat FROM madrasah LIMIT 1')) {
+if ($res = $mysqli->query('SELECT nama, alamat, logo, nama_panitia FROM madrasah LIMIT 1')) {
     if ($row = $res->fetch_assoc()) {
         $madrasah = $row;
     }
@@ -44,7 +46,9 @@ if ($res = $mysqli->query('SELECT nama, alamat FROM madrasah LIMIT 1')) {
     <style>
         body { font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 20px; background-color: #f3f4f6; }
         .kartu-wrapper { max-width: 800px; margin: 0 auto; background-color: #ffffff; border: 1px solid #d1d5db; padding: 24px; }
-        .kartu-header { text-align: center; margin-bottom: 16px; }
+        .kartu-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .kartu-logo { width: 72px; height: 72px; border: none; border-radius: 6px; object-fit: contain; background: #fff; }
+        .kartu-header-text { flex: 1; text-align: center; }
         .kartu-header h1 { font-size: 20px; margin: 0; }
         .kartu-header h2 { font-size: 18px; margin: 4px 0 0 0; }
         .kartu-header p { margin: 4px 0; font-size: 12px; }
@@ -63,10 +67,14 @@ if ($res = $mysqli->query('SELECT nama, alamat FROM madrasah LIMIT 1')) {
 <body onload="window.print()">
     <div class="kartu-wrapper">
         <div class="kartu-header">
-            <h1>FORMULIR PENDAFTARAN PESERTA DIDIK BARU</h1>
-            <h2><?= esc($madrasah['nama']); ?></h2>
-            <p><?= esc($madrasah['alamat']); ?></p>
-            <p>Tahun Pelajaran <?= date('Y'); ?>/<?= date('Y') + 1; ?></p>
+            <?php if (!empty($madrasah['logo'])): ?>
+                <img class="kartu-logo" src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo">
+            <?php endif; ?>
+            <div class="kartu-header-text">
+                <h1>FORMULIR PENDAFTARAN PESERTA DIDIK BARU</h1>
+                <h2><?= esc(strtoupper($madrasah['nama'])); ?></h2>
+                <p>Tahun Ajaran <?= date('Y'); ?>/<?= date('Y') + 1; ?></p>
+            </div>
         </div>
 
         <div class="kartu-no">Nomor Pendaftaran: <?= esc($data['no_pendaftaran']); ?></div>
@@ -104,9 +112,9 @@ if ($res = $mysqli->query('SELECT nama, alamat FROM madrasah LIMIT 1')) {
 
         <div class="ttd-wrapper">
             <div class="ttd">
-                <div><?= esc($madrasah['alamat']); ?>, <?= date('d-m-Y'); ?></div>
+                <div>Jepara, <?= date('d-m-Y'); ?></div>
                 <div class="ttd-space"></div>
-                <div>(.............................................)</div>
+                <div><?= esc($madrasah['nama_panitia'] !== '' ? $madrasah['nama_panitia'] : 'Panitia PPDB'); ?></div>
             </div>
         </div>
     </div>

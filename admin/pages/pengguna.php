@@ -47,21 +47,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    if ($aksi === 'edit' && isset($_POST['id'])) {
-        $id = (int)$_POST['id'];
+    if ($aksi === 'edit') {
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
         $username = isset($_POST['username']) ? trim($_POST['username']) : '';
         $password = isset($_POST['password']) ? (string)$_POST['password'] : '';
         $fotoName = null;
 
-        $stmt = $mysqli->prepare('SELECT foto, password FROM users WHERE id = ? LIMIT 1');
-        if ($stmt) {
-            $stmt->bind_param('i', $id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $current = $result->fetch_assoc();
-            $stmt->close();
-        } else {
-            $current = null;
+        $current = null;
+        if ($id > 0) {
+            $stmt = $mysqli->prepare('SELECT id, username, foto, password FROM users WHERE id = ? LIMIT 1');
+            if ($stmt) {
+                $stmt->bind_param('i', $id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $current = $result->fetch_assoc();
+                $stmt->close();
+            }
+        }
+        if (!$current && $username !== '') {
+            $stmt = $mysqli->prepare('SELECT id, username, foto, password FROM users WHERE username = ? LIMIT 1');
+            if ($stmt) {
+                $stmt->bind_param('s', $username);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $current = $result->fetch_assoc();
+                $stmt->close();
+                if ($current) {
+                    $id = (int)$current['id'];
+                }
+            }
         }
 
         if (!$current) {

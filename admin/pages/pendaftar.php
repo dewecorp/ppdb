@@ -107,6 +107,7 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
                                 <th>Jenis Kelamin</th>
                                 <th>NIK</th>
                                 <th>KK</th>
+                                <th>Alamat</th>
                                 <th>KIP</th>
                                 <th>PKH</th>
                                 <th>Status Daftar</th>
@@ -126,6 +127,7 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
                                 <td><?= esc($row['jenis_kelamin']); ?></td>
                                 <td><?= esc($row['nik']); ?></td>
                                 <td><?= esc($row['kk']); ?></td>
+                                <td><?= esc($row['alamat']); ?></td>
                                 <td><?= esc($row['kip']); ?></td>
                                 <td><?= esc($row['pkh']); ?></td>
                                 <td>
