@@ -10,6 +10,22 @@ $total_pendaftar = count_pendaftar();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $aksi = isset($_POST['aksi']) ? $_POST['aksi'] : '';
 
+    if ($aksi === 'reset_total') {
+        $okDelete = @$mysqli->query('DELETE FROM pendaftar');
+        $okReset = reset_no_pendaftaran();
+        if ($okDelete) {
+            if ($okReset) {
+                flash('success', 'Semua data pendaftar dihapus dan nomor pendaftaran direset.');
+            } else {
+                flash('success', 'Semua data pendaftar dihapus. Nomor pendaftaran gagal direset.');
+            }
+            log_activity('reset_total', 'Hapus semua pendaftar & reset nomor');
+        } else {
+            flash('error', 'Gagal menghapus semua data pendaftar.');
+        }
+        redirect_to_pendaftar();
+    }
+
     if ($aksi === 'ubah_status' && isset($_POST['id'], $_POST['status'])) {
         $id = (int)$_POST['id'];
         $status = $_POST['status'] === 'diterima' ? 'diterima' : ($_POST['status'] === 'ditolak' ? 'ditolak' : 'proses');
@@ -18,10 +34,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param('si', $status, $id);
             $stmt->execute();
             $stmt->close();
-            flash('success', 'Status pendaftar berhasil diperbarui.');
+            $rowEmail = null;
+            if ($res2 = $mysqli->prepare('SELECT nama_lengkap, no_pendaftaran, email, hp FROM pendaftar WHERE id=? LIMIT 1')) {
+                $res2->bind_param('i', $id);
+                $res2->execute();
+                $r = $res2->get_result();
+                $rowEmail = $r->fetch_assoc() ?: null;
+                $res2->close();
+            }
+            if ($rowEmail && !empty($rowEmail['email'])) {
+                $info = madrasah_info();
+                $subject = 'Informasi Status PPDB - ' . (string)$info['nama'];
+                $statusText = $status === 'diterima' ? 'DITERIMA' : ($status === 'ditolak' ? 'DITOLAK' : 'DALAM PROSES');
+                $lines = [];
+                $lines[] = 'Assalamu\'alaikum ' . $rowEmail['nama_lengkap'] . ',';
+                $lines[] = 'Nomor Pendaftaran: ' . $rowEmail['no_pendaftaran'];
+                $lines[] = 'Status Pendaftaran: ' . $statusText;
+                $lines[] = 'Informasi detail dapat dilihat di halaman PPDB: ' . base_url();
+                $message = implode("\r\n", $lines);
+                if (send_email($rowEmail['email'], $subject, $message)) {
+                    $flash = 'Status diperbarui dan email notifikasi terkirim.';
+                } else {
+                    $flash = 'Status diperbarui. Email gagal dikirim.';
+                }
+                if (isset($rowEmail['hp']) ? $rowEmail['hp'] !== '' : false) {
+                    if (send_whatsapp((string)$rowEmail['hp'], $message)) {
+                        $flash .= ' WhatsApp terkirim.';
+                    } else {
+                        $flash .= ' WhatsApp gagal.';
+                    }
+                }
+                flash('success', $flash);
+            } else {
+                flash('success', 'Status pendaftar berhasil diperbarui.');
+            }
             log_activity('update_pendaftar_status', 'Ubah status pendaftar ID ' . $id . ' menjadi ' . $status);
         } else {
             flash('error', 'Gagal memperbarui status pendaftar.');
+        }
+        redirect_to_pendaftar();
+    }
+
+    if ($aksi === 'kirim_email' && isset($_POST['id'])) {
+        $id = (int)$_POST['id'];
+        $row = null;
+        if ($res = $mysqli->prepare('SELECT nama_lengkap, no_pendaftaran, email, status_daftar FROM pendaftar WHERE id = ? LIMIT 1')) {
+            $res->bind_param('i', $id);
+            $res->execute();
+            $result = $res->get_result();
+            $row = $result->fetch_assoc() ?: null;
+            $res->close();
+        }
+        if ($row && !empty($row['email'])) {
+            $info = madrasah_info();
+            $subject = 'Informasi Status PPDB - ' . (string)$info['nama'];
+            $statusText = $row['status_daftar'] === 'diterima' ? 'DITERIMA' : ($row['status_daftar'] === 'ditolak' ? 'DITOLAK' : 'DALAM PROSES');
+            $bodyLines = [];
+            $bodyLines[] = 'Assalamu\'alaikum ' . $row['nama_lengkap'] . ',';
+            $bodyLines[] = 'Nomor Pendaftaran: ' . $row['no_pendaftaran'];
+            $bodyLines[] = 'Status Pendaftaran: ' . $statusText;
+            $bodyLines[] = 'Informasi detail dapat dilihat di halaman PPDB: ' . base_url();
+            if (!empty($info['hp_panitia']) || !empty($info['hp_kepala'])) {
+                $bodyLines[] = 'Kontak: ' . (!empty($info['hp_panitia']) ? $info['hp_panitia'] : $info['hp_kepala']);
+            }
+            $bodyLines[] = 'Terima kasih.';
+            $message = implode("\r\n", $bodyLines);
+            if (send_email($row['email'], $subject, $message)) {
+                flash('success', 'Notifikasi email berhasil dikirim.');
+                log_activity('send_email_pendaftar', 'Kirim email pendaftar ID ' . $id);
+            } else {
+                flash('error', 'Gagal mengirim email. Pastikan konfigurasi email server tersedia.');
+            }
+        } else {
+            flash('error', 'Email pendaftar tidak tersedia.');
         }
         redirect_to_pendaftar();
     }
@@ -89,6 +174,9 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
                 <button type="button" class="btn btn-sm btn-danger" id="btnHapusTerpilih">
                     <i class="fas fa-trash-alt"></i> Hapus Terpilih
                 </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" id="btnResetTotal">
+                    <i class="fas fa-exclamation-triangle"></i> Reset Total
+                </button>
             </div>
         </div>
         <div class="card-body">
@@ -144,6 +232,21 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
                                         class="btn btn-sm btn-info mb-1">
                                         Kartu
                                     </a>
+                                    <button type="button" class="btn btn-sm btn-primary btn-email mb-1"
+                                        data-id="<?= (int)$row['id']; ?>">
+                                        Email
+                                    </button>
+                                    <?php
+                                        $hp = isset($row['hp']) ? preg_replace('/\D+/', '', (string)$row['hp']) : '';
+                                        $info = madrasah_info();
+                                        $statusText = $row['status_daftar'] === 'diterima' ? 'DITERIMA' : ($row['status_daftar'] === 'ditolak' ? 'DITOLAK' : 'DALAM PROSES');
+                                        $waText = rawurlencode('Assalamu\'alaikum ' . $row['nama_lengkap'] . '%0ANomor: ' . $row['no_pendaftaran'] . '%0AStatus: ' . $statusText . '%0AInfo: ' . base_url());
+                                    ?>
+                                    <?php if (!empty($hp)): ?>
+                                    <a href="https://wa.me/<?= esc($hp); ?>?text=<?= $waText; ?>" target="_blank" class="btn btn-sm btn-success mb-1">
+                                        WhatsApp
+                                    </a>
+                                    <?php endif; ?>
                                     <button type="button" class="btn btn-sm btn-success btn-status mb-1"
                                         data-id="<?= (int)$row['id']; ?>" data-status="diterima">
                                         Terima

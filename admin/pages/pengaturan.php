@@ -16,6 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $syarat_pendaftaran = isset($_POST['syarat_pendaftaran']) ? $_POST['syarat_pendaftaran'] : '';
     $alur_pendaftaran = isset($_POST['alur_pendaftaran']) ? $_POST['alur_pendaftaran'] : '';
     $tahun_ajaran = isset($_POST['tahun_ajaran']) ? trim($_POST['tahun_ajaran']) : '';
+    $wa_token = isset($_POST['wa_token']) ? trim($_POST['wa_token']) : '';
+    $wa_phone_id = isset($_POST['wa_phone_id']) ? trim($_POST['wa_phone_id']) : '';
+    $pendaftaran_start_at = isset($_POST['pendaftaran_start_at']) ? trim($_POST['pendaftaran_start_at']) : '';
+    $pendaftaran_end_at = isset($_POST['pendaftaran_end_at']) ? trim($_POST['pendaftaran_end_at']) : '';
 
     set_option('status_pendaftaran', $status_pendaftaran);
     set_option('info_pendaftaran', $info_pendaftaran);
@@ -23,6 +27,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     set_option('alur_pendaftaran', $alur_pendaftaran);
     if ($tahun_ajaran !== '') {
         set_option('tahun_ajaran', $tahun_ajaran);
+    }
+    set_option('wa_token', $wa_token);
+    set_option('wa_phone_id', $wa_phone_id);
+    if ($pendaftaran_start_at !== '') {
+        $dtStart = str_replace('T', ' ', $pendaftaran_start_at) . ':00';
+        set_option('pendaftaran_start_at', $dtStart);
+    } else {
+        set_option('pendaftaran_start_at', '');
+    }
+    if ($pendaftaran_end_at !== '') {
+        $dtEnd = str_replace('T', ' ', $pendaftaran_end_at) . ':00';
+        set_option('pendaftaran_end_at', $dtEnd);
+    } else {
+        set_option('pendaftaran_end_at', '');
     }
 
     if (isset($_FILES['header_background']) && $_FILES['header_background']['error'] === UPLOAD_ERR_OK) {
@@ -55,6 +73,12 @@ $alur_pendaftaran = get_option('alur_pendaftaran', '');
 $header_background = get_option('header_background', '');
 $default_tahun = date('Y') . '/' . (date('Y') + 1);
 $tahun_ajaran = get_option('tahun_ajaran', $default_tahun);
+$wa_token = get_option('wa_token', '');
+$wa_phone_id = get_option('wa_phone_id', '');
+$_start_raw = get_option('pendaftaran_start_at', '');
+$_end_raw = get_option('pendaftaran_end_at', '');
+$_start_val = $_start_raw !== '' ? date('Y-m-d\TH:i', strtotime($_start_raw)) : '';
+$_end_val = $_end_raw !== '' ? date('Y-m-d\TH:i', strtotime($_end_raw)) : '';
 ?>
 <div class="container-fluid">
 
@@ -126,12 +150,56 @@ $tahun_ajaran = get_option('tahun_ajaran', $default_tahun);
                                 class="form-control" rows="8"><?= esc($alur_pendaftaran); ?></textarea>
                             <small class="text-muted">Tuliskan alur pendaftaran atau upload gambar alur.</small>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Syarat Pendaftaran</h6>
+                    </div>
+                    <div class="card-body">
                         <div class="form-group">
                             <label>Syarat Pendaftaran (Timeline)</label>
                             <textarea name="syarat_pendaftaran" id="syarat_pendaftaran"
                                 class="form-control" rows="10"><?= esc($syarat_pendaftaran); ?></textarea>
                             <small class="text-muted">Tuliskan syarat dalam bentuk urutan/timeline.</small>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Integrasi WhatsApp</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>WhatsApp Cloud Token</label>
+                            <input type="password" name="wa_token" class="form-control" value="<?= esc($wa_token); ?>" placeholder="Token API">
+                        </div>
+                        <div class="form-group">
+                            <label>WhatsApp Phone Number ID</label>
+                            <input type="text" name="wa_phone_id" class="form-control" value="<?= esc($wa_phone_id); ?>" placeholder="Contoh: 123456789012345">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Jadwal Pendaftaran</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Tanggal Mulai</label>
+                            <input type="datetime-local" name="pendaftaran_start_at" class="form-control" value="<?= esc($_start_val); ?>">
+                        </div>
+                        <div class="form-group">
+                            <label>Tanggal Selesai</label>
+                            <input type="datetime-local" name="pendaftaran_end_at" class="form-control" value="<?= esc($_end_val); ?>">
+                        </div>
+                        <small class="text-muted">Status pendaftaran otomatis mengikuti rentang waktu ini.</small>
                     </div>
                 </div>
             </div>

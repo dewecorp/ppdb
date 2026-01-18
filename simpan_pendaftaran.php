@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$status_pendaftaran = get_option('status_pendaftaran', 'tutup');
+$status_pendaftaran = get_ppdb_status();
 if ($status_pendaftaran !== 'buka') {
     flash('error', 'Pendaftaran sedang ditutup.');
     header('Location: ' . base_url());

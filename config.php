@@ -177,19 +177,17 @@ function generate_no_pendaftaran(): string
 
     $optionKey = 'sequence_ppdb_' . $year;
     $lastSeq = (int)get_option($optionKey, '0');
-    if ($lastSeq === 0) {
-        $stmt = $mysqli->prepare('SELECT no_pendaftaran FROM pendaftar WHERE no_pendaftaran LIKE CONCAT(?, "%") ORDER BY id DESC LIMIT 1');
+    if ($lastSeq > 0) {
+        $stmt = $mysqli->prepare('SELECT COUNT(*) FROM pendaftar WHERE no_pendaftaran LIKE CONCAT(?, "%")');
         if ($stmt) {
             $stmt->bind_param('s', $prefix);
             $stmt->execute();
-            $stmt->bind_result($lastNo);
-            if ($stmt->fetch()) {
-                $stmt->close();
-                $lastNumber = (int)substr($lastNo, strlen($prefix));
-                $lastSeq = $lastNumber;
-            } else {
-                $stmt->close();
+            $stmt->bind_result($cntYear);
+            $stmt->fetch();
+            $stmt->close();
+            if ((int)$cntYear === 0) {
                 $lastSeq = 0;
+                set_option($optionKey, '0');
             }
         }
     }
@@ -229,7 +227,114 @@ function count_pendaftar(?string $status = null): int
 
 function reset_no_pendaftaran(): bool
 {
-    $year = date('Y');
+    $ta = get_option('tahun_ajaran', '');
+    if (preg_match('/^\s*(\d{4})\s*\/\s*\d{4}\s*$/', $ta, $m)) {
+        $year = $m[1];
+    } else {
+        $year = date('Y');
+    }
     return set_option('sequence_ppdb_' . $year, '0');
 }
 
+function get_ppdb_status(): string
+{
+    $manual = get_option('status_pendaftaran', 'tutup');
+    $start = get_option('pendaftaran_start_at', '');
+    $end = get_option('pendaftaran_end_at', '') !== '' ? get_option('pendaftaran_end_at', '') : get_option('pendaftaran_open_until', '');
+    if ($start === '' && $end === '') {
+        return $manual;
+    }
+    $now = time();
+    $tsStart = $start !== '' ? strtotime($start) : false;
+    $tsEnd = $end !== '' ? strtotime($end) : false;
+    if ($tsStart !== false && $now < $tsStart) {
+        if ($manual !== 'tutup') set_option('status_pendaftaran', 'tutup');
+        return 'tutup';
+    }
+    if ($tsEnd !== false && $now > $tsEnd) {
+        if ($manual !== 'tutup') set_option('status_pendaftaran', 'tutup');
+        return 'tutup';
+    }
+    if ($manual !== 'buka') set_option('status_pendaftaran', 'buka');
+    return 'buka';
+}
+function madrasah_info(): array
+{
+    global $mysqli;
+    $info = [
+        'nama' => 'Madrasah',
+        'email' => '',
+        'hp_panitia' => '',
+        'hp_kepala' => ''
+    ];
+    if ($res = $mysqli->query('SELECT nama, email, hp_panitia, hp_kepala FROM madrasah LIMIT 1')) {
+        if ($row = $res->fetch_assoc()) {
+            $info = $row;
+        }
+        $res->free();
+    }
+    return $info;
+}
+
+function send_email(string $to, string $subject, string $message): bool
+{
+    $info = madrasah_info();
+    $fromName = trim((string)$info['nama']) !== '' ? (string)$info['nama'] : 'Panitia PPDB';
+    $fromEmail = trim((string)$info['email']) !== '' ? (string)$info['email'] : 'no-reply@localhost';
+    $headers = [];
+    $headers[] = 'From: ' . $fromName . ' <' . $fromEmail . '>';
+    $headers[] = 'MIME-Version: 1.0';
+    $headers[] = 'Content-Type: text/plain; charset=UTF-8';
+    $headersStr = implode("\r\n", $headers);
+    return @mail($to, $subject, $message, $headersStr);
+}
+
+function normalize_phone(string $hp): string
+{
+    $digits = preg_replace('/\D+/', '', $hp);
+    if ($digits === '') {
+        return '';
+    }
+    if (strpos($digits, '62') === 0) {
+        return $digits;
+    }
+    if (strpos($digits, '0') === 0) {
+        return '62' . substr($digits, 1);
+    }
+    return $digits;
+}
+
+function send_whatsapp(string $to, string $message): bool
+{
+    $token = get_option('wa_token', '');
+    $phoneId = get_option('wa_phone_id', '');
+    if ($token === '' || $phoneId === '') {
+        return false;
+    }
+    $to = normalize_phone($to);
+    if ($to === '') {
+        return false;
+    }
+    $url = 'https://graph.facebook.com/v17.0/' . $phoneId . '/messages';
+    $payload = [
+        'messaging_product' => 'whatsapp',
+        'to' => $to,
+        'type' => 'text',
+        'text' => [
+            'preview_url' => false,
+            'body' => $message
+        ]
+    ];
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $token,
+        'Content-Type: application/json'
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    $resp = curl_exec($ch);
+    $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    return $httpCode >= 200 && $httpCode < 300;
+}

@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/config.php';
 
-$status_pendaftaran = get_option('status_pendaftaran', 'tutup');
+$status_pendaftaran = get_ppdb_status();
 $info_pendaftaran = get_option('info_pendaftaran', 'Informasi PPDB belum diatur.');
 $syarat_pendaftaran = get_option('syarat_pendaftaran', '');
 $alur_pendaftaran = get_option('alur_pendaftaran', '');

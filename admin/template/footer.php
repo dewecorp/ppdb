@@ -216,6 +216,40 @@ if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
                     $('.check-item').prop('checked', $(this).is(':checked'));
                 });
 
+                $('#btnResetTotal').on('click', function () {
+                    Swal.fire({
+                        title: 'Reset Total?',
+                        text: 'Semua data pendaftar akan dihapus dan nomor direset.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, reset',
+                        cancelButtonText: 'Batal'
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            $('#aksiGlobal').val('reset_total');
+                            $('#formPendaftar').submit();
+                        }
+                    });
+                });
+
+                $(document).on('click', '.btn-email', function () {
+                    var id = $(this).data('id');
+                    Swal.fire({
+                        title: 'Kirim Email?',
+                        text: 'Kirim informasi status ke email pendaftar ini?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, kirim',
+                        cancelButtonText: 'Batal'
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            $('#aksiGlobal').val('kirim_email');
+                            $('#idGlobal').val(id);
+                            $('#formPendaftar').submit();
+                        }
+                    });
+                });
+
                 $(document).on('click', '.btn-status', function () {
                     var id = $(this).data('id');
                     var status = $(this).data('status');
