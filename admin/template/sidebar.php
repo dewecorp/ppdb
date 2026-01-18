@@ -8,7 +8,7 @@ function active_menu(string $page, string $current): string
 ?>
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
+    <a class="sidebar-brand d-flex align-items-center justify-content-start" href="index.php">
         <?php if (!empty($madrasah_logo)): ?>
             <img src="<?= esc(base_url('uploads/' . $madrasah_logo)); ?>" alt="Logo" style="height:32px" class="mr-2">
         <?php else: ?>
@@ -32,7 +32,7 @@ function active_menu(string $page, string $current): string
             }
         }
         ?>
-        <div class="sidebar-brand-text mx-3">
+        <div class="sidebar-brand-text mx-0 text-left">
             <div class="sidebar-app-name"><?= esc($sidebar_app_name); ?></div>
             <div class="sidebar-school-name"><?= esc($madrasah_line_top); ?></div>
             <?php if ($madrasah_line_bottom !== ''): ?>

@@ -1,4 +1,10 @@
 <?php
+function redirect_to_pendaftar(): void
+{
+    echo '<script>window.location.href="' . base_url('admin/index.php?page=pendaftar') . '";</script>';
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $aksi = isset($_POST['aksi']) ? $_POST['aksi'] : '';
 
@@ -15,8 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             flash('error', 'Gagal memperbarui status pendaftar.');
         }
-        header('Location: ' . base_url('admin/index.php?page=pendaftar'));
-        exit;
+        redirect_to_pendaftar();
     }
 
     if ($aksi === 'hapus' && isset($_POST['id'])) {
@@ -31,8 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             flash('error', 'Gagal menghapus data pendaftar.');
         }
-        header('Location: ' . base_url('admin/index.php?page=pendaftar'));
-        exit;
+        redirect_to_pendaftar();
     }
 
     if ($aksi === 'hapus_terpilih' && !empty($_POST['ids']) && is_array($_POST['ids'])) {
@@ -52,8 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 flash('error', 'Gagal menghapus data terpilih.');
             }
         }
-        header('Location: ' . base_url('admin/index.php?page=pendaftar'));
-        exit;
+        redirect_to_pendaftar();
     }
 }
 
@@ -99,7 +102,6 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
                                 <th>Jenis Kelamin</th>
                                 <th>NIK</th>
                                 <th>KK</th>
-                                <th>Akte</th>
                                 <th>KIP</th>
                                 <th>PKH</th>
                                 <th>Status Daftar</th>
@@ -119,7 +121,6 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
                                 <td><?= esc($row['jenis_kelamin']); ?></td>
                                 <td><?= esc($row['nik']); ?></td>
                                 <td><?= esc($row['kk']); ?></td>
-                                <td><?= esc($row['akte'] ?? ''); ?></td>
                                 <td><?= esc($row['kip']); ?></td>
                                 <td><?= esc($row['pkh']); ?></td>
                                 <td>
@@ -160,73 +161,4 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
 
 </div>
 
-<script>
-    $(function () {
-        $('#checkAll').on('change', function () {
-            $('.check-item').prop('checked', $(this).is(':checked'));
-        });
-
-        $(document).on('click', '.btn-status', function () {
-            var id = $(this).data('id');
-            var status = $(this).data('status');
-            var text = status === 'diterima' ? 'menerima' : 'menolak';
-            Swal.fire({
-                title: 'Ubah Status?',
-                text: 'Anda yakin akan ' + text + ' pendaftar ini?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, lanjutkan',
-                cancelButtonText: 'Batal'
-            }).then(function (result) {
-                if (result.isConfirmed) {
-                    $('#aksiGlobal').val('ubah_status');
-                    $('#idGlobal').val(id);
-                    $('#statusGlobal').val(status);
-                    $('#formPendaftar').submit();
-                }
-            });
-        });
-
-        $(document).on('click', '.btn-hapus', function () {
-            var id = $(this).data('id');
-            Swal.fire({
-                title: 'Hapus Data?',
-                text: 'Data yang dihapus tidak dapat dikembalikan.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, hapus',
-                cancelButtonText: 'Batal'
-            }).then(function (result) {
-                if (result.isConfirmed) {
-                    $('#aksiGlobal').val('hapus');
-                    $('#idGlobal').val(id);
-                    $('#formPendaftar').submit();
-                }
-            });
-        });
-
-        $('#btnHapusTerpilih').on('click', function () {
-            if ($('.check-item:checked').length === 0) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Tidak ada data',
-                    text: 'Silakan pilih data yang akan dihapus.'
-                });
-                return;
-            }
-            Swal.fire({
-                title: 'Hapus Data Terpilih?',
-                text: 'Data yang dihapus tidak dapat dikembalikan.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, hapus',
-                cancelButtonText: 'Batal'
-            }).then(function (result) {
-                if (result.isConfirmed) {
-                    $('#aksiGlobal').val('hapus_terpilih');
-                    $('#formPendaftar').submit();
-                }
-            });
-        });
-    });
-</script>
+<!-- handlers dipindah ke footer agar berjalan setelah jQuery & plugin dimuat -->

@@ -73,7 +73,7 @@ $stmt = $mysqli->prepare('INSERT INTO pendaftar (
     pkh,
     status_daftar,
     created_at
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, "proses", NOW())');
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"proses", NOW())');
 
 if ($stmt === false) {
     flash('error', 'Terjadi kesalahan saat menyimpan data.');
@@ -108,13 +108,38 @@ $stmt->bind_param(
 );
 
 if ($stmt->execute()) {
-    flash('success', 'Pendaftaran berhasil dikirim. Nomor pendaftaran Anda: ' . $no_pendaftaran);
+    $insert_id = $mysqli->insert_id;
+    $stmt->close();
+    ?>
+    <!DOCTYPE html>
+    <html lang="id">
+    <head>
+        <meta charset="utf-8">
+        <title>Pendaftaran Berhasil - <?= htmlspecialchars($no_pendaftaran, ENT_QUOTES, 'UTF-8'); ?></title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </head>
+    <body>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Pendaftaran Berhasil',
+            text: 'Nomor pendaftaran Anda: <?= addslashes($no_pendaftaran); ?>',
+            confirmButtonText: 'Cetak Kartu'
+        }).then(function () {
+            var url = '<?= addslashes(base_url('cetak_kartu.php?id=' . $insert_id)); ?>';
+            window.open(url, '_blank');
+            setTimeout(function () {
+                window.location.href = '<?= addslashes(base_url()); ?>';
+            }, 500);
+        });
+    </script>
+    </body>
+    </html>
+    <?php
+    exit;
 } else {
+    $stmt->close();
     flash('error', 'Gagal menyimpan data pendaftaran.');
+    header('Location: ' . base_url());
+    exit;
 }
-
-$stmt->close();
-
-header('Location: ' . base_url());
-exit;
-

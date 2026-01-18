@@ -37,6 +37,16 @@ function base_url(string $path = ''): string
     INDEX (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 @$mysqli->query('DELETE FROM activity_logs WHERE created_at < (NOW() - INTERVAL 1 DAY)');
+// Ensure schema adjustments: drop obsolete columns if exist
+if ($chk = @$mysqli->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pendaftar' AND COLUMN_NAME = 'akte'")) {
+    @$chk->execute();
+    @$chk->bind_result($cnt);
+    @$chk->fetch();
+    @$chk->close();
+    if ((int)$cnt > 0) {
+        @$mysqli->query("ALTER TABLE pendaftar DROP COLUMN akte");
+    }
+}
 
 function esc($value): string
 {

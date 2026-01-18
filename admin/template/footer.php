@@ -98,6 +98,93 @@ $error_message = flash('error');
                 ]
             });
 
+            if ($('.btn-hapus-backup').length) {
+                $(document).on('click', '.btn-hapus-backup', function () {
+                    var form = $(this).closest('form');
+                    Swal.fire({
+                        title: 'Hapus Backup?',
+                        text: 'File backup yang dihapus tidak dapat dikembalikan.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, hapus',
+                        cancelButtonText: 'Batal'
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            }
+
+            if ($('#formPendaftar').length) {
+                $('#checkAll').on('change', function () {
+                    $('.check-item').prop('checked', $(this).is(':checked'));
+                });
+
+                $(document).on('click', '.btn-status', function () {
+                    var id = $(this).data('id');
+                    var status = $(this).data('status');
+                    var text = status === 'diterima' ? 'menerima' : 'menolak';
+                    Swal.fire({
+                        title: 'Ubah Status?',
+                        text: 'Anda yakin akan ' + text + ' pendaftar ini?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, lanjutkan',
+                        cancelButtonText: 'Batal'
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            $('#aksiGlobal').val('ubah_status');
+                            $('#idGlobal').val(id);
+                            $('#statusGlobal').val(status);
+                            $('#formPendaftar').submit();
+                        }
+                    });
+                });
+
+                $(document).on('click', '.btn-hapus', function () {
+                    var id = $(this).data('id');
+                    Swal.fire({
+                        title: 'Hapus Data?',
+                        text: 'Data yang dihapus tidak dapat dikembalikan.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, hapus',
+                        cancelButtonText: 'Batal'
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            $('#aksiGlobal').val('hapus');
+                            $('#idGlobal').val(id);
+                            $('#formPendaftar').submit();
+                        }
+                    });
+                });
+
+                $('#btnHapusTerpilih').on('click', function () {
+                    if ($('.check-item:checked').length === 0) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Tidak ada data',
+                            text: 'Silakan pilih data yang akan dihapus.'
+                        });
+                        return;
+                    }
+                    Swal.fire({
+                        title: 'Hapus Data Terpilih?',
+                        text: 'Data yang dihapus tidak dapat dikembalikan.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, hapus',
+                        cancelButtonText: 'Batal'
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            $('#aksiGlobal').val('hapus_terpilih');
+                            $('#formPendaftar').submit();
+                        }
+                    });
+                });
+            }
+
             if (typeof window.initEditors === 'function') {
                 var tries = 0;
                 var checkEditors = function () {
