@@ -32,28 +32,41 @@ $user = current_user();
         .sidebar-brand-text {
             font-family: 'Nunito', sans-serif;
             font-weight: 800;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             line-height: 1.2;
         }
 
         .sidebar-app-name {
-            font-size: 1rem;
+            font-size: 0.95rem;
             letter-spacing: 0.12em;
         }
 
         .sidebar-school-name {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             letter-spacing: 0.06em;
         }
 
         .sidebar .nav-link span {
-            font-size: 1.05rem;
+            font-size: 1.15rem;
             font-weight: 600;
         }
 
         .topbar .nav-link {
-            font-size: 1.05rem;
+            font-size: 1.15rem;
             font-weight: 600;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 14rem;
+            overflow-y: auto;
+        }
+
+        #content-wrapper {
+            margin-left: 14rem;
         }
 
         .topbar-fixed {
@@ -71,6 +84,12 @@ $user = current_user();
         @media (max-width: 768px) {
             .topbar-fixed {
                 left: 0;
+            }
+            #content-wrapper {
+                margin-left: 0;
+            }
+            .sidebar {
+                left: -14rem;
             }
         }
 

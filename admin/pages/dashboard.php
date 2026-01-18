@@ -1,4 +1,39 @@
 <?php
+if (!function_exists('time_ago_id')) {
+    function time_ago_id(string $datetime): string
+    {
+        $tz = new DateTimeZone('Asia/Jakarta');
+        $time = new DateTime($datetime, $tz);
+        $now = new DateTime('now', $tz);
+        $diff = $now->getTimestamp() - $time->getTimestamp();
+
+        if ($diff < 60) {
+            return 'baru saja';
+        }
+
+        $minute = 60;
+        $hour = 3600;
+        $day = 86400;
+        $week = 604800;
+
+        if ($diff < $hour) {
+            $value = floor($diff / $minute);
+            return $value . ' menit yang lalu';
+        }
+        if ($diff < $day) {
+            $value = floor($diff / $hour);
+            return $value . ' jam yang lalu';
+        }
+        if ($diff < $week) {
+            $value = floor($diff / $day);
+            return $value . ' hari yang lalu';
+        }
+
+        $value = floor($diff / $week);
+        return $value . ' minggu yang lalu';
+    }
+}
+
 $total = count_pendaftar();
 $diterima = count_pendaftar('diterima');
 $ditolak = count_pendaftar('ditolak');
@@ -11,6 +46,7 @@ if ($result = $mysqli->query('SELECT id, user_id, action, message, created_at FR
     }
     $result->free();
 }
+$activity_count = count($activity_logs);
 ?>
 <div class="container-fluid">
 
@@ -91,7 +127,12 @@ if ($result = $mysqli->query('SELECT id, user_id, action, message, created_at FR
         <div class="col-xl-12 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Aktivitas Terbaru</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        Aktivitas Terbaru
+                        <?php if ($activity_count > 0): ?>
+                            (<?= $activity_count; ?>)
+                        <?php endif; ?>
+                    </h6>
                 </div>
                 <div class="card-body activity-scroll">
                     <?php if (empty($activity_logs)): ?>
@@ -104,6 +145,7 @@ if ($result = $mysqli->query('SELECT id, user_id, action, message, created_at FR
                                 $timestamp = strtotime($log['created_at']);
                                 $date_label = date('d M Y', $timestamp);
                                 $time_label = date('H:i', $timestamp);
+                                $time_ago = time_ago_id($log['created_at']);
 
                                 $icon = 'fas fa-info';
                                 $bg = 'bg-primary';
@@ -144,7 +186,10 @@ if ($result = $mysqli->query('SELECT id, user_id, action, message, created_at FR
                                 <div>
                                     <i class="<?= esc($icon); ?> <?= esc($bg); ?>"></i>
                                     <div class="timeline-item">
-                                        <span class="time"><i class="fas fa-clock"></i> <?= esc($time_label); ?></span>
+                                        <span class="time">
+                                            <i class="fas fa-clock"></i>
+                                            <?= esc($time_label); ?> (<?= esc($time_ago); ?>)
+                                        </span>
                                         <h3 class="timeline-header"><?= esc($title); ?></h3>
                                         <div class="timeline-body">
                                             <?php if (!empty($log['message'])): ?>
@@ -156,9 +201,6 @@ if ($result = $mysqli->query('SELECT id, user_id, action, message, created_at FR
                                     </div>
                                 </div>
                             <?php endforeach; ?>
-                            <div>
-                                <i class="fas fa-clock bg-gray"></i>
-                            </div>
                         </div>
                     <?php endif; ?>
                 </div>

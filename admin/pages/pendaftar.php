@@ -166,7 +166,7 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
             $('.check-item').prop('checked', $(this).is(':checked'));
         });
 
-        $('.btn-status').on('click', function () {
+        $(document).on('click', '.btn-status', function () {
             var id = $(this).data('id');
             var status = $(this).data('status');
             var text = status === 'diterima' ? 'menerima' : 'menolak';
@@ -187,7 +187,7 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
             });
         });
 
-        $('.btn-hapus').on('click', function () {
+        $(document).on('click', '.btn-hapus', function () {
             var id = $(this).data('id');
             Swal.fire({
                 title: 'Hapus Data?',
