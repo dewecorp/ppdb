@@ -64,6 +64,10 @@ $totalProses = count_pendaftar('proses');
             padding: 20px;
             font-size: 12px;
         }
+        @page {
+            size: 330mm 215mm;
+            margin: 12mm;
+        }
 
         .header {
             text-align: center;
@@ -141,12 +145,14 @@ $totalProses = count_pendaftar('proses');
             <tr>
                 <th>No</th>
                 <th>No Pendaftaran</th>
-                <th>Nama</th>
-                <th>JK</th>
+                <th>Nama Pendaftar</th>
+                <th>Jenis Kelamin</th>
                 <th>NIK</th>
                 <th>KK</th>
-                <th>HP</th>
-                <th>Status</th>
+                <th>Alamat</th>
+                <th>KIP</th>
+                <th>PKH</th>
+                <th>Status Daftar</th>
             </tr>
         </thead>
         <tbody>
@@ -158,7 +164,9 @@ $totalProses = count_pendaftar('proses');
                 <td><?= esc($row['jenis_kelamin']); ?></td>
                 <td><?= esc($row['nik']); ?></td>
                 <td><?= esc($row['kk']); ?></td>
-                <td><?= esc($row['hp']); ?></td>
+                <td><?= esc($row['alamat']); ?></td>
+                <td><?= esc($row['kip']); ?></td>
+                <td><?= esc($row['pkh']); ?></td>
                 <td><?= esc($row['status_daftar']); ?></td>
             </tr>
             <?php endforeach; ?>
@@ -167,4 +175,3 @@ $totalProses = count_pendaftar('proses');
 </body>
 
 </html>
-

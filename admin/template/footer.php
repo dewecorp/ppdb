@@ -1,6 +1,13 @@
 <?php
 $success_message = flash('success');
 $error_message = flash('error');
+$madrasah_name = '';
+if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
+    if ($row = $res->fetch_assoc()) {
+        $madrasah_name = $row['nama'];
+    }
+    $res->free();
+}
 ?>
             </div>
 
@@ -44,6 +51,9 @@ $error_message = flash('error');
         $(function () {
             var successMessage = <?= json_encode($success_message); ?>;
             var errorMessage = <?= json_encode($error_message); ?>;
+            var APP_NAME = <?= json_encode('Sistem PPDB Online'); ?>;
+            var MADRASAH_NAME = <?= json_encode($madrasah_name); ?>;
+            var TODAY = <?= json_encode(date('d-m-Y')); ?>;
 
             (function initAdminClock() {
                 var $clock = $('#adminClock');
@@ -106,22 +116,82 @@ $error_message = flash('error');
                 });
             });
 
-            $('.datatable').DataTable({
+            $('.datatable').not('#tablePendaftar').DataTable({
                 responsive: true,
                 dom: 'Bfrtip',
                 buttons: [
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-sm btn-success',
-                        title: 'Data'
+                        title: APP_NAME + ' - ' + MADRASAH_NAME + ' - ' + TODAY,
+                        filename: 'export',
+                        customize: function (xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            var pageSetup = $('<pageSetup/>').attr('paperSize', '14').attr('orientation', 'landscape');
+                            $('worksheet', sheet).append(pageSetup);
+                        }
                     },
                     {
                         extend: 'pdfHtml5',
                         className: 'btn btn-sm btn-danger',
-                        title: 'Data'
+                        title: APP_NAME + ' - ' + MADRASAH_NAME + ' - ' + TODAY,
+                        customize: function (doc) {
+                            doc.pageSize = { width: 935, height: 609 };
+                            doc.pageMargins = [20, 20, 20, 20];
+                            doc.content.unshift({
+                                text: APP_NAME + '\n' + MADRASAH_NAME + '\n' + 'Tanggal: ' + TODAY,
+                                alignment: 'center',
+                                margin: [0, 0, 0, 10],
+                                fontSize: 10
+                            });
+                        }
                     }
                 ]
             });
+
+            if ($('#tablePendaftar').length) {
+                $('#tablePendaftar').DataTable({
+                    responsive: true,
+                    dom: 'Bfrtip',
+                    buttons: [
+                        {
+                            extend: 'excelHtml5',
+                            className: 'btn btn-sm btn-success',
+                            title: APP_NAME + ' - ' + MADRASAH_NAME + ' - ' + TODAY,
+                            filename: 'data_pendaftar',
+                            exportOptions: {
+                                columns: [1,2,3,4,5,6,7,8,9,10],
+                                format: { body: function (data) { return (data || '').replace(/<[^>]*>/g, '').trim(); } }
+                            },
+                            customize: function (xlsx) {
+                                var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                                var pageSetup = $('<pageSetup/>').attr('paperSize', '14').attr('orientation', 'landscape');
+                                $('worksheet', sheet).append(pageSetup);
+                            }
+                        },
+                        {
+                            extend: 'pdfHtml5',
+                            className: 'btn btn-sm btn-danger',
+                            title: APP_NAME + ' - ' + MADRASAH_NAME + ' - ' + TODAY,
+                            filename: 'data_pendaftar',
+                            exportOptions: {
+                                columns: [1,2,3,4,5,6,7,8,9,10],
+                                format: { body: function (data) { return (data || '').replace(/<[^>]*>/g, '').trim(); } }
+                            },
+                            customize: function (doc) {
+                                doc.pageSize = { width: 935, height: 609 };
+                                doc.pageMargins = [20, 20, 20, 20];
+                                doc.content.unshift({
+                                    text: APP_NAME + '\n' + MADRASAH_NAME + '\n' + 'Tanggal: ' + TODAY,
+                                    alignment: 'center',
+                                    margin: [0, 0, 0, 10],
+                                    fontSize: 10
+                                });
+                            }
+                        }
+                    ]
+                });
+            }
 
             if ($('.btn-hapus-backup').length) {
                 $(document).on('click', '.btn-hapus-backup', function () {

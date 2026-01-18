@@ -97,7 +97,7 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
                 <input type="hidden" name="id" id="idGlobal" value="">
                 <input type="hidden" name="status" id="statusGlobal" value="">
                 <div class="table-responsive">
-                    <table class="table table-bordered datatable" width="100%" cellspacing="0">
+                    <table id="tablePendaftar" class="table table-bordered datatable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
                                 <th><input type="checkbox" id="checkAll"></th>
