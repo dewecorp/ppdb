@@ -45,8 +45,6 @@ if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 
-    <script src="https://cdn.ckeditor.com/4.25.1-lts/standard/ckeditor.js"></script>
-
     <script>
         $(function () {
             var successMessage = <?= json_encode($success_message); ?>;
@@ -79,6 +77,41 @@ if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
                 updateClock();
                 setInterval(updateClock, 1000);
             })();
+
+            var initMobileSidebar = function () {
+                var $body = $('body');
+                var $sidebar = $('.sidebar');
+                if ($(window).width() <= 768) {
+                    $body.addClass('sidebar-toggled').removeClass('sidebar-open');
+                    $sidebar.addClass('toggled');
+                } else {
+                    $body.removeClass('sidebar-toggled sidebar-open');
+                    $sidebar.removeClass('toggled');
+                }
+            };
+
+            initMobileSidebar();
+            $(window).on('resize', initMobileSidebar);
+
+            $('#sidebarToggleTop, #sidebarToggle').on('click', function () {
+                var $body = $('body');
+                setTimeout(function () {
+                    if ($body.hasClass('sidebar-toggled')) {
+                        $body.removeClass('sidebar-open');
+                    } else {
+                        $body.addClass('sidebar-open');
+                    }
+                }, 0);
+            });
+
+            $(document).on('click', '.sidebar-overlay', function () {
+                var $body = $('body');
+                var $sidebar = $('.sidebar');
+                if (!$body.hasClass('sidebar-toggled')) {
+                    $body.addClass('sidebar-toggled').removeClass('sidebar-open');
+                    $sidebar.addClass('toggled');
+                }
+            });
 
             if (successMessage) {
                 Swal.fire({
@@ -315,18 +348,7 @@ if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
             }
 
             if (typeof window.initEditors === 'function') {
-                var tries = 0;
-                var checkEditors = function () {
-                    if (window.CKEDITOR) {
-                        window.initEditors();
-                        return;
-                    }
-                    if (tries < 20) {
-                        tries++;
-                        setTimeout(checkEditors, 500);
-                    }
-                };
-                checkEditors();
+                window.initEditors();
             }
 
             if ($('#btnResetNomor').length) {

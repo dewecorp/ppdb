@@ -81,6 +81,7 @@ $user = current_user();
             left: 0;
             width: 14rem;
             overflow-y: auto;
+            z-index: 1040;
         }
 
         #content-wrapper {
@@ -110,6 +111,32 @@ $user = current_user();
             border-radius: 0 !important;
         }
 
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            z-index: 1035;
+            display: none;
+        }
+
+        .wysihtml5-wrapper {
+            width: 100%;
+        }
+
+        .wysihtml5-editor {
+            min-height: 220px;
+            max-height: 420px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .wysihtml5-toolbar .btn {
+            padding: 0.25rem 0.5rem;
+        }
+
         @media (max-width: 768px) {
             .topbar-fixed {
                 left: 0;
@@ -118,7 +145,18 @@ $user = current_user();
                 margin-left: 0;
             }
             .sidebar {
+                left: 0;
+                transition: left 0.3s ease;
+            }
+            body.sidebar-toggled .sidebar,
+            .sidebar.toggled {
                 left: -14rem;
+            }
+            .sidebar-overlay {
+                display: none;
+            }
+            body.sidebar-open .sidebar-overlay {
+                display: block;
             }
         }
 
@@ -228,6 +266,7 @@ $user = current_user();
     <div id="wrapper">
 
         <?php include __DIR__ . '/sidebar.php'; ?>
+        <div class="sidebar-overlay d-md-none"></div>
 
         <div id="content-wrapper" class="d-flex flex-column">
 

@@ -120,7 +120,7 @@ $_end_val = $_end_raw !== '' ? date('Y-m-d\TH:i', strtotime($_end_raw)) : '';
                         <div class="form-group">
                             <label>Informasi Pendaftaran</label>
                             <textarea name="info_pendaftaran" id="info_pendaftaran"
-                                class="form-control" rows="10"><?= esc($info_pendaftaran); ?></textarea>
+                                class="form-control" rows="10"><?= $info_pendaftaran; ?></textarea>
                             <small class="text-muted">Gunakan editor untuk menulis informasi PPDB.</small>
                         </div>
                     </div>
@@ -147,7 +147,7 @@ $_end_val = $_end_raw !== '' ? date('Y-m-d\TH:i', strtotime($_end_raw)) : '';
                         <div class="form-group">
                             <label>Alur PPDB Online</label>
                             <textarea name="alur_pendaftaran" id="alur_pendaftaran"
-                                class="form-control" rows="8"><?= esc($alur_pendaftaran); ?></textarea>
+                                class="form-control" rows="8"><?= $alur_pendaftaran; ?></textarea>
                             <small class="text-muted">Tuliskan alur pendaftaran atau upload gambar alur.</small>
                         </div>
                     </div>
@@ -162,7 +162,7 @@ $_end_val = $_end_raw !== '' ? date('Y-m-d\TH:i', strtotime($_end_raw)) : '';
                         <div class="form-group">
                             <label>Syarat Pendaftaran (Timeline)</label>
                             <textarea name="syarat_pendaftaran" id="syarat_pendaftaran"
-                                class="form-control" rows="10"><?= esc($syarat_pendaftaran); ?></textarea>
+                                class="form-control" rows="10"><?= $syarat_pendaftaran; ?></textarea>
                             <small class="text-muted">Tuliskan syarat dalam bentuk urutan/timeline.</small>
                         </div>
                     </div>
@@ -211,6 +211,87 @@ $_end_val = $_end_raw !== '' ? date('Y-m-d\TH:i', strtotime($_end_raw)) : '';
 </div>
 
 <script>
-    window.initEditors = function () {};
+    window.initEditors = function () {
+        if (!window.jQuery) return;
+
+        (function ($) {
+            if (!$.fn.wysihtml5) {
+                $.fn.wysihtml5 = function () {
+                    return this.each(function () {
+                        var $textarea = $(this);
+                        var initial = $textarea.val() || '';
+                        var $wrapper = $('<div class="wysihtml5-wrapper mb-2"></div>');
+                        var $toolbar = $('<div class="btn-toolbar mb-2 wysihtml5-toolbar" role="toolbar"></div>');
+
+                        var groups = [
+                            [
+                                { cmd: 'bold', icon: 'fa-bold', title: 'Tebal' },
+                                { cmd: 'italic', icon: 'fa-italic', title: 'Miring' },
+                                { cmd: 'underline', icon: 'fa-underline', title: 'Garis bawah' }
+                            ],
+                            [
+                                { cmd: 'insertUnorderedList', icon: 'fa-list-ul', title: 'Bullet' },
+                                { cmd: 'insertOrderedList', icon: 'fa-list-ol', title: 'Numbered' }
+                            ],
+                            [
+                                { cmd: 'justifyLeft', icon: 'fa-align-left', title: 'Rata kiri' },
+                                { cmd: 'justifyCenter', icon: 'fa-align-center', title: 'Rata tengah' },
+                                { cmd: 'justifyRight', icon: 'fa-align-right', title: 'Rata kanan' }
+                            ],
+                            [
+                                { cmd: 'createLink', icon: 'fa-link', title: 'Tambah link' },
+                                { cmd: 'removeFormat', icon: 'fa-eraser', title: 'Bersihkan format' }
+                            ]
+                        ];
+
+                        $.each(groups, function (_, groupButtons) {
+                            var $group = $('<div class="btn-group mr-2" role="group"></div>');
+                            $.each(groupButtons, function (_, b) {
+                                var $btn = $('<button type="button" class="btn btn-sm btn-light border"></button>');
+                                $btn.attr('data-command', b.cmd);
+                                $btn.attr('title', b.title);
+                                $btn.append($('<i class="fas ' + b.icon + '"></i>'));
+                                $group.append($btn);
+                            });
+                            $toolbar.append($group);
+                        });
+
+                        var $editor = $('<div class="wysihtml5-editor form-control" contenteditable="true"></div>');
+                        $editor.html(initial);
+
+                        $textarea.after($wrapper);
+                        $wrapper.append($toolbar).append($editor);
+                        $textarea.hide();
+
+                        $toolbar.on('click', 'button[data-command]', function (e) {
+                            e.preventDefault();
+                            var cmd = $(this).attr('data-command');
+                            $editor.focus();
+                            if (cmd === 'createLink') {
+                                var url = window.prompt('Masukkan URL', 'https://');
+                                if (url) {
+                                    if (!/^https?:\/\//i.test(url)) {
+                                        url = 'http://' + url;
+                                    }
+                                    document.execCommand('createLink', false, url);
+                                }
+                                return;
+                            }
+                            document.execCommand(cmd, false, null);
+                        });
+
+                        var sync = function () {
+                            $textarea.val($editor.html());
+                        };
+
+                        $editor.on('keyup blur input', sync);
+                        $textarea.closest('form').on('submit', sync);
+                    });
+                };
+            }
+
+            $('#info_pendaftaran,#alur_pendaftaran,#syarat_pendaftaran').wysihtml5();
+        })(jQuery);
+    };
 </script>
 
