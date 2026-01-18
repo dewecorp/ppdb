@@ -81,7 +81,7 @@ $tahun_ajaran = get_option('tahun_ajaran', $default_tahun);
                         <div class="form-group">
                             <label>Informasi Pendaftaran</label>
                             <textarea name="info_pendaftaran" id="info_pendaftaran"
-                                class="form-control" rows="6"><?= esc($info_pendaftaran); ?></textarea>
+                                class="form-control" rows="10"><?= esc($info_pendaftaran); ?></textarea>
                             <small class="text-muted">Gunakan editor untuk menulis informasi PPDB.</small>
                         </div>
                     </div>
@@ -108,13 +108,13 @@ $tahun_ajaran = get_option('tahun_ajaran', $default_tahun);
                         <div class="form-group">
                             <label>Alur PPDB Online</label>
                             <textarea name="alur_pendaftaran" id="alur_pendaftaran"
-                                class="form-control" rows="4"><?= esc($alur_pendaftaran); ?></textarea>
+                                class="form-control" rows="8"><?= esc($alur_pendaftaran); ?></textarea>
                             <small class="text-muted">Tuliskan alur pendaftaran atau upload gambar alur.</small>
                         </div>
                         <div class="form-group">
                             <label>Syarat Pendaftaran (Timeline)</label>
                             <textarea name="syarat_pendaftaran" id="syarat_pendaftaran"
-                                class="form-control" rows="6"><?= esc($syarat_pendaftaran); ?></textarea>
+                                class="form-control" rows="10"><?= esc($syarat_pendaftaran); ?></textarea>
                             <small class="text-muted">Tuliskan syarat dalam bentuk urutan/timeline.</small>
                         </div>
                     </div>
@@ -128,33 +128,6 @@ $tahun_ajaran = get_option('tahun_ajaran', $default_tahun);
 </div>
 
 <script>
-    window.initEditors = function () {
-        if (window.CKEDITOR) {
-            var cfg = {
-                allowedContent: true,
-                removePlugins: 'elementspath',
-                resize_enabled: true,
-                extraPlugins: 'justify,colorbutton,font',
-                toolbar: [
-                    ['Undo', 'Redo', 'RemoveFormat'],
-                    ['Bold', 'Italic', 'Underline'],
-                    ['NumberedList', 'BulletedList', 'Outdent', 'Indent', 'Blockquote'],
-                    ['Link', 'Unlink'],
-                    ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
-                    ['Format', 'Font', 'FontSize', 'TextColor', 'BGColor'],
-                    ['Table', 'HorizontalRule', 'Source']
-                ]
-            };
-            if (document.getElementById('info_pendaftaran')) {
-                CKEDITOR.replace('info_pendaftaran', cfg);
-            }
-            if (document.getElementById('alur_pendaftaran')) {
-                CKEDITOR.replace('alur_pendaftaran', cfg);
-            }
-            if (document.getElementById('syarat_pendaftaran')) {
-                CKEDITOR.replace('syarat_pendaftaran', cfg);
-            }
-        }
-    };
+    window.initEditors = function () {};
 </script>
 

@@ -120,28 +120,107 @@ $error_message = flash('error');
             line-height: 1.8;
             color: #4b5563;
         }
-        #alur .card-body ol,
-        #alur .card-body ul {
-            margin: 0 0 1rem 1.25rem;
-            padding-left: 0.5rem;
-        }
-        #alur .card-body ol {
-            list-style: decimal;
-        }
-        #alur .card-body ul {
-            list-style: disc;
-        }
-        #alur .card-body li {
-            margin-bottom: 0.5rem;
-        }
-        #alur .card-body ol ol,
-        #alur .card-body ul ul {
+
+        .alur-timeline {
+            position: relative;
+            padding-left: 1.75rem;
             margin-top: 0.5rem;
+        }
+
+        .alur-timeline::before {
+            content: "";
+            position: absolute;
+            top: 0.25rem;
+            bottom: 0.25rem;
+            left: 0.4rem;
+            width: 3px;
+            background: linear-gradient(to bottom, #2563eb, #10b981);
+            border-radius: 999px;
+        }
+
+        .alur-timeline ol,
+        .alur-timeline ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .alur-timeline li {
+            position: relative;
+            margin-bottom: 1.25rem;
+            padding-left: 1.75rem;
+        }
+
+        .alur-timeline li::before {
+            content: "";
+            position: absolute;
+            left: -0.1rem;
+            top: 0.2rem;
+            width: 0.9rem;
+            height: 0.9rem;
+            border-radius: 999px;
+            border: 3px solid #ffffff;
+            background: linear-gradient(135deg, #2563eb, #10b981);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+
+        .alur-timeline li:last-child {
+            margin-bottom: 0;
+        }
+
+        .alur-timeline strong {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: #111827;
+        }
+
+        #syarat .card-body {
+            font-size: 1rem;
+            color: #374151;
+        }
+
+        .syarat-modern ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .syarat-modern li {
+            position: relative;
+            margin-bottom: 0.85rem;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            border-radius: 0.85rem;
+            background: #f9fafb;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+            display: flex;
+            align-items: center;
+        }
+
+        .syarat-modern li::before {
+            content: "";
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0.95rem;
+            height: 0.95rem;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #f97316, #facc15);
+            box-shadow: 0 0 0 4px rgba(248, 196, 113, 0.4);
+        }
+
+        .syarat-modern li span {
+            display: block;
         }
 
         @media (max-width: 768px) {
             .info-text {
                 column-count: 1;
+            }
+
+            .syarat-modern li {
+                padding-left: 2.5rem;
             }
         }
 
@@ -153,19 +232,82 @@ $error_message = flash('error');
         }
 
         .navbar-brand span {
+            font-family: 'Poppins', sans-serif;
             font-weight: 800;
             text-transform: uppercase;
+            font-size: 1.05rem;
+            letter-spacing: 0.08em;
+        }
+
+        .navbar-nav .nav-link {
+            font-family: 'Poppins', sans-serif;
             font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #ffffff !important;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #fbbf24 !important;
+        }
+
+        .navbar-logo {
+            height: 32px;
+            margin-right: 10px;
+            filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.9));
+        }
+
+        .section-kontak {
+            background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+        }
+
+        .contact-icons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.98rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .contact-item-icon {
+            width: 2.4rem;
+            height: 2.4rem;
+            border-radius: 999px;
+            background-color: rgba(15, 23, 42, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .contact-item-icon i {
+            font-size: 1.1rem;
+        }
+
+        .contact-item a {
+            color: #e5e7eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-item a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 
 <body id="page-top">
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color:#005f4f;">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color:#005f4f;">
         <div class="container">
             <a class="navbar-brand" href="#beranda">
                 <?php if (!empty($madrasah['logo'])): ?>
-                <img src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo" style="height:28px; margin-right:8px;">
+                <img src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo" class="navbar-logo">
                 <?php endif; ?>
                 <span>PPDB ONLINE <?= esc($madrasah['nama']); ?></span>
             </a>
@@ -190,7 +332,7 @@ $error_message = flash('error');
         style="background: url('<?= esc($header_background !== '' ? base_url('uploads/' . $header_background) : 'assets/img/undraw_posting_photo.svg'); ?>') center center/cover no-repeat;">
         <div class="container hero-inner">
             <h1 class="display-4 font-weight-bold mb-2">SELAMAT DATANG</h1>
-            <h2 class="h4 mb-3">PPDB ONLINE <?= esc($madrasah['nama']); ?></h2>
+            <h2 class="h4 mb-3" style="text-transform: uppercase;">PPDB ONLINE <?= esc($madrasah['nama']); ?></h2>
             <p class="lead mb-4">Tahun Ajaran <?= esc($tahun_ajaran); ?></p>
             <div class="hero-status">
                 <?php if ($status_pendaftaran === 'buka') : ?>
@@ -220,7 +362,9 @@ $error_message = flash('error');
                     <div class="card shadow-sm border-0">
                         <div class="card-body">
                             <?php if (trim($alur_pendaftaran) !== '') : ?>
-                            <?= $alur_pendaftaran; ?>
+                            <div class="alur-timeline">
+                                <?= $alur_pendaftaran; ?>
+                            </div>
                             <?php else : ?>
                             <p>Alur pendaftaran belum diatur oleh admin.</p>
                             <?php endif; ?>
@@ -254,7 +398,9 @@ $error_message = flash('error');
                     <div class="card shadow-sm border-0">
                         <div class="card-body">
                             <?php if (trim($syarat_pendaftaran) !== '') : ?>
-                            <?= $syarat_pendaftaran; ?>
+                            <div class="syarat-modern">
+                                <?= $syarat_pendaftaran; ?>
+                            </div>
                             <?php else : ?>
                             <p>Syarat pendaftaran belum diatur oleh admin.</p>
                             <?php endif; ?>
@@ -265,20 +411,42 @@ $error_message = flash('error');
         </div>
     </section>
 
-    <section id="kontak" class="section bg-gradient-primary text-white">
+    <section id="kontak" class="section section-kontak text-white">
         <div class="container">
-            <h3 class="section-title text-center">Kontak Panitia</h3>
+            <h3 class="section-title text-center">KONTAK KAMI</h3>
             <div class="row justify-content-center">
                 <div class="col-lg-8 text-center">
                     <p class="mb-1 font-weight-bold"><?= esc($madrasah['nama']); ?></p>
-                    <p class="mb-1"><?= esc($madrasah['alamat']); ?></p>
-                    <p class="mb-1">Email: <?= esc($madrasah['email']); ?></p>
-                    <p class="mb-1">Website: <?= esc($madrasah['website']); ?></p>
-                    <p class="mb-1">HP Kepala: <?= esc($madrasah['hp_kepala']); ?></p>
-                    <p class="mb-1">HP Panitia: <?= esc($madrasah['hp_panitia']); ?></p>
-                    <?php if (!empty($madrasah['nama_panitia'])): ?>
-                    <p class="mb-1">Nama Panitia: <?= esc($madrasah['nama_panitia']); ?></p>
-                    <?php endif; ?>
+                    <p class="mb-3"><?= esc($madrasah['alamat']); ?></p>
+                    <div class="contact-icons">
+                        <?php $hp_umum = $madrasah['hp_panitia'] !== '-' && $madrasah['hp_panitia'] !== '' ? $madrasah['hp_panitia'] : $madrasah['hp_kepala']; ?>
+                        <?php if (!empty($madrasah['email']) && $madrasah['email'] !== '-'): ?>
+                        <div class="contact-item">
+                            <div class="contact-item-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <a href="mailto:<?= esc($madrasah['email']); ?>"><?= esc($madrasah['email']); ?></a>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (!empty($madrasah['website']) && $madrasah['website'] !== '-'): ?>
+                        <div class="contact-item">
+                            <div class="contact-item-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <a href="<?= esc(strpos($madrasah['website'], 'http') === 0 ? $madrasah['website'] : 'http://' . $madrasah['website']); ?>" target="_blank" rel="noopener">
+                                <?= esc($madrasah['website']); ?>
+                            </a>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (!empty($hp_umum) && $hp_umum !== '-'): ?>
+                        <div class="contact-item">
+                            <div class="contact-item-icon">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <a href="tel:<?= esc($hp_umum); ?>"><?= esc($hp_umum); ?></a>
+                        </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>

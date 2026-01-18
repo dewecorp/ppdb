@@ -16,7 +16,29 @@ function active_menu(string $page, string $current): string
                 <i class="fas fa-graduation-cap"></i>
             </div>
         <?php endif; ?>
-        <div class="sidebar-brand-text mx-3"><?= esc($madrasah_nama); ?></div>
+        <?php
+        $sidebar_app_name = 'PPDB';
+        $madrasah_line_top = $madrasah_nama;
+        $madrasah_line_bottom = '';
+
+        if (stripos($madrasah_nama, 'MI SULTAN FATTAH SUKOSONO') !== false) {
+            $madrasah_line_top = 'MI SULTAN FATTAH';
+            $madrasah_line_bottom = 'SUKOSONO';
+        } else {
+            $last_space_pos = strrpos($madrasah_nama, ' ');
+            if ($last_space_pos !== false) {
+                $madrasah_line_top = substr($madrasah_nama, 0, $last_space_pos);
+                $madrasah_line_bottom = substr($madrasah_nama, $last_space_pos + 1);
+            }
+        }
+        ?>
+        <div class="sidebar-brand-text mx-3">
+            <div class="sidebar-app-name"><?= esc($sidebar_app_name); ?></div>
+            <div class="sidebar-school-name"><?= esc($madrasah_line_top); ?></div>
+            <?php if ($madrasah_line_bottom !== ''): ?>
+                <div class="sidebar-school-name"><?= esc($madrasah_line_bottom); ?></div>
+            <?php endif; ?>
+        </div>
     </a>
 
     <hr class="sidebar-divider my-0">

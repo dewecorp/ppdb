@@ -3,6 +3,14 @@ $total = count_pendaftar();
 $diterima = count_pendaftar('diterima');
 $ditolak = count_pendaftar('ditolak');
 $proses = count_pendaftar('proses');
+
+$activity_logs = [];
+if ($result = $mysqli->query('SELECT id, user_id, action, message, created_at FROM activity_logs ORDER BY created_at DESC LIMIT 10')) {
+    while ($row = $result->fetch_assoc()) {
+        $activity_logs[] = $row;
+    }
+    $result->free();
+}
 ?>
 <div class="container-fluid">
 
@@ -79,5 +87,83 @@ $proses = count_pendaftar('proses');
 
     </div>
 
-</div>
+    <div class="row">
+        <div class="col-xl-12 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Aktivitas Terbaru</h6>
+                </div>
+                <div class="card-body activity-scroll">
+                    <?php if (empty($activity_logs)): ?>
+                        <p class="mb-0 text-muted">Belum ada aktivitas tercatat dalam 24 jam terakhir.</p>
+                    <?php else: ?>
+                        <div class="timeline">
+                            <?php
+                            $current_date_label = null;
+                            foreach ($activity_logs as $log):
+                                $timestamp = strtotime($log['created_at']);
+                                $date_label = date('d M Y', $timestamp);
+                                $time_label = date('H:i', $timestamp);
 
+                                $icon = 'fas fa-info';
+                                $bg = 'bg-primary';
+                                $title = 'Aktivitas Sistem';
+
+                                if ($log['action'] === 'login') {
+                                    $icon = 'fas fa-sign-in-alt';
+                                    $bg = 'bg-success';
+                                    $title = 'Login Admin';
+                                } elseif ($log['action'] === 'update_pendaftar_status') {
+                                    $icon = 'fas fa-user-check';
+                                    $bg = 'bg-info';
+                                    $title = 'Perubahan Status Pendaftar';
+                                } elseif ($log['action'] === 'delete_pendaftar' || $log['action'] === 'delete_pendaftar_bulk') {
+                                    $icon = 'fas fa-user-times';
+                                    $bg = 'bg-danger';
+                                    $title = 'Penghapusan Data Pendaftar';
+                                } elseif ($log['action'] === 'create_user' || $log['action'] === 'update_user') {
+                                    $icon = 'fas fa-user-cog';
+                                    $bg = 'bg-warning';
+                                    $title = 'Pengaturan Pengguna';
+                                } elseif ($log['action'] === 'update_madrasah') {
+                                    $icon = 'fas fa-school';
+                                    $bg = 'bg-primary';
+                                    $title = 'Pengaturan Madrasah';
+                                } elseif ($log['action'] === 'delete_backup') {
+                                    $icon = 'fas fa-database';
+                                    $bg = 'bg-danger';
+                                    $title = 'Penghapusan Backup';
+                                }
+                            ?>
+                                <?php if ($date_label !== $current_date_label): ?>
+                                    <div class="time-label">
+                                        <span class="bg-primary"><?= esc($date_label); ?></span>
+                                    </div>
+                                    <?php $current_date_label = $date_label; ?>
+                                <?php endif; ?>
+                                <div>
+                                    <i class="<?= esc($icon); ?> <?= esc($bg); ?>"></i>
+                                    <div class="timeline-item">
+                                        <span class="time"><i class="fas fa-clock"></i> <?= esc($time_label); ?></span>
+                                        <h3 class="timeline-header"><?= esc($title); ?></h3>
+                                        <div class="timeline-body">
+                                            <?php if (!empty($log['message'])): ?>
+                                                <?= esc($log['message']); ?>
+                                            <?php else: ?>
+                                                Aktivitas tercatat.
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                            <div>
+                                <i class="fas fa-clock bg-gray"></i>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

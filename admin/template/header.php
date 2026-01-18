@@ -28,6 +28,146 @@ $user = current_user();
     <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap4.min.css" rel="stylesheet">
+    <style>
+        .sidebar-brand-text {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 0.95rem;
+            line-height: 1.2;
+        }
+
+        .sidebar-app-name {
+            font-size: 1rem;
+            letter-spacing: 0.12em;
+        }
+
+        .sidebar-school-name {
+            font-size: 0.8rem;
+            letter-spacing: 0.06em;
+        }
+
+        .sidebar .nav-link span {
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .topbar .nav-link {
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .topbar-fixed {
+            position: fixed;
+            top: 0;
+            left: 14rem;
+            right: 0;
+            z-index: 1030;
+        }
+
+        #content {
+            padding-top: 4.375rem;
+        }
+
+        @media (max-width: 768px) {
+            .topbar-fixed {
+                left: 0;
+            }
+        }
+
+        .timeline {
+            position: relative;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .timeline::before {
+            content: "";
+            position: absolute;
+            top: 0.25rem;
+            bottom: 0.25rem;
+            left: 31px;
+            width: 2px;
+            background: linear-gradient(to bottom, #4e73df, #1cc88a);
+        }
+
+        .time-label {
+            position: relative;
+            margin: 0 0 15px 0;
+        }
+
+        .time-label span {
+            border-radius: 4px;
+            background-color: #4e73df;
+            color: #fff;
+            display: inline-block;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .timeline > div {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .timeline > div > i {
+            position: absolute;
+            left: 15px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            color: #fff;
+            box-shadow: 0 0 0 4px rgba(78, 115, 223, 0.25);
+        }
+
+        .timeline-item {
+            margin-left: 60px;
+            margin-right: 15px;
+            margin-top: 0;
+            background-color: #f8f9fc;
+            border-radius: 0.35rem;
+            box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
+            padding: 10px 12px;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-header {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .timeline-header a {
+            color: #4e73df;
+        }
+
+        .timeline-body {
+            font-size: 0.85rem;
+            margin-top: 4px;
+            color: #4b5563;
+        }
+
+        .timeline-footer {
+            margin-top: 6px;
+        }
+
+        .timeline .time {
+            float: right;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .activity-scroll {
+            max-height: 320px;
+            overflow-y: auto;
+        }
+    </style>
 </head>
 
 <body id="page-top">
@@ -40,7 +180,7 @@ $user = current_user();
 
             <div id="content">
 
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar topbar-fixed shadow">
 
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>

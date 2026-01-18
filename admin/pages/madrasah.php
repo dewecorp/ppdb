@@ -105,7 +105,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
     </div>
 
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
@@ -120,13 +120,64 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                     </button>
                 </div>
                 <div class="card-body">
-                    <p><strong>Nama Madrasah:</strong> <?= esc($madrasah['nama']); ?></p>
-                    <p><strong>Alamat:</strong> <?= esc($madrasah['alamat']); ?></p>
-                    <p><strong>Email:</strong> <?= esc($madrasah['email']); ?></p>
-                    <p><strong>Website:</strong> <?= esc($madrasah['website']); ?></p>
-                    <p><strong>HP Kepala:</strong> <?= esc($madrasah['hp_kepala']); ?></p>
-                    <p><strong>HP Panitia:</strong> <?= esc($madrasah['hp_panitia']); ?></p>
-                    <p><strong>Nama Panitia:</strong> <?= esc($madrasah['nama_panitia']); ?></p>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-school mr-1"></i> Nama Madrasah
+                            </div>
+                            <div class="font-weight-bold">
+                                <?= esc($madrasah['nama']); ?>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-map-marker-alt mr-1"></i> Alamat
+                            </div>
+                            <div>
+                                <?= esc($madrasah['alamat']); ?>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-envelope mr-1"></i> Email
+                            </div>
+                            <div>
+                                <?= esc($madrasah['email']); ?>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-globe mr-1"></i> Website
+                            </div>
+                            <div>
+                                <?= esc($madrasah['website']); ?>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-user-tie mr-1"></i> HP Kepala
+                            </div>
+                            <div>
+                                <?= esc($madrasah['hp_kepala']); ?>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-users mr-1"></i> HP Panitia
+                            </div>
+                            <div>
+                                <?= esc($madrasah['hp_panitia']); ?>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-user-check mr-1"></i> Nama Panitia
+                            </div>
+                            <div>
+                                <?= esc($madrasah['nama_panitia']); ?>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
