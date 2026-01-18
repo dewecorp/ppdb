@@ -83,10 +83,7 @@ $tahun_ajaran = get_option('tahun_ajaran', $default_tahun);
                                 <label class="custom-control-label" for="statusTutup">Ditutup</label>
                             </div>
                             <div class="mt-3">
-                                <form id="formResetNomor" method="post" class="d-inline">
-                                    <input type="hidden" name="aksi" value="reset_no">
-                                    <button type="button" id="btnResetNomor" class="btn btn-danger">Reset Nomor Pendaftaran</button>
-                                </form>
+                                <button type="submit" name="aksi" value="reset_no" class="btn btn-danger">Reset Nomor Pendaftaran</button>
                                 <small class="text-muted d-block mt-1">Mereset urutan nomor, tahun aktif tetap.</small>
                             </div>
                         </div>

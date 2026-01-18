@@ -31,7 +31,8 @@ if ([string]::IsNullOrWhiteSpace($uemail)) {
 $remotes = git remote
 while (-not $remotes) {
     if ([string]::IsNullOrWhiteSpace($RemoteUrl)) {
-        $RemoteUrl = Read-Host "https://github.com/dewecorp/ppdb.git"
+        $RemoteUrl = Read-Host "Masukkan URL remote (default: https://github.com/dewecorp/ppdb.git)"
+        if ([string]::IsNullOrWhiteSpace($RemoteUrl)) { $RemoteUrl = "https://github.com/dewecorp/ppdb.git" }
     }
     if (-not [string]::IsNullOrWhiteSpace($RemoteUrl)) {
         git remote add origin $RemoteUrl
@@ -39,6 +40,14 @@ while (-not $remotes) {
     } else {
         Write-Host "Remote wajib diset untuk push."
     }
+}
+# Pastikan origin terkonfigurasi ke URL yang diinginkan
+$originUrl = (git remote get-url origin 2>$null)
+if ([string]::IsNullOrWhiteSpace($originUrl)) {
+    if ([string]::IsNullOrWhiteSpace($RemoteUrl)) { $RemoteUrl = "https://github.com/dewecorp/ppdb.git" }
+    git remote add origin $RemoteUrl
+} elseif (-not [string]::IsNullOrWhiteSpace($RemoteUrl) -and $originUrl -ne $RemoteUrl) {
+    git remote set-url origin $RemoteUrl
 }
 git fetch --all | Out-Null
 $status = git status --porcelain
