@@ -167,27 +167,37 @@ function generate_no_pendaftaran(): string
 {
     global $mysqli;
 
-    $year = date('Y');
+    $ta = get_option('tahun_ajaran', '');
+    if (preg_match('/^\s*(\d{4})\s*\/\s*\d{4}\s*$/', $ta, $m)) {
+        $year = $m[1];
+    } else {
+        $year = date('Y');
+    }
     $prefix = 'PPDB' . $year;
 
-    $stmt = $mysqli->prepare('SELECT no_pendaftaran FROM pendaftar WHERE no_pendaftaran LIKE CONCAT(?, "%") ORDER BY id DESC LIMIT 1');
-    if ($stmt) {
-        $stmt->bind_param('s', $prefix);
-        $stmt->execute();
-        $stmt->bind_result($lastNo);
-        if ($stmt->fetch()) {
-            $stmt->close();
-            $lastNumber = (int)substr($lastNo, strlen($prefix));
-            $nextNumber = $lastNumber + 1;
-        } else {
-            $stmt->close();
-            $nextNumber = 1;
+    $optionKey = 'sequence_ppdb_' . $year;
+    $lastSeq = (int)get_option($optionKey, '0');
+    if ($lastSeq === 0) {
+        $stmt = $mysqli->prepare('SELECT no_pendaftaran FROM pendaftar WHERE no_pendaftaran LIKE CONCAT(?, "%") ORDER BY id DESC LIMIT 1');
+        if ($stmt) {
+            $stmt->bind_param('s', $prefix);
+            $stmt->execute();
+            $stmt->bind_result($lastNo);
+            if ($stmt->fetch()) {
+                $stmt->close();
+                $lastNumber = (int)substr($lastNo, strlen($prefix));
+                $lastSeq = $lastNumber;
+            } else {
+                $stmt->close();
+                $lastSeq = 0;
+            }
         }
-    } else {
-        $nextNumber = 1;
     }
 
-    return $prefix . str_pad((string)$nextNumber, 4, '0', STR_PAD_LEFT);
+    $nextNumber = $lastSeq + 1;
+    set_option($optionKey, (string)$nextNumber);
+
+    return $prefix . str_pad((string)$nextNumber, 3, '0', STR_PAD_LEFT);
 }
 
 function count_pendaftar(?string $status = null): int
@@ -215,5 +225,11 @@ function count_pendaftar(?string $status = null): int
     $stmt->close();
 
     return (int)$count;
+}
+
+function reset_no_pendaftaran(): bool
+{
+    $year = date('Y');
+    return set_option('sequence_ppdb_' . $year, '0');
 }
 

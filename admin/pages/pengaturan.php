@@ -1,5 +1,16 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $aksi = isset($_POST['aksi']) ? $_POST['aksi'] : '';
+    if ($aksi === 'reset_no') {
+        if (reset_no_pendaftaran()) {
+            flash('success', 'Nomor pendaftaran tahun berjalan berhasil direset ke 001.');
+            log_activity('reset_no', 'Reset penomoran pendaftaran');
+        } else {
+            flash('error', 'Gagal mereset nomor pendaftaran.');
+        }
+        echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=pengaturan')) . '";</script>';
+        exit;
+    }
     $status_pendaftaran = isset($_POST['status_pendaftaran']) && $_POST['status_pendaftaran'] === 'buka' ? 'buka' : 'tutup';
     $info_pendaftaran = isset($_POST['info_pendaftaran']) ? $_POST['info_pendaftaran'] : '';
     $syarat_pendaftaran = isset($_POST['syarat_pendaftaran']) ? $_POST['syarat_pendaftaran'] : '';
@@ -70,6 +81,13 @@ $tahun_ajaran = get_option('tahun_ajaran', $default_tahun);
                                 <input type="radio" id="statusTutup" name="status_pendaftaran" value="tutup"
                                     class="custom-control-input" <?= $status_pendaftaran !== 'buka' ? 'checked' : ''; ?>>
                                 <label class="custom-control-label" for="statusTutup">Ditutup</label>
+                            </div>
+                            <div class="mt-3">
+                                <form id="formResetNomor" method="post" class="d-inline">
+                                    <input type="hidden" name="aksi" value="reset_no">
+                                    <button type="button" id="btnResetNomor" class="btn btn-danger">Reset Nomor Pendaftaran</button>
+                                </form>
+                                <small class="text-muted d-block mt-1">Mereset urutan nomor, tahun aktif tetap.</small>
                             </div>
                         </div>
                         <div class="form-group">

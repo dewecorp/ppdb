@@ -5,6 +5,8 @@ function redirect_to_pendaftar(): void
     exit;
 }
 
+$total_pendaftar = count_pendaftar();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $aksi = isset($_POST['aksi']) ? $_POST['aksi'] : '';
 
@@ -76,7 +78,10 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
 
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-wrap justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Daftar Pendaftar</h6>
+            <h6 class="m-0 font-weight-bold text-primary">
+                Daftar Pendaftar
+                <span class="badge badge-pill badge-primary ml-2">Total: <?= (int)$total_pendaftar; ?></span>
+            </h6>
             <div class="mt-2 mt-sm-0">
                 <a href="laporan_pendaftar.php" target="_blank" class="btn btn-sm btn-secondary">
                     <i class="fas fa-print"></i> Cetak Rekap

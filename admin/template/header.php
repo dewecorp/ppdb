@@ -81,6 +81,7 @@ $user = current_user();
 
         #content-wrapper {
             margin-left: 14rem;
+            min-height: 100vh;
         }
 
         .topbar-fixed {
@@ -203,7 +204,7 @@ $user = current_user();
 
         footer.sticky-footer {
             padding: 1rem 0 !important;
-            min-height: 64px;
+            min-height: 64px !important;
         }
     </style>
 </head>
@@ -223,6 +224,10 @@ $user = current_user();
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
+
+                    <div class="d-none d-sm-flex align-items-center mr-auto">
+                        <span id="adminClock" class="text-gray-700 small font-weight-bold"></span>
+                    </div>
 
                     <ul class="navbar-nav ml-auto">
                         <div class="topbar-divider d-none d-sm-block"></div>

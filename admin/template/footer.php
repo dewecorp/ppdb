@@ -45,6 +45,31 @@ $error_message = flash('error');
             var successMessage = <?= json_encode($success_message); ?>;
             var errorMessage = <?= json_encode($error_message); ?>;
 
+            (function initAdminClock() {
+                var $clock = $('#adminClock');
+                if ($clock.length === 0) return;
+                var updateClock = function () {
+                    var now = new Date();
+                    var dateStr = now.toLocaleDateString('id-ID', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        timeZone: 'Asia/Jakarta'
+                    });
+                    var timeStr = now.toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false,
+                        timeZone: 'Asia/Jakarta'
+                    }).replace(/\./g, ':');
+                    $clock.text(dateStr + ' ' + timeStr + ' WIB');
+                };
+                updateClock();
+                setInterval(updateClock, 1000);
+            })();
+
             if (successMessage) {
                 Swal.fire({
                     icon: 'success',
@@ -198,6 +223,24 @@ $error_message = flash('error');
                     }
                 };
                 checkEditors();
+            }
+
+            if ($('#btnResetNomor').length) {
+                $(document).on('click', '#btnResetNomor', function (e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Reset Nomor Pendaftaran?',
+                        text: 'Nomor berikutnya akan kembali ke 0001 untuk tahun berjalan.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, reset',
+                        cancelButtonText: 'Batal'
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            $('#formResetNomor').submit();
+                        }
+                    });
+                });
             }
         });
     </script>
