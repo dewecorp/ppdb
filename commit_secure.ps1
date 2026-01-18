@@ -31,7 +31,7 @@ if ([string]::IsNullOrWhiteSpace($uemail)) {
 $remotes = git remote
 while (-not $remotes) {
     if ([string]::IsNullOrWhiteSpace($RemoteUrl)) {
-        $RemoteUrl = Read-Host "Masukkan URL remote (contoh https://...)"
+        $RemoteUrl = Read-Host "https://github.com/dewecorp/ppdb.git"
     }
     if (-not [string]::IsNullOrWhiteSpace($RemoteUrl)) {
         git remote add origin $RemoteUrl
