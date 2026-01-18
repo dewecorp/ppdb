@@ -22,6 +22,10 @@ $user = current_user();
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <?php if (!empty($madrasah_logo)): ?>
+    <link rel="icon" type="image/png" href="<?= esc(base_url('uploads/' . $madrasah_logo)); ?>">
+    <link rel="shortcut icon" href="<?= esc(base_url('uploads/' . $madrasah_logo)); ?>">
+    <?php endif; ?>
     <?php
         $current_page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
         $titles = [
