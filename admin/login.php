@@ -1,0 +1,131 @@
+<?php
+require __DIR__ . '/../config.php';
+
+if (is_logged_in()) {
+    header('Location: ' . base_url('admin/index.php'));
+    exit;
+}
+
+if ($result = $mysqli->query('SELECT COUNT(*) AS jml FROM users')) {
+    $row = $result->fetch_assoc();
+    if ((int)$row['jml'] === 0) {
+        $username = 'admin';
+        $password = password_hash('admin123', PASSWORD_DEFAULT);
+        $stmtSeed = $mysqli->prepare('INSERT INTO users (username, password) VALUES (?, ?)');
+        if ($stmtSeed) {
+            $stmtSeed->bind_param('ss', $username, $password);
+            $stmtSeed->execute();
+            $stmtSeed->close();
+        }
+    }
+    $result->free();
+}
+
+$error_message = flash('error');
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = isset($_POST['username']) ? trim($_POST['username']) : '';
+    $password = isset($_POST['password']) ? (string)$_POST['password'] : '';
+
+    $stmt = $mysqli->prepare('SELECT id, username, password FROM users WHERE username = ? LIMIT 1');
+    if ($stmt) {
+        $stmt->bind_param('s', $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($user = $result->fetch_assoc()) {
+            if (password_verify($password, $user['password'])) {
+                $_SESSION['user_id'] = (int)$user['id'];
+                log_activity('login', 'Login oleh ' . $user['username'], (int)$user['id']);
+                header('Location: ' . base_url('admin/index.php'));
+                exit;
+            }
+        }
+        $stmt->close();
+    }
+
+    flash('error', 'Username atau password salah.');
+    header('Location: ' . base_url('admin/login.php'));
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Login Admin PPDB</title>
+    <link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
+    <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gradient-primary">
+
+    <div class="container">
+
+        <div class="row justify-content-center">
+
+            <div class="col-xl-5 col-lg-6 col-md-8">
+
+                <div class="card o-hidden border-0 shadow-lg my-5">
+                    <div class="card-body p-0">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="p-5">
+                                    <div class="text-center">
+                                        <h1 class="h4 text-gray-900 mb-4">Login Admin PPDB</h1>
+                                    </div>
+                                    <form class="user" method="post" action="">
+                                        <div class="form-group">
+                                            <input type="text" name="username" class="form-control form-control-user"
+                                                placeholder="Username" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="password" name="password"
+                                                class="form-control form-control-user" placeholder="Password" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-user btn-block">
+                                            Login
+                                        </button>
+                                        <hr>
+                                        <p class="small text-muted">
+                                            Username awal: <strong>admin</strong>, Password:
+                                            <strong>admin123</strong>
+                                        </p>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="../assets/vendor/jquery/jquery.min.js"></script>
+    <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="../assets/js/sb-admin-2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        (function () {
+            var errorMessage = <?= json_encode($error_message); ?>;
+            if (errorMessage) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Login Gagal',
+                    text: errorMessage,
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
+        })();
+    </script>
+</body>
+
+</html>
