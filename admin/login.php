@@ -21,6 +21,19 @@ if ($result = $mysqli->query('SELECT COUNT(*) AS jml FROM users')) {
     $result->free();
 }
 
+// Get school information
+$madrasah = [
+    'nama' => 'MI SULTAN FATTAH SUKOSONO',
+    'logo' => ''
+];
+
+if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
+    if ($row = $result->fetch_assoc()) {
+        $madrasah = $row;
+    }
+    $result->free();
+}
+
 $error_message = flash('error');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -55,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Login Admin PPDB</title>
+    <title>Login Admin - <?= esc($madrasah['nama']); ?></title>
     <link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
     <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
@@ -75,7 +88,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="col-lg-12">
                                 <div class="p-5">
                                     <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-4">Login Admin PPDB</h1>
+                                        <?php if (!empty($madrasah['logo'])): ?>
+                                        <img src="<?= base_url('uploads/' . $madrasah['logo']); ?>" alt="Logo" class="img-fluid mb-3" style="max-height: 80px;">
+                                        <?php endif; ?>
+                                        <h1 class="h4 text-gray-900 mb-1">Sistem PPDB</h1>
+                                        <h6 class="text-gray-700 mb-4"> <?= esc($madrasah['nama']); ?></h6>
                                     </div>
                                     <form class="user" method="post" action="">
                                         <div class="form-group">
@@ -89,11 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <button type="submit" class="btn btn-primary btn-user btn-block">
                                             Login
                                         </button>
-                                        <hr>
-                                        <p class="small text-muted">
-                                            Username awal: <strong>admin</strong>, Password:
-                                            <strong>admin123</strong>
-                                        </p>
                                     </form>
                                 </div>
                             </div>
