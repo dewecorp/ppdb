@@ -126,27 +126,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($aksi === 'hapus' && isset($_POST['id'])) {
         $id = (int)$_POST['id'];
         $username = '';
-        if ($st = $mysqli->prepare('SELECT username FROM users WHERE id=? LIMIT 1')) {
+        $user_data = null;
+        
+        if ($st = $mysqli->prepare('SELECT id, username FROM users WHERE id=? LIMIT 1')) {
             $st->bind_param('i', $id);
             $st->execute();
-            $st->bind_result($username);
-            $st->fetch();
+            $result = $st->get_result();
+            $user_data = $result->fetch_assoc();
             $st->close();
         }
-        if ($username === 'admin') {
-            flash('error', 'Pengguna admin tidak dapat dihapus.');
-        } else {
-            $stmt = $mysqli->prepare('DELETE FROM users WHERE id=?');
-            if ($stmt) {
-                $stmt->bind_param('i', $id);
-                if ($stmt->execute()) {
-                    flash('success', 'Pengguna berhasil dihapus.');
-                    log_activity('delete_user', 'Hapus pengguna ' . $username);
-                } else {
-                    flash('error', 'Gagal menghapus pengguna.');
+        
+        if ($user_data) {
+            $username = $user_data['username'];
+            
+            // Check if this is the first user (primary admin) or the 'admin' user
+            $first_user_result = $mysqli->query('SELECT id FROM users ORDER BY id ASC LIMIT 1');
+            $first_user = $first_user_result ? $first_user_result->fetch_assoc() : null;
+            
+            if ($first_user && $id == $first_user['id']) {
+                flash('error', 'Pengguna utama (admin pertama) tidak dapat dihapus.');
+            } else if ($username === 'admin') {
+                flash('error', 'Pengguna admin tidak dapat dihapus.');
+            } else {
+                $stmt = $mysqli->prepare('DELETE FROM users WHERE id=?');
+                if ($stmt) {
+                    $stmt->bind_param('i', $id);
+                    if ($stmt->execute()) {
+                        flash('success', 'Pengguna berhasil dihapus.');
+                        log_activity('delete_user', 'Hapus pengguna ' . $username);
+                    } else {
+                        flash('error', 'Gagal menghapus pengguna.');
+                    }
+                    $stmt->close();
                 }
-                $stmt->close();
             }
+        } else {
+            flash('error', 'Pengguna tidak ditemukan.');
         }
         header('Location: ' . base_url('admin/index.php?page=pengguna'));
         exit;
@@ -154,6 +169,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $users = [];
+$first_user_result = $mysqli->query('SELECT id FROM users ORDER BY id ASC LIMIT 1');
+$first_user_id = null;
+
+if ($first_user_result) {
+    $first_row = $first_user_result->fetch_assoc();
+    $first_user_id = $first_row['id'];
+    $first_user_result->free();
+}
+
 if ($result = $mysqli->query('SELECT * FROM users ORDER BY id ASC')) {
     while ($row = $result->fetch_assoc()) {
         $users[] = $row;
@@ -208,7 +232,7 @@ if ($result = $mysqli->query('SELECT * FROM users ORDER BY id ASC')) {
                                     data-toggle="modal" data-target="#modalEditPengguna">
                                     Edit
                                 </button>
-                                <?php if ($user['username'] !== 'admin'): ?>
+                                <?php if ($user['username'] !== 'admin' && $user['id'] != $first_user_id): ?>
                                 <form method="post" class="d-inline form-hapus-pengguna">
                                     <input type="hidden" name="aksi" value="hapus">
                                     <input type="hidden" name="id" value="<?= (int)$user['id']; ?>">
@@ -216,6 +240,10 @@ if ($result = $mysqli->query('SELECT * FROM users ORDER BY id ASC')) {
                                         Hapus
                                     </button>
                                 </form>
+                                <?php elseif ($user['id'] == $first_user_id): ?>
+                                <button type="button" class="btn btn-sm btn-danger" disabled title="Akun utama tidak dapat dihapus">
+                                    Hapus
+                                </button>
                                 <?php endif; ?>
                             </td>
                         </tr>
