@@ -55,7 +55,7 @@ if ($notif_res = $mysqli->query($notif_sql)) {
         ];
         $page_title = isset($titles[$current_page]) ? $titles[$current_page] : 'Dashboard';
     ?>
-    <title><?= esc($page_title); ?> - <?= esc($madrasah_nama); ?></title>
+    <title><?= esc($page_title); ?> - PPDB Online</title>
     <link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
     <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
