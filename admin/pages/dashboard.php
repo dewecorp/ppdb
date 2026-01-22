@@ -67,13 +67,19 @@ if ($result_chart = $mysqli->query($query_chart)) {
 
 // Data Pendaftar Terbaru
 $recent_registrants = [];
-if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_daftar, created_at FROM pendaftar ORDER BY created_at DESC LIMIT 5")) {
+if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_daftar, created_at FROM pendaftar ORDER BY created_at DESC LIMIT 20")) {
     while ($row_recent = $res_recent->fetch_assoc()) {
         $recent_registrants[] = $row_recent;
     }
     $res_recent->free();
 }
 ?>
+<style>
+    .activity-scroll, .recent-registrants-scroll {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>
 <div class="container-fluid">
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -168,13 +174,13 @@ if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_da
         </div>
 
         <!-- Pendaftar Terbaru -->
-        <div class="col-xl-6 mb-4">
+        <div class="col-xl-12 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Pendaftar Terbaru</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Pendaftar Terbaru (Total: <?= $total; ?>)</h6>
                     <a href="index.php?page=pendaftar" class="btn btn-sm btn-primary shadow-sm">Lihat Semua</a>
                 </div>
-                <div class="card-body">
+                <div class="card-body recent-registrants-scroll">
                     <?php if (empty($recent_registrants)): ?>
                         <p class="text-center text-muted my-3">Belum ada pendaftar.</p>
                     <?php else: ?>
@@ -182,6 +188,7 @@ if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_da
                             <table class="table table-bordered table-hover" width="100%" cellspacing="0">
                                 <thead>
                                     <tr>
+                                        <th style="width: 5%">No</th>
                                         <th>Nama</th>
                                         <th>No. Daftar</th>
                                         <th>Status</th>
@@ -189,8 +196,9 @@ if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_da
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($recent_registrants as $reg): ?>
+                                    <?php $i = 1; foreach ($recent_registrants as $reg): ?>
                                     <tr>
+                                        <td><?= $i++; ?></td>
                                         <td><?= esc($reg['nama_lengkap']); ?></td>
                                         <td><?= esc($reg['no_pendaftaran']); ?></td>
                                         <td>
@@ -213,7 +221,7 @@ if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_da
             </div>
         </div>
 
-        <div class="col-xl-6 mb-4">
+        <div class="col-xl-12 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">
