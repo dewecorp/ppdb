@@ -396,6 +396,7 @@ $error_message = flash('error');
                     <li class="nav-item"><a class="nav-link" href="#alur">Alur</a></li>
                     <li class="nav-item"><a class="nav-link" href="#informasi">Info</a></li>
                     <li class="nav-item"><a class="nav-link" href="#syarat">Syarat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#fasilitas">Fasilitas</a></li>
                     <li class="nav-item"><a class="nav-link" href="#kontak">Kontak</a></li>
                     <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('admin/login.php')); ?>" target="_blank" rel="noopener">Login
                             Admin</a></li>
