@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $status_pendaftaran = isset($_POST['status_pendaftaran']) && $_POST['status_pendaftaran'] === 'buka' ? 'buka' : 'tutup';
     $info_pendaftaran = isset($_POST['info_pendaftaran']) ? $_POST['info_pendaftaran'] : '';
     $syarat_pendaftaran = isset($_POST['syarat_pendaftaran']) ? $_POST['syarat_pendaftaran'] : '';
+    $fasilitas_siswa = isset($_POST['fasilitas_siswa']) ? $_POST['fasilitas_siswa'] : '';
     $alur_pendaftaran = isset($_POST['alur_pendaftaran']) ? $_POST['alur_pendaftaran'] : '';
     $tahun_ajaran = isset($_POST['tahun_ajaran']) ? trim($_POST['tahun_ajaran']) : '';
     $wa_token = isset($_POST['wa_token']) ? trim($_POST['wa_token']) : '';
@@ -24,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     set_option('status_pendaftaran', $status_pendaftaran);
     set_option('info_pendaftaran', $info_pendaftaran);
     set_option('syarat_pendaftaran', $syarat_pendaftaran);
+    set_option('fasilitas_siswa', $fasilitas_siswa);
     set_option('alur_pendaftaran', $alur_pendaftaran);
     if ($tahun_ajaran !== '') {
         set_option('tahun_ajaran', $tahun_ajaran);
@@ -69,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $status_pendaftaran = get_option('status_pendaftaran', 'tutup');
 $info_pendaftaran = get_option('info_pendaftaran', '');
 $syarat_pendaftaran = get_option('syarat_pendaftaran', '');
+$fasilitas_siswa = get_option('fasilitas_siswa', '');
 $alur_pendaftaran = get_option('alur_pendaftaran', '');
 $header_background = get_option('header_background', '');
 $default_tahun = date('Y') . '/' . (date('Y') + 1);
@@ -164,6 +167,21 @@ $_end_val = $_end_raw !== '' ? date('Y-m-d\TH:i', strtotime($_end_raw)) : '';
                             <textarea name="syarat_pendaftaran" id="syarat_pendaftaran"
                                 class="form-control" rows="10"><?= $syarat_pendaftaran; ?></textarea>
                             <small class="text-muted">Tuliskan syarat dalam bentuk urutan/timeline.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Fasilitas Siswa Baru</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Daftar Fasilitas</label>
+                            <textarea name="fasilitas_siswa" id="fasilitas_siswa"
+                                class="form-control" rows="10"><?= $fasilitas_siswa; ?></textarea>
+                            <small class="text-muted">Tuliskan fasilitas yang akan didapatkan siswa baru.</small>
                         </div>
                     </div>
                 </div>
@@ -290,7 +308,7 @@ $_end_val = $_end_raw !== '' ? date('Y-m-d\TH:i', strtotime($_end_raw)) : '';
                 };
             }
 
-            $('#info_pendaftaran,#alur_pendaftaran,#syarat_pendaftaran').wysihtml5();
+            $('#info_pendaftaran,#alur_pendaftaran,#syarat_pendaftaran,#fasilitas_siswa').wysihtml5();
         })(jQuery);
     };
 </script>

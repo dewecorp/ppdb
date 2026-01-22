@@ -4,6 +4,7 @@ require __DIR__ . '/config.php';
 $status_pendaftaran = get_ppdb_status();
 $info_pendaftaran = get_option('info_pendaftaran', 'Informasi PPDB belum diatur.');
 $syarat_pendaftaran = get_option('syarat_pendaftaran', '');
+$fasilitas_siswa = get_option('fasilitas_siswa', '');
 $alur_pendaftaran = get_option('alur_pendaftaran', '');
 $header_background = get_option('header_background', '');
 $default_tahun = date('Y') . '/' . (date('Y') + 1);
@@ -218,6 +219,73 @@ $error_message = flash('error');
             display: block;
         }
 
+        .fasilitas-modern ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .section-fasilitas {
+            background: linear-gradient(135deg, #0f766e, #115e59);
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-fasilitas::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .section-fasilitas .section-title {
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .fasilitas-modern li {
+            position: relative;
+            padding: 1.5rem 1.5rem 1.5rem 3.5rem;
+            background: #ffffff;
+            color: #374151; /* Dark text for visibility on white background */
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .fasilitas-modern li:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: #3b82f6;
+        }
+
+        .fasilitas-modern li::before {
+            content: "\f00c"; /* FontAwesome check icon */
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 1rem;
+            top: 1.5rem;
+            width: 2rem;
+            height: 2rem;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+        }
+
         @media (max-width: 768px) {
             .info-text {
                 column-count: 1;
@@ -225,6 +293,10 @@ $error_message = flash('error');
 
             .syarat-modern li {
                 padding-left: 2.5rem;
+            }
+            
+            .fasilitas-modern ul {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -410,6 +482,25 @@ $error_message = flash('error');
                             <?php endif; ?>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="fasilitas" class="section section-fasilitas">
+        <div class="container" style="position: relative; z-index: 1;">
+            <h3 class="section-title text-center">Fasilitas Siswa Baru</h3>
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <?php if (trim($fasilitas_siswa) !== '') : ?>
+                    <div class="fasilitas-modern">
+                        <?= $fasilitas_siswa; ?>
+                    </div>
+                    <?php else : ?>
+                    <div class="text-center text-white-50">
+                        <p>Fasilitas siswa baru belum diatur oleh admin.</p>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
