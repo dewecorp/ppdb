@@ -168,6 +168,9 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
                 <span class="badge badge-pill badge-primary ml-2">Total: <?= (int)$total_pendaftar; ?></span>
             </h6>
             <div class="mt-2 mt-sm-0">
+                <a href="cetak_semua_kartu.php" target="_blank" class="btn btn-sm btn-info">
+                    <i class="fas fa-id-card"></i> Cetak Semua Kartu
+                </a>
                 <a href="laporan_pendaftar.php" target="_blank" class="btn btn-sm btn-secondary">
                     <i class="fas fa-print"></i> Cetak Rekap
                 </a>

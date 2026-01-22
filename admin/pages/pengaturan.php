@@ -11,6 +11,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=pengaturan')) . '";</script>';
         exit;
     }
+    if ($aksi === 'reset_jadwal') {
+        set_option('pendaftaran_start_at', '');
+        set_option('pendaftaran_end_at', '');
+        set_option('pendaftaran_open_until', '');
+        flash('success', 'Jadwal pendaftaran berhasil direset.');
+        log_activity('reset_jadwal', 'Reset jadwal pendaftaran');
+        echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=pengaturan')) . '";</script>';
+        exit;
+    }
     $status_pendaftaran = isset($_POST['status_pendaftaran']) && $_POST['status_pendaftaran'] === 'buka' ? 'buka' : 'tutup';
     $info_pendaftaran = isset($_POST['info_pendaftaran']) ? $_POST['info_pendaftaran'] : '';
     $syarat_pendaftaran = isset($_POST['syarat_pendaftaran']) ? $_POST['syarat_pendaftaran'] : '';
@@ -21,6 +30,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $wa_phone_id = isset($_POST['wa_phone_id']) ? trim($_POST['wa_phone_id']) : '';
     $pendaftaran_start_at = isset($_POST['pendaftaran_start_at']) ? trim($_POST['pendaftaran_start_at']) : '';
     $pendaftaran_end_at = isset($_POST['pendaftaran_end_at']) ? trim($_POST['pendaftaran_end_at']) : '';
+
+    // Jika dipaksa BUKA, pastikan jadwal tidak menghalangi (reset jadwal jika kadaluarsa/belum mulai)
+    if ($status_pendaftaran === 'buka') {
+        $tsNow = time();
+        if ($pendaftaran_start_at !== '' && strtotime($pendaftaran_start_at) > $tsNow) {
+            $pendaftaran_start_at = ''; 
+        }
+        if ($pendaftaran_end_at !== '' && strtotime($pendaftaran_end_at) < $tsNow) {
+            $pendaftaran_end_at = '';
+        }
+    }
 
     set_option('status_pendaftaran', $status_pendaftaran);
     set_option('info_pendaftaran', $info_pendaftaran);
@@ -67,6 +87,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=pengaturan')) . '";</script>';
     exit;
 }
+
+// Pastikan status sinkron dengan jadwal (otomatis tutup jika expired)
+get_ppdb_status();
 
 $status_pendaftaran = get_option('status_pendaftaran', 'tutup');
 $info_pendaftaran = get_option('info_pendaftaran', '');
@@ -218,6 +241,9 @@ $_end_val = $_end_raw !== '' ? date('Y-m-d\TH:i', strtotime($_end_raw)) : '';
                             <input type="datetime-local" name="pendaftaran_end_at" class="form-control" value="<?= esc($_end_val); ?>">
                         </div>
                         <small class="text-muted">Status pendaftaran otomatis mengikuti rentang waktu ini.</small>
+                        <div class="mt-3">
+                            <button type="submit" name="aksi" value="reset_jadwal" class="btn btn-sm btn-danger">Reset Jadwal</button>
+                        </div>
                     </div>
                 </div>
             </div>

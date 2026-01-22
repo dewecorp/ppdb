@@ -1,5 +1,5 @@
 -- Backup database
--- Waktu: 2026-01-19 04:20:20
+-- Waktu: 2026-01-22 10:16:49
 
 --
 -- Struktur tabel `activity_logs`
@@ -16,41 +16,20 @@ CREATE TABLE `activity_logs` (
   KEY `created_at` (`created_at`),
   KEY `action` (`action`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Data untuk tabel `activity_logs`
 --
 INSERT INTO `activity_logs` (`id`,`user_id`,`action`,`message`,`created_at`) VALUES
-('8','1','update_user','Perbarui pengguna ID 1 (admin)','2026-01-18 13:00:09'),
-('9','1','update_user','Perbarui pengguna ID 1 (Admin)','2026-01-18 13:00:25'),
-('10','1','update_pendaftar_status','Ubah status pendaftar ID 2 menjadi ditolak','2026-01-18 13:31:48'),
-('11','1','update_pendaftar_status','Ubah status pendaftar ID 2 menjadi diterima','2026-01-18 13:42:25'),
-('12','1','send_whatsapp','Kirim WhatsApp ke 082331838221 status diterima hasil=fail','2026-01-18 13:42:25'),
-('13','1','send_email','Kirim Email ke ibnuhasan3@gmail.com status diterima hasil=ok','2026-01-18 13:42:27'),
-('14','1','update_pendaftar_status','Ubah status pendaftar ID 2 menjadi ditolak','2026-01-18 13:43:10'),
-('15','1','send_whatsapp','Kirim WhatsApp ke 082331838221 status ditolak hasil=fail','2026-01-18 13:43:10'),
-('16','1','send_email','Kirim Email ke ibnuhasan3@gmail.com status ditolak hasil=ok','2026-01-18 13:43:11'),
-('17','1','update_pendaftar_status','Ubah status pendaftar ID 2 menjadi diterima','2026-01-18 13:45:27'),
-('18','1','send_whatsapp','Kirim WhatsApp ke 082331838221 status diterima hasil=fail','2026-01-18 13:45:27'),
-('19','1','send_email','Kirim Email ke ibnuhasan3@gmail.com status diterima hasil=ok','2026-01-18 13:45:27'),
-('20','1','backup','Membuat backup backup-20260118-071340.sql','2026-01-18 14:13:40'),
-('21','1','update_pendaftar_status','Ubah status pendaftar ID 2 menjadi ditolak','2026-01-18 15:27:15'),
-('22','1','update_pendaftar_status','Ubah status pendaftar ID 2 menjadi diterima','2026-01-18 15:30:22'),
-('23','1','delete_backup','Hapus backup backup-20260117-143104.sql','2026-01-18 15:38:52'),
-('24','1','update_madrasah','Perbarui data madrasah','2026-01-18 16:13:27'),
-('25','1','update_user','Perbarui pengguna ID 1 (Admin)','2026-01-18 16:46:21'),
-('26','1','update_user','Perbarui pengguna ID 1 (Admin)','2026-01-18 18:28:01'),
-('27','1','update_pendaftar_status','Ubah status pendaftar ID 3 menjadi diterima','2026-01-18 19:01:11'),
-('28','1','reset_no','Reset penomoran pendaftaran','2026-01-18 19:40:11'),
-('29','1','send_email_pendaftar','Kirim email pendaftar ID 5','2026-01-18 20:30:09'),
-('30','1','update_pendaftar_status','Ubah status pendaftar ID 6 menjadi diterima','2026-01-18 20:47:48'),
-('31','1','reset_no','Reset penomoran pendaftaran','2026-01-18 21:56:33'),
-('32','1','update_user','Perbarui pengguna ID 1 (Admin)','2026-01-19 04:53:25'),
-('33','1','reset_total','Hapus semua pendaftar & reset nomor','2026-01-19 04:53:48'),
-('34','1','logout','Logout','2026-01-19 04:58:22'),
-('35','1','login','Login oleh Admin','2026-01-19 04:58:58'),
-('36','1','update_pendaftar_status','Ubah status pendaftar ID 7 menjadi diterima','2026-01-19 09:30:52');
+('39','1','login','Login oleh Admin','2026-01-22 07:22:01'),
+('40','1','pendaftaran_baru','Pendaftaran baru atas nama Santoso (PPDB2026004)','2026-01-22 08:02:33'),
+('41','1','update_pendaftar_status','Ubah status pendaftar ID 8 menjadi diterima','2026-01-22 08:03:33'),
+('42','1','backup','Membuat backup backup-20260122-080621.sql','2026-01-22 08:06:21'),
+('43','1','pendaftaran_baru','Pendaftaran baru atas nama Atun (PPDB2026005)','2026-01-22 09:00:46'),
+('44','1','pendaftaran_baru','Pendaftaran baru atas nama Dewi (PPDB2026006)','2026-01-22 09:05:02'),
+('45','1','delete_backup','Hapus backup backup-20260118-071340.sql','2026-01-22 10:16:36'),
+('46','1','delete_backup','Hapus backup backup-20260119-042020.sql','2026-01-22 10:16:44');
 
 --
 -- Struktur tabel `madrasah`
@@ -76,6 +55,31 @@ CREATE TABLE `madrasah` (
 INSERT INTO `madrasah` (`id`,`nama`,`alamat`,`email`,`website`,`hp_kepala`,`hp_panitia`,`logo`,`nama_panitia`) VALUES
 ('1','MI Sultan Fattah Sukosono','Jln. Kauman RT. 10 RW. 03 Sukosono Jepara','misultanfattah@gmail.com','https://misultanfattah.sch.id/','-','083844483341','logo-20260117142115.png','Ali Yasin, S.Pd.I.'),
 ('2','MI SULTAN FATTAH SUKOSONO','Alamat madrasah belum diatur','-','-','-','-',NULL,NULL);
+
+--
+-- Struktur tabel `notifications`
+--
+
+DROP TABLE IF EXISTS `notifications`;
+CREATE TABLE `notifications` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(50) NOT NULL DEFAULT 'general',
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Data untuk tabel `notifications`
+--
+INSERT INTO `notifications` (`id`,`type`,`title`,`content`,`is_read`,`created_at`) VALUES
+('1','registration','Pendaftaran Baru','{\"nama\":\"Nur Huda\",\"no_pendaftaran\":\"PPDB2026002\",\"waktu\":\"2026-01-22 00:47:33\"}','1','2026-01-22 07:47:33'),
+('2','registration','Pendaftaran Baru','{\"nama\":\"siti\",\"no_pendaftaran\":\"PPDB2026003\",\"waktu\":\"2026-01-22 08:00:09\"}','1','2026-01-22 08:00:09'),
+('3','registration','Pendaftaran Baru','{\"nama\":\"Santoso\",\"no_pendaftaran\":\"PPDB2026004\",\"waktu\":\"2026-01-22 08:02:33\"}','1','2026-01-22 08:02:33'),
+('4','registration','Pendaftaran Baru','{\"nama\":\"Atun\",\"no_pendaftaran\":\"PPDB2026005\",\"waktu\":\"2026-01-22 09:00:46\"}','1','2026-01-22 09:00:46'),
+('5','registration','Pendaftaran Baru','{\"nama\":\"Dewi\",\"no_pendaftaran\":\"PPDB2026006\",\"waktu\":\"2026-01-22 09:05:02\"}','1','2026-01-22 09:05:02');
 
 --
 -- Struktur tabel `pendaftar`
@@ -110,13 +114,18 @@ CREATE TABLE `pendaftar` (
   `created_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `no_pendaftaran` (`no_pendaftaran`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Data untuk tabel `pendaftar`
 --
 INSERT INTO `pendaftar` (`id`,`no_pendaftaran`,`nama_lengkap`,`nik`,`kk`,`jenis_kelamin`,`tempat_lahir`,`tanggal_lahir`,`alamat`,`status_keluarga`,`anak_ke`,`jumlah_saudara`,`asal_tk`,`nama_ayah`,`nama_ibu`,`pekerjaan_ayah`,`pekerjaan_ibu`,`nama_wali`,`pekerjaan_wali`,`email`,`hp`,`kip`,`pkh`,`status_daftar`,`created_at`) VALUES
-('7','PPDB2026001','Nur Ahwan','3320135408060001','332001','Laki-laki','Jepara','2010-01-18','Jalan Kauman RT. 10 RW. 03 Sukosono','Anak kandung','1','3','TK Al Huda','ayah','ibu','tukang','tukang','ayah','tukang','ibnuhasan3@gmail.com','082331838221','Ya','Ya','diterima','2026-01-19 04:54:14');
+('7','PPDB2026001','Nur Ahwan','3320135408060001','332001','Laki-laki','Jepara','2010-01-18','Jalan Kauman RT. 10 RW. 03 Sukosono','Anak kandung','1','3','TK Al Huda','ayah','ibu','tukang','tukang','ayah','tukang','ibnuhasan3@gmail.com','082331838221','Ya','Ya','diterima','2026-01-19 04:54:14'),
+('8','PPDB2026002','Nur Huda','3320135408060001','332001','Laki-laki','Jepara','2002-05-22','RT. 07 RW. 02 Sukosono Kedung','Anak kandung','2','5','TK Al Huda','ayah','ibu','tukang','tukang','ayah','tukang','ibnuhasan3@gmail.com','082331838221','Tidak','Ya','diterima','2026-01-22 07:47:33'),
+('9','PPDB2026003','siti','3320135408060001','332001','Perempuan','Jepara','2010-01-18','RT. 07 RW. 02 Sukosono Kedung','Anak kandung','1','3','TK Al Huda','ayah','ibu','tukang','tukang','ayah','tukang','ibnuhasan3@gmail.com','082331838221','Ya','Tidak','proses','2026-01-22 08:00:08'),
+('10','PPDB2026004','Santoso','3320135408060004','332001','Laki-laki','Jepara','2010-01-18','Jalan Kauman RT. 10 RW. 03 Sukosono','Anak kandung','1','3','TK Al Huda','ayah','ibu','tukang','tukang','ayah','tukang','ibnuhasan3@gmail.com','082331838221','Tidak','Ya','proses','2026-01-22 08:02:33'),
+('11','PPDB2026005','Atun','3320135408060004','332001','Perempuan','Jepara','2010-01-18','RT. 07 RW. 02 Sukosono Kedung','Anak kandung','1','3','TK Al Huda','ayah','ibu','tukang','tukang','ayah','tukang','ibnuhasan3@gmail.com','082331838221','Ya','Ya','proses','2026-01-22 09:00:46'),
+('12','PPDB2026006','Dewi','3320135408060004','332001','Perempuan','Jepara','2010-01-18','RT. 07 RW. 02 Sukosono Kedung','Anak kandung','1','3','TK Al Huda','ayah','ibu','tukang','tukang','ayah','tukang','ibnuhasan3@gmail.com','082331838221','Ya','Ya','proses','2026-01-22 09:05:02');
 
 --
 -- Struktur tabel `pengaturan`
@@ -129,7 +138,7 @@ CREATE TABLE `pengaturan` (
   `nilai` text NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nama` (`nama`)
-) ENGINE=InnoDB AUTO_INCREMENT=220 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=255 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Data untuk tabel `pengaturan`
@@ -158,11 +167,12 @@ INSERT INTO `pengaturan` (`id`,`nama`,`nilai`) VALUES
 ('109','smtp_user','Admin'),
 ('110','smtp_pass','admin123'),
 ('121','email_from','misultanfattah@gmail.com'),
-('156','sequence_ppdb_2026','1'),
+('156','sequence_ppdb_2026','6'),
 ('169','wa_token','admin123'),
 ('170','wa_phone_id','Admin'),
 ('171','pendaftaran_start_at',''),
-('172','pendaftaran_end_at','');
+('172','pendaftaran_end_at',''),
+('228','fasilitas_siswa','<ul><li style=\"box-sizing: inherit;\">Gratis uang pendaftaran dan uang gedung</li><li style=\"box-sizing: inherit;\">Seragam olah raga 1 stel</li><li style=\"box-sizing: inherit;\">Baju seragam hari Rabu dan Kamis</li><li style=\"box-sizing: inherit;\">Peci Hitam untuk Putra</li><li style=\"box-sizing: inherit;\">Kerudung putih untuk Putri</li></ul>');
 
 --
 -- Struktur tabel `users`
