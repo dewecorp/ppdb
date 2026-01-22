@@ -109,6 +109,26 @@ $stmt->bind_param(
 
 if ($stmt->execute()) {
     $insert_id = $mysqli->insert_id;
+    
+    // Insert Notification
+    $notif_title = "Pendaftaran Baru";
+    $notif_content = json_encode([
+        'nama' => $nama_lengkap,
+        'no_pendaftaran' => $no_pendaftaran,
+        'waktu' => date('Y-m-d H:i:s')
+    ]);
+    
+    $created_at = date('Y-m-d H:i:s');
+    $stmt_notif = $mysqli->prepare('INSERT INTO notifications (type, title, content, created_at) VALUES ("registration", ?, ?, ?)');
+    if ($stmt_notif) {
+        $stmt_notif->bind_param('sss', $notif_title, $notif_content, $created_at);
+        $stmt_notif->execute();
+        $stmt_notif->close();
+    }
+
+    // Log Activity
+    log_activity('pendaftaran_baru', 'Pendaftaran baru atas nama ' . $nama_lengkap . ' (' . $no_pendaftaran . ')');
+
     $stmt->close();
     ?>
     <!DOCTYPE html>

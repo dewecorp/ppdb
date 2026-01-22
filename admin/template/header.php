@@ -14,6 +14,23 @@ if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
 }
 
 $user = current_user();
+
+// Cleanup old notifications
+$mysqli->query("DELETE FROM notifications WHERE created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)");
+
+// Fetch notifications (last 24 hours)
+$notifications = [];
+$unread_count = 0;
+$notif_sql = "SELECT * FROM notifications WHERE created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY) ORDER BY created_at DESC";
+if ($notif_res = $mysqli->query($notif_sql)) {
+    while ($notif_row = $notif_res->fetch_assoc()) {
+        $notifications[] = $notif_row;
+        if ($notif_row['is_read'] == 0) {
+            $unread_count++;
+        }
+    }
+    $notif_res->free();
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -283,6 +300,62 @@ $user = current_user();
                     </div>
 
                     <ul class="navbar-nav ml-auto">
+                        <!-- Nav Item - Alerts -->
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-bell fa-fw"></i>
+                                <!-- Counter - Alerts -->
+                                <?php if ($unread_count > 0): ?>
+                                    <span class="badge badge-danger badge-counter"><?= $unread_count > 9 ? '9+' : $unread_count; ?></span>
+                                <?php endif; ?>
+                            </a>
+                            <!-- Dropdown - Alerts -->
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="alertsDropdown">
+                                <h6 class="dropdown-header">
+                                    Notifikasi Pendaftaran
+                                </h6>
+                                <div class="notif-scroll" style="max-height: 300px; overflow-y: auto;">
+                                <?php if (empty($notifications)): ?>
+                                    <a class="dropdown-item d-flex align-items-center" href="#">
+                                        <div class="mr-3">
+                                            <div class="icon-circle bg-secondary">
+                                                <i class="fas fa-info text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="font-weight-bold">Tidak ada notifikasi baru</span>
+                                        </div>
+                                    </a>
+                                <?php else: ?>
+                                    <?php foreach ($notifications as $notif): 
+                                        $data = json_decode($notif['content'], true);
+                                        $is_unread = $notif['is_read'] == 0;
+                                        $font_weight = $is_unread ? 'font-weight-bold' : '';
+                                        $nama = isset($data['nama']) ? $data['nama'] : $notif['content'];
+                                        $no_reg = isset($data['no_pendaftaran']) ? $data['no_pendaftaran'] : '-';
+                                        $waktu = isset($data['waktu']) ? $data['waktu'] : $notif['created_at'];
+                                    ?>
+                                    <a class="dropdown-item d-flex align-items-center notif-item" href="index.php?page=pendaftar" data-id="<?= $notif['id']; ?>">
+                                        <div class="mr-3">
+                                            <div class="icon-circle bg-primary">
+                                                <i class="fas fa-file-alt text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="small text-gray-500"><?= date('d F Y, H:i', strtotime($waktu)); ?></div>
+                                            <span class="<?= $font_weight; ?>">
+                                                Pendaftaran baru atas nama <?= esc($nama); ?> dengan nomor pendaftaran <?= esc($no_reg); ?>
+                                            </span>
+                                        </div>
+                                    </a>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                                </div>
+                            </div>
+                        </li>
+
                         <div class="topbar-divider d-none d-sm-block"></div>
 
                         <li class="nav-item dropdown no-arrow">

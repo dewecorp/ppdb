@@ -368,6 +368,32 @@ if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
                     });
                 });
             }
+
+            // Notification Handler
+            $('.notif-item').on('click', function(e) {
+                e.preventDefault();
+                var $this = $(this);
+                var id = $this.data('id');
+                var href = $this.attr('href');
+                var $span = $this.find('span');
+                
+                if ($span.hasClass('font-weight-bold')) {
+                    $.post('api/mark_read.php', { id: id }, function(response) {
+                        // Redirect regardless of success
+                        if (href && href !== '#') {
+                            window.location.href = href;
+                        }
+                    }, 'json').fail(function() {
+                        if (href && href !== '#') {
+                            window.location.href = href;
+                        }
+                    });
+                } else {
+                    if (href && href !== '#') {
+                        window.location.href = href;
+                    }
+                }
+            });
         });
     </script>
 </body>
