@@ -49,3 +49,21 @@ table.dataTable tbody th, table.dataTable tbody td,
 .card-header {
     color: #000 !important;
 }
+
+/* Mobile Navbar Customization */
+@media (max-width: 576px) {
+    .navbar-brand {
+        max-width: 80%; /* Ensure brand doesn't push toggler off screen */
+    }
+    .navbar-brand .d-flex.flex-column span:first-child {
+        font-size: 1rem !important;
+    }
+    .navbar-brand .d-flex.flex-column span:last-child {
+        font-size: 0.75rem !important;
+        white-space: normal; /* Allow text wrapping for long school names */
+    }
+    .navbar-logo {
+        max-height: 40px; /* Adjust logo size for mobile */
+        width: auto;
+    }
+}
