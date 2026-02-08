@@ -19,9 +19,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     if ($stmt) {
         $stmt->bind_param("sssssssi", $nama, $nik, $kk, $jk, $hp, $email, $alamat, $id);
         if ($stmt->execute()) {
-            echo "<script>alert('Data berhasil diperbarui!'); window.location.href='data_pendaftar.php';</script>";
-            exit;
-        } else {
+                echo "<!DOCTYPE html>
+                <html>
+                <head>
+                    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+                </head>
+                <body>
+                    <script>
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: 'Data berhasil diperbarui!',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(function() {
+                            window.location.href='data_pendaftar.php';
+                        });
+                    </script>
+                </body>
+                </html>";
+                exit;
+            } else {
             $error = "Gagal memperbarui data: " . $stmt->error;
         }
         $stmt->close();

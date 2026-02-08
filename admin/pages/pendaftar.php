@@ -241,12 +241,16 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
                                     </button>
                                     <?php
                                         $hp = isset($row['hp']) ? preg_replace('/\D+/', '', (string)$row['hp']) : '';
+                                        // Ensure Indonesian country code
+                                        if (substr($hp, 0, 1) === '0') {
+                                            $hp = '62' . substr($hp, 1);
+                                        }
                                         $info = madrasah_info();
                                         $statusText = $row['status_daftar'] === 'diterima' ? 'DITERIMA' : ($row['status_daftar'] === 'ditolak' ? 'DITOLAK' : 'DALAM PROSES');
-                                        $waText = rawurlencode('Assalamu\'alaikum ' . $row['nama_lengkap'] . '%0ANomor: ' . $row['no_pendaftaran'] . '%0AStatus: ' . $statusText . '%0AInfo: ' . base_url());
+                                        $waText = rawurlencode("Assalamu'alaikum " . $row['nama_lengkap'] . "\nNomor: " . $row['no_pendaftaran'] . "\nStatus: " . $statusText . "\nInfo: " . base_url());
                                     ?>
                                     <?php if (!empty($hp)): ?>
-                                    <a href="https://wa.me/<?= esc($hp); ?>?text=<?= $waText; ?>" target="_blank" class="btn btn-sm btn-success mb-1">
+                                    <a href="https://api.whatsapp.com/send?phone=<?= esc($hp); ?>&text=<?= $waText; ?>" target="_blank" class="btn btn-sm btn-success mb-1">
                                         WhatsApp
                                     </a>
                                     <?php endif; ?>
