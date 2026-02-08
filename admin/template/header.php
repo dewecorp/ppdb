@@ -61,6 +61,7 @@ if ($notif_res = $mysqli->query($notif_sql)) {
     <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap4.min.css" rel="stylesheet">
+    <link href="../assets/css/custom.css" rel="stylesheet">
     <style>
         .sidebar-brand-text {
             font-family: 'Nunito', sans-serif;
@@ -82,7 +83,7 @@ if ($notif_res = $mysqli->query($notif_sql)) {
         }
 
         .sidebar .nav-item .nav-link span {
-            font-size: 1.05rem !important;
+            font-size: 0.9rem !important;
             font-weight: 600 !important;
         }
 

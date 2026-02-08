@@ -1,0 +1,51 @@
+/* Custom CSS to override gray fonts to black */
+
+body {
+    color: #000 !important;
+}
+
+.text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400, .text-gray-500, 
+.text-gray-600, .text-gray-700, .text-gray-800, .text-gray-900 {
+    color: #000 !important;
+}
+
+/* DataTables often use gray */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_processing,
+.dataTables_wrapper .dataTables_paginate {
+    color: #000 !important;
+}
+
+/* Footer text */
+footer.sticky-footer .copyright {
+    color: #000 !important;
+}
+
+/* Form placeholders often gray */
+::placeholder {
+    color: #000 !important;
+    opacity: 1; /* Firefox */
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color: #000 !important;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+    color: #000 !important;
+}
+
+/* Table headers and cells often gray */
+table.dataTable thead th, table.dataTable thead td,
+table.dataTable tbody th, table.dataTable tbody td,
+.table thead th, .table thead td,
+.table tbody th, .table tbody td {
+    color: #000 !important;
+}
+
+/* Card headers */
+.card-header {
+    color: #000 !important;
+}

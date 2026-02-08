@@ -11,10 +11,10 @@ if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
 ?>
             </div>
 
-            <footer class="sticky-footer bg-white">
+            <footer class="sticky-footer" style="background: linear-gradient(135deg, #062c21, #064e3b); padding: 1rem 0; display: flex; align-items: center;">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Sistem Penerimaan Peserta Didik Baru MI Sultan Fattah Sukosono @ <?= date('Y'); ?></span>
+                        <span style="color: #ffffff !important;">Sistem Penerimaan Peserta Didik Baru MI Sultan Fattah Sukosono @ <?= date('Y'); ?></span>
                     </div>
                 </div>
             </footer>

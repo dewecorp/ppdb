@@ -45,6 +45,7 @@ $error_message = flash('error');
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="assets/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="assets/css/custom.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -116,14 +117,14 @@ $error_message = flash('error');
         #alur .section-title {
             font-family: 'Poppins', sans-serif;
             letter-spacing: 0.03em;
-            color: #374151;
+            color: #000;
         }
 
         #alur .card-body {
             font-family: 'Poppins', sans-serif;
             font-size: 1.05rem;
             line-height: 1.8;
-            color: #4b5563;
+            color: #000;
         }
 
         .alur-timeline {
@@ -177,12 +178,12 @@ $error_message = flash('error');
             display: block;
             font-weight: 700;
             margin-bottom: 0.25rem;
-            color: #111827;
+            color: #000;
         }
 
         #syarat .card-body {
             font-size: 1rem;
-            color: #374151;
+            color: #000;
         }
 
         .syarat-modern ul {
@@ -254,7 +255,7 @@ $error_message = flash('error');
             position: relative;
             padding: 1.5rem 1.5rem 1.5rem 3.5rem;
             background: #ffffff;
-            color: #374151; /* Dark text for visibility on white background */
+            color: #000; /* Dark text for visibility on white background */
             border-radius: 1rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -301,9 +302,9 @@ $error_message = flash('error');
         }
 
         .footer {
-            background-color: #1f2937;
+            background: linear-gradient(135deg, #062c21, #064e3b);
             color: #e5e7eb;
-            padding: 1.5rem 0;
+            padding: 1rem 0;
             font-size: 0.875rem;
         }
 
@@ -317,11 +318,13 @@ $error_message = flash('error');
 
         .navbar-nav .nav-link {
             font-family: 'Poppins', sans-serif;
-            font-size: 0.95rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.02em;
             text-transform: uppercase;
             color: #ffffff !important;
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
         }
 
         .navbar-nav .nav-link:hover {
@@ -398,8 +401,9 @@ $error_message = flash('error');
                     <li class="nav-item"><a class="nav-link" href="#syarat">Syarat</a></li>
                     <li class="nav-item"><a class="nav-link" href="#fasilitas">Fasilitas</a></li>
                     <li class="nav-item"><a class="nav-link" href="#kontak">Kontak</a></li>
-                    <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('admin/login.php')); ?>" target="_blank" rel="noopener">Login
-                            Admin</a></li>
+                <li class="nav-item"><a class="nav-link" href="data_pendaftar.php">Data Pendaftar</a></li>
+                <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('admin/login.php')); ?>" target="_blank" rel="noopener">Login
+                        Admin</a></li>
                 </ul>
             </div>
         </div>
