@@ -280,15 +280,95 @@ function madrasah_info(): array
 
 function send_email(string $to, string $subject, string $message): bool
 {
+    $host = get_option('smtp_host');
+    
+    // Jika SMTP Host kosong, gunakan mail() bawaan
+    if (empty($host)) {
+        $info = madrasah_info();
+        $fromName = trim((string)$info['nama']) !== '' ? (string)$info['nama'] : 'Panitia PPDB';
+        $fromEmail = trim((string)$info['email']) !== '' ? (string)$info['email'] : 'no-reply@localhost';
+        $headers = [];
+        $headers[] = 'From: ' . $fromName . ' <' . $fromEmail . '>';
+        $headers[] = 'MIME-Version: 1.0';
+        $headers[] = 'Content-Type: text/plain; charset=UTF-8';
+        $headersStr = implode("\r\n", $headers);
+        return @mail($to, $subject, $message, $headersStr);
+    }
+
+    // SMTP Implementation
+    $port = get_option('smtp_port', '465');
+    $user = get_option('smtp_user');
+    $pass = get_option('smtp_pass');
+    $secure = get_option('smtp_secure', 'ssl');
+    $fromEmail = get_option('email_from');
     $info = madrasah_info();
-    $fromName = trim((string)$info['nama']) !== '' ? (string)$info['nama'] : 'Panitia PPDB';
-    $fromEmail = trim((string)$info['email']) !== '' ? (string)$info['email'] : 'no-reply@localhost';
-    $headers = [];
-    $headers[] = 'From: ' . $fromName . ' <' . $fromEmail . '>';
-    $headers[] = 'MIME-Version: 1.0';
-    $headers[] = 'Content-Type: text/plain; charset=UTF-8';
-    $headersStr = implode("\r\n", $headers);
-    return @mail($to, $subject, $message, $headersStr);
+    $fromName = $info['nama'];
+
+    if (empty($fromEmail)) $fromEmail = $user;
+
+    $context = stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]);
+    $protocol = ($secure === 'ssl' || $port == 465) ? 'ssl://' : '';
+    $socket = @stream_socket_client($protocol . $host . ':' . $port, $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $context);
+
+    if (!$socket) {
+        log_activity('smtp_error', "Connect failed: $errstr ($errno)");
+        return false;
+    }
+
+    $read = function() use ($socket) {
+        $s = '';
+        while($str = fgets($socket, 515)) {
+            $s .= $str;
+            if(substr($str, 3, 1) == " ") break;
+        }
+        return $s;
+    };
+    $write = function($cmd) use ($socket) {
+        fwrite($socket, $cmd . "\r\n");
+    };
+
+    $read(); // banner
+    $write('EHLO ' . $_SERVER['SERVER_NAME']);
+    $read();
+
+    if ($secure === 'tls' && $port != 465) {
+        $write('STARTTLS');
+        if (substr($read(), 0, 3) != '220') return false;
+        stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+        $write('EHLO ' . $_SERVER['SERVER_NAME']);
+        $read();
+    }
+
+    if ($user && $pass) {
+        $write('AUTH LOGIN');
+        $read();
+        $write(base64_encode($user));
+        $read();
+        $write(base64_encode($pass));
+        if (substr($read(), 0, 3) != '235') return false;
+    }
+
+    $write("MAIL FROM: <$fromEmail>");
+    $read();
+    $write("RCPT TO: <$to>");
+    $read();
+    $write('DATA');
+    $read();
+
+    $headers = "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+    $headers .= "Date: " . date('r') . "\r\n";
+    $headers .= "From: $fromName <$fromEmail>\r\n";
+    $headers .= "To: $to\r\n";
+    $headers .= "Subject: $subject\r\n";
+
+    $write($headers . "\r\n" . $message . "\r\n.");
+    $result = substr($read(), 0, 3) == '250';
+
+    $write('QUIT');
+    fclose($socket);
+
+    return $result;
 }
 
 function normalize_phone(string $hp): string
@@ -334,9 +414,17 @@ function send_whatsapp(string $to, string $message): bool
         'Content-Type: application/json'
     ]);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
     $resp = curl_exec($ch);
     $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    
+    if ($httpCode < 200 || $httpCode >= 300) {
+        $err = curl_error($ch);
+        log_activity('whatsapp_error', "To: $to, Code: $httpCode, CurlErr: $err, Resp: $resp");
+    }
+
     curl_close($ch);
     return $httpCode >= 200 && $httpCode < 300;
 }
