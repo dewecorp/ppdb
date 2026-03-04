@@ -88,11 +88,14 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
 
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color:#005f4f;">
         <div class="container">
-            <a class="navbar-brand" href="index">
+            <a class="navbar-brand d-flex align-items-center" href="index">
                 <?php if (!empty($madrasah['logo'])): ?>
-                <img src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo" class="navbar-logo">
+                <img src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo" class="navbar-logo mr-2">
                 <?php endif; ?>
-                <span>PPDB ONLINE <?= esc($madrasah['nama']); ?></span>
+                <div class="d-flex flex-column">
+                    <span class="font-weight-bold" style="line-height: 1.1; font-size: 1.1rem;">PPDB ONLINE</span>
+                    <span style="line-height: 1.1; font-size: 0.8rem;"><?= esc($madrasah['nama']); ?></span>
+                </div>
             </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -106,7 +109,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                     <li class="nav-item"><a class="nav-link" href="index#fasilitas">Fasilitas</a></li>
                     <li class="nav-item"><a class="nav-link" href="index#kontak">Kontak</a></li>
                     <li class="nav-item active"><a class="nav-link" href="data_pendaftar">Data Pendaftar</a></li>
-                    <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('admin/login')); ?>" target="_blank" rel="noopener">Login Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('admin/login')); ?>" target="_blank" rel="noopener" title="Login Admin"><i class="fas fa-cog"></i></a></li>
                 </ul>
             </div>
         </div>
@@ -121,7 +124,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
             <div class="col-md-8">
                 <form action="" method="GET">
                     <div class="input-group">
-                        <input type="text" name="q" class="form-control bg-light border-0 small" placeholder="Cari Nama Siswa atau Masukkan No Pendaftaran..." aria-label="Search" aria-describedby="basic-addon2" value="<?= isset($_GET['q']) ? esc($_GET['q']) : '' ?>">
+                        <input type="text" name="q" class="form-control form-control-lg bg-white border-0 small" placeholder="Cari Nama Siswa atau Masukkan No Pendaftaran..." aria-label="Search" aria-describedby="basic-addon2" value="<?= isset($_GET['q']) ? esc($_GET['q']) : '' ?>">
                         <div class="input-group-append">
                             <button class="btn btn-primary" type="submit">
                                 <i class="fas fa-search fa-sm"></i> Cari

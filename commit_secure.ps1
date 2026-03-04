@@ -66,8 +66,7 @@ if ($upstream) {
 }
 Write-Host "Membuat backup ZIP..."
 if (-not (Test-Path "backups")) { New-Item -ItemType Directory -Path "backups" | Out-Null }
-$ts = Get-Date -Format "yyyyMMdd-HHmmss"
 $items = Get-ChildItem -Force -Path $PSScriptRoot | Where-Object { $_.Name -ne ".git" -and $_.Name -ne "backups" } | Select-Object -ExpandProperty FullName
-Compress-Archive -Path $items -DestinationPath ("backups/project-{0}.zip" -f $ts) -Force
-Write-Host "Selesai. Backup: backups\project-$ts.zip"
+Compress-Archive -Path $items -DestinationPath "backups/project-backup.zip" -Force
+Write-Host "Selesai. Backup: backups\project-backup.zip"
 Read-Host "Tekan Enter untuk menutup"

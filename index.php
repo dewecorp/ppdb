@@ -405,8 +405,7 @@ $error_message = flash('error');
                     <li class="nav-item"><a class="nav-link" href="#fasilitas">Fasilitas</a></li>
                     <li class="nav-item"><a class="nav-link" href="#kontak">Kontak</a></li>
                 <li class="nav-item"><a class="nav-link" href="data_pendaftar">Data Pendaftar</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('admin/login')); ?>" target="_blank" rel="noopener">Login
-                        Admin</a></li>
+                <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('admin/login')); ?>" target="_blank" rel="noopener" title="Login Admin"><i class="fas fa-cog"></i></a></li>
                 </ul>
             </div>
         </div>
