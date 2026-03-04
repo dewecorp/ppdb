@@ -146,7 +146,7 @@ if ($stmt->execute()) {
             text: 'Nomor pendaftaran Anda: <?= addslashes($no_pendaftaran); ?>',
             confirmButtonText: 'Cetak Kartu'
         }).then(function () {
-            var url = '<?= addslashes(base_url('cetak_kartu.php?id=' . $insert_id)); ?>';
+            var url = '<?= addslashes(base_url('cetak_kartu?id=' . $insert_id)); ?>';
             window.open(url, '_blank');
             setTimeout(function () {
                 window.location.href = '<?= addslashes(base_url()); ?>';

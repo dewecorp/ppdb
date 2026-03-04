@@ -4,8 +4,17 @@ Options -Indexes -MultiViews
     RewriteEngine On
     RewriteBase /ppdb_2026/admin/
 
-    # Handle clean URLs: admin/madrasah -> admin/index.php?page=madrasah
+    # Redirect /admin/file.php to /admin/file
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /ppdb_2026/admin/([^\ ]+)\.php
+    RewriteRule ^([^\ ]+)\.php$ %1 [L,R=301]
+
+    # Handle clean URLs for standalone files (login, logout, etc.)
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}\.php -f
+    RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+    # Handle clean URLs for index.php?page=...
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^([^/]+)$ index.php?page=$1 [L,QSA]
+    RewriteRule ^(dashboard|madrasah|pendaftar|pengaturan|pengguna|backup)$ index.php?page=$1 [L,QSA]
 </IfModule>

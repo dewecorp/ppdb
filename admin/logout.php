@@ -7,5 +7,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     session_destroy();
 }
 
-header('Location: ' . base_url('admin/login.php'));
+header('Location: ' . base_url('admin/login'));
 exit;

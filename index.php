@@ -572,7 +572,7 @@ $error_message = flash('error');
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="simpan_pendaftaran.php" method="post">
+                <form action="simpan_pendaftaran" method="post">
                     <div class="modal-body">
                         <h6 class="font-weight-bold text-primary mb-3">A. Identitas Calon Peserta Didik</h6>
                         <div class="form-row">

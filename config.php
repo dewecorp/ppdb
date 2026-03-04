@@ -135,7 +135,7 @@ function log_activity(string $action, string $message = '', ?int $user_id = null
 function require_login(): void
 {
     if (!is_logged_in()) {
-        header('Location: ' . base_url('admin/login.php'));
+        header('Location: ' . base_url('admin/login'));
         exit;
     }
 }

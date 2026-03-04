@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
                             timer: 2000,
                             showConfirmButton: false
                         }).then(function() {
-                            window.location.href='data_pendaftar.php';
+                            window.location.href='data_pendaftar';
                         });
                     </script>
                 </body>
@@ -61,7 +61,7 @@ if ($id > 0) {
 }
 
 if (!$pendaftar) {
-    echo "<script>alert('Data tidak ditemukan!'); window.location.href='data_pendaftar.php';</script>";
+    echo "<script>alert('Data tidak ditemukan!'); window.location.href='data_pendaftar';</script>";
     exit;
 }
 
@@ -123,7 +123,7 @@ if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color:#005f4f;">
         <div class="container">
-            <a class="navbar-brand" href="index.php">
+            <a class="navbar-brand" href="index">
                 <?php if (!empty($madrasah['logo'])): ?>
                 <img src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo" class="navbar-logo">
                 <?php endif; ?>
@@ -135,13 +135,13 @@ if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item"><a class="nav-link" href="index.php#alur">Alur</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php#informasi">Info</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php#syarat">Syarat</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php#fasilitas">Fasilitas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php#kontak">Kontak</a></li>
-                    <li class="nav-item active"><a class="nav-link" href="data_pendaftar.php">Data Pendaftar</a></li>
-                    <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('admin/login.php')); ?>" target="_blank" rel="noopener">Login Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index#alur">Alur</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index#informasi">Info</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index#syarat">Syarat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index#fasilitas">Fasilitas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index#kontak">Kontak</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="data_pendaftar">Data Pendaftar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('admin/login')); ?>" target="_blank" rel="noopener">Login Admin</a></li>
                 </ul>
             </div>
         </div>
@@ -202,7 +202,7 @@ if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
                             </div>
                             
                             <div class="form-group d-flex justify-content-between">
-                                <a href="data_pendaftar.php" class="btn btn-secondary">Kembali</a>
+                                <a href="data_pendaftar" class="btn btn-secondary">Kembali</a>
                                 <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                             </div>
                         </form>

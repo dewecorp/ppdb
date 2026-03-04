@@ -88,7 +88,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
 
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color:#005f4f;">
         <div class="container">
-            <a class="navbar-brand" href="index.php">
+            <a class="navbar-brand" href="index">
                 <?php if (!empty($madrasah['logo'])): ?>
                 <img src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo" class="navbar-logo">
                 <?php endif; ?>
@@ -127,7 +127,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                                 <i class="fas fa-search fa-sm"></i> Cari
                             </button>
                             <?php if(isset($_GET['q']) && $_GET['q'] !== ''): ?>
-                                <a href="data_pendaftar.php" class="btn btn-secondary">
+                                <a href="data_pendaftar" class="btn btn-secondary">
                                     Reset
                                 </a>
                             <?php endif; ?>
@@ -195,7 +195,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                                     echo '<td><span class="badge badge-' . $statusClass . '">' . $statusText . '</span></td>';
                                     echo '<td class="text-center">';
                                     if ($show_edit) {
-                                        echo '<a href="edit_pendaftar.php?id=' . $row['id'] . '" class="btn btn-sm btn-warning">
+                                        echo '<a href="edit_pendaftar?id=' . $row['id'] . '" class="btn btn-sm btn-warning">
                                                 <i class="fas fa-edit"></i> Edit
                                               </a>';
                                     } else {

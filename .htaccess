@@ -4,7 +4,11 @@ Options -Indexes -MultiViews
     RewriteEngine On
     RewriteBase /ppdb_2026/
 
-    # Hide .php extension
+    # Redirect /file.php to /file
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /ppdb_2026/([^\ ]+)\.php
+    RewriteRule ^([^\ ]+)\.php$ %1 [L,R=301]
+
+    # Internally rewrite /file to /file.php
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME}\.php -f
     RewriteRule ^([^\.]+)$ $1.php [NC,L]

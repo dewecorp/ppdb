@@ -2,7 +2,7 @@
 require __DIR__ . '/../config.php';
 
 if (is_logged_in()) {
-    header('Location: ' . base_url('admin/index.php'));
+    header('Location: ' . base_url('admin/dashboard'));
     exit;
 }
 
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (password_verify($password, $user['password'])) {
                 $_SESSION['user_id'] = (int)$user['id'];
                 log_activity('login', 'Login oleh ' . $user['username'], (int)$user['id']);
-                header('Location: ' . base_url('admin/index.php'));
+                header('Location: ' . base_url('admin/dashboard'));
                 exit;
             }
         }
@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     flash('error', 'Username atau password salah.');
-    header('Location: ' . base_url('admin/login.php'));
+    header('Location: ' . base_url('admin/login'));
     exit;
 }
 ?>
