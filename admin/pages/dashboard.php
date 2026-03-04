@@ -312,7 +312,7 @@ if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_da
 </div>
 
 <!-- Page level plugins -->
-<script src="../assets/vendor/chart.js/Chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
 
 <script>
 // Set new default font family and font color to mimic Bootstrap's default styling

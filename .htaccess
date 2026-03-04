@@ -2,18 +2,37 @@ Options -Indexes -MultiViews
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    
+    # 1. Handle trailing slash (optional but recommended for CI style)
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)/$ $1 [L,R=301]
 
-    # Rule 1: Redirect /index and /index.php to the base directory ./
+    # 2. Redirect /index and /index.php to root ./
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index(\.php)?\ HTTP/
     RewriteRule ^index(\.php)?$ ./ [R=301,L]
 
-    # Rule 2: Externally redirect to remove .php extension
-    # This rule only runs for direct browser requests for .php files
-    RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\s([^?#\s]+)\.php[?#\s]
-    RewriteRule ^(.*)\.php$ %1 [R=301,L]
-
-    # Rule 3: Internally rewrite pretty URL to actual .php file
-    # This runs after the browser has been redirected
+    # 3. Handle admin subfolder specifically
+    # Admin pages like /admin/dashboard -> /admin/index.php?page=dashboard
+    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME}\.php -f
+    RewriteRule ^admin/(dashboard|madrasah|pendaftar|pengaturan|pengguna|backup)$ admin/index.php?page=$1 [L,QSA]
+
+    # 4. Standard CI style: Remove index.php from URL
+    # This will rewrite /admin/login to /admin/login.php internally
+    # and /data_pendaftar to /data_pendaftar.php internally
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}.php -f
     RewriteRule ^(.*)$ $1.php [L]
+
+    # 5. Handle /admin/ to /admin/index.php internally if it's a directory
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteCond %{REQUEST_FILENAME}/index.php -f
+    RewriteRule ^(.*)$ $1/index.php [L]
 </IfModule>
+
+# Ensure correct MIME types for font files on some hosts
+AddType application/font-woff2 .woff2
+AddType application/font-woff .woff
+AddType application/vnd.ms-fontobject .eot
+AddType font/ttf .ttf
+AddType image/svg+xml .svg
