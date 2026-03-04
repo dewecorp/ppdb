@@ -2,10 +2,9 @@
 if (!function_exists('time_ago_id')) {
     function time_ago_id(string $datetime): string
     {
-        $tz = new DateTimeZone('Asia/Jakarta');
-        $time = new DateTime($datetime, $tz);
-        $now = new DateTime('now', $tz);
-        $diff = $now->getTimestamp() - $time->getTimestamp();
+        $time = strtotime($datetime);
+        $now = time();
+        $diff = $now - $time;
 
         if ($diff < 60) {
             return 'baru saja';
