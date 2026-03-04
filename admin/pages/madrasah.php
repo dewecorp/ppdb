@@ -43,6 +43,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
+
+            // Hapus logo lama jika ada
+            $oldLogoQuery = $mysqli->query("SELECT logo FROM madrasah LIMIT 1");
+            if ($oldLogoQuery && $oldLogoRow = $oldLogoQuery->fetch_assoc()) {
+                $oldLogo = $oldLogoRow['logo'];
+                if (!empty($oldLogo) && file_exists($uploadDir . '/' . $oldLogo)) {
+                    unlink($uploadDir . '/' . $oldLogo);
+                }
+            }
+
             $logoName = 'logo-' . date('YmdHis') . '.' . $ext;
             if (!move_uploaded_file($tmp, $uploadDir . '/' . $logoName)) {
                 $logoName = null;

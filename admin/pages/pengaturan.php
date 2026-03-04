@@ -75,6 +75,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
+
+            // Hapus background lama jika ada
+            $oldBg = get_option('header_background', '');
+            if ($oldBg !== '' && file_exists($uploadDir . '/' . $oldBg)) {
+                unlink($uploadDir . '/' . $oldBg);
+            }
+
             $newName = 'header-' . date('YmdHis') . '.' . $ext;
             $dest = $uploadDir . '/' . $newName;
             if (move_uploaded_file($tmp, $dest)) {

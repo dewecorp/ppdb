@@ -53,7 +53,7 @@ $error_message = flash('error');
 
         .hero {
             position: relative;
-            min-height: 80vh;
+            min-height: 100vh;
             color: #fff;
             display: flex;
             align-items: center;
