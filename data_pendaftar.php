@@ -100,13 +100,13 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item"><a class="nav-link" href="index.php#alur">Alur</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php#informasi">Info</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php#syarat">Syarat</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php#fasilitas">Fasilitas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php#kontak">Kontak</a></li>
-                    <li class="nav-item active"><a class="nav-link" href="data_pendaftar.php">Data Pendaftar</a></li>
-                    <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('admin/login.php')); ?>" target="_blank" rel="noopener">Login Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index#alur">Alur</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index#informasi">Info</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index#syarat">Syarat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index#fasilitas">Fasilitas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index#kontak">Kontak</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="data_pendaftar">Data Pendaftar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('admin/login')); ?>" target="_blank" rel="noopener">Login Admin</a></li>
                 </ul>
             </div>
         </div>

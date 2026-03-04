@@ -8,7 +8,7 @@ function active_menu(string $page, string $current): string
 ?>
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-    <a class="sidebar-brand d-flex align-items-center justify-content-start" href="index.php">
+    <a class="sidebar-brand d-flex align-items-center justify-content-start" href="<?= base_url('admin/dashboard'); ?>">
         <?php if (!empty($madrasah_logo)): ?>
             <img src="<?= esc(base_url('uploads/' . $madrasah_logo)); ?>" alt="Logo" style="height:32px" class="mr-2">
         <?php else: ?>
@@ -44,7 +44,7 @@ function active_menu(string $page, string $current): string
     <hr class="sidebar-divider my-0">
 
     <li class="nav-item <?= active_menu('dashboard', $current_page); ?>">
-        <a class="nav-link" href="index.php?page=dashboard">
+        <a class="nav-link" href="<?= base_url('admin/dashboard'); ?>">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span></a>
     </li>
@@ -56,31 +56,31 @@ function active_menu(string $page, string $current): string
     </div>
 
     <li class="nav-item <?= active_menu('madrasah', $current_page); ?>">
-        <a class="nav-link" href="index.php?page=madrasah">
+        <a class="nav-link" href="<?= base_url('admin/madrasah'); ?>">
             <i class="fas fa-fw fa-school"></i>
             <span>Data Madrasah</span></a>
     </li>
 
     <li class="nav-item <?= active_menu('pendaftar', $current_page); ?>">
-        <a class="nav-link" href="index.php?page=pendaftar">
+        <a class="nav-link" href="<?= base_url('admin/pendaftar'); ?>">
             <i class="fas fa-fw fa-users"></i>
             <span>Data Pendaftar</span></a>
     </li>
 
     <li class="nav-item <?= active_menu('pengaturan', $current_page); ?>">
-        <a class="nav-link" href="index.php?page=pengaturan">
+        <a class="nav-link" href="<?= base_url('admin/pengaturan'); ?>">
             <i class="fas fa-fw fa-cogs"></i>
             <span>Pengaturan</span></a>
     </li>
 
     <li class="nav-item <?= active_menu('pengguna', $current_page); ?>">
-        <a class="nav-link" href="index.php?page=pengguna">
+        <a class="nav-link" href="<?= base_url('admin/pengguna'); ?>">
             <i class="fas fa-fw fa-user-cog"></i>
             <span>Pengguna</span></a>
     </li>
 
     <li class="nav-item <?= active_menu('backup', $current_page); ?>">
-        <a class="nav-link" href="index.php?page=backup">
+        <a class="nav-link" href="<?= base_url('admin/backup'); ?>">
             <i class="fas fa-fw fa-database"></i>
             <span>Backup &amp; Restore</span></a>
     </li>

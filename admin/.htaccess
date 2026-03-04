@@ -1,0 +1,11 @@
+Options -Indexes -MultiViews
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /ppdb_2026/admin/
+
+    # Handle clean URLs: admin/madrasah -> admin/index.php?page=madrasah
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^([^/]+)$ index.php?page=$1 [L,QSA]
+</IfModule>

@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         file_put_contents($backupDir . '/' . $fileName, $sql);
         flash('success', 'Backup database berhasil dibuat.');
         log_activity('backup', 'Membuat backup ' . $fileName);
-        echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=backup')) . '";</script>';
+        echo '<script>window.location.href="' . esc(base_url('admin/backup')) . '";</script>';
         exit;
     }
 
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             flash('error', 'Gagal membaca file backup.');
         }
-        echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=backup')) . '";</script>';
+        echo '<script>window.location.href="' . esc(base_url('admin/backup')) . '";</script>';
         exit;
     }
 
@@ -97,8 +97,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             unlink($path);
             flash('success', 'File backup berhasil dihapus.');
             log_activity('delete_backup', 'Hapus backup ' . $nama);
+        } else {
+            flash('error', 'File backup tidak ditemukan.');
         }
-        echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=backup')) . '";</script>';
+        echo '<script>window.location.href="' . esc(base_url('admin/backup')) . '";</script>';
         exit;
     }
 }

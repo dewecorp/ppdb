@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     flash('success', 'Data madrasah berhasil disimpan.');
     log_activity('update_madrasah', 'Perbarui data madrasah');
-    echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=madrasah')) . '";</script>';
+    echo '<script>window.location.href="' . esc(base_url('admin/madrasah')) . '";</script>';
     exit;
 }
 

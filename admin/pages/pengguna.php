@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($username === '' || $password === '') {
             flash('error', 'Username dan password wajib diisi.');
-            header('Location: ' . base_url('admin/index.php?page=pengguna'));
+            header('Location: ' . base_url('admin/pengguna'));
             exit;
         }
 
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             flash('error', 'Gagal menambahkan pengguna.');
         }
-        echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=pengguna')) . '";</script>';
+        echo '<script>window.location.href="' . esc(base_url('admin/pengguna')) . '";</script>';
         exit;
     }
 
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!$current) {
             flash('error', 'Pengguna tidak ditemukan.');
-            echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=pengguna')) . '";</script>';
+            echo '<script>window.location.href="' . esc(base_url('admin/pengguna')) . '";</script>';
             exit;
         }
 
@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             flash('error', 'Gagal memperbarui pengguna.');
         }
-        echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=pengguna')) . '";</script>';
+        echo '<script>window.location.href="' . esc(base_url('admin/pengguna')) . '";</script>';
         exit;
     }
 
@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             flash('error', 'Pengguna tidak ditemukan.');
         }
-        header('Location: ' . base_url('admin/index.php?page=pengguna'));
+        header('Location: ' . base_url('admin/pengguna'));
         exit;
     }
 }

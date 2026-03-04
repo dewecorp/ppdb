@@ -338,7 +338,7 @@ if ($notif_res = $mysqli->query($notif_sql)) {
                                         $no_reg = isset($data['no_pendaftaran']) ? $data['no_pendaftaran'] : '-';
                                         $waktu = isset($data['waktu']) ? $data['waktu'] : $notif['created_at'];
                                     ?>
-                                    <a class="dropdown-item d-flex align-items-center notif-item" href="index.php?page=pendaftar" data-id="<?= $notif['id']; ?>">
+                                    <a class="dropdown-item d-flex align-items-center notif-item" href="<?= base_url('admin/pendaftar'); ?>" data-id="<?= $notif['id']; ?>">
                                         <div class="mr-3">
                                             <div class="icon-circle bg-primary">
                                                 <i class="fas fa-file-alt text-white"></i>

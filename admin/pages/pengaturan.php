@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             flash('error', 'Gagal mereset nomor pendaftaran.');
         }
-        echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=pengaturan')) . '";</script>';
+        echo '<script>window.location.href="' . esc(base_url('admin/pengaturan')) . '";</script>';
         exit;
     }
     if ($aksi === 'reset_jadwal') {
@@ -84,7 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     flash('success', 'Pengaturan berhasil disimpan.');
-    echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=pengaturan')) . '";</script>';
+    log_activity('update_settings', 'Perbarui pengaturan sistem');
+    echo '<script>window.location.href="' . esc(base_url('admin/pengaturan')) . '";</script>';
     exit;
 }
 
@@ -112,7 +113,7 @@ $_end_val = $_end_raw !== '' ? date('Y-m-d\TH:i', strtotime($_end_raw)) : '';
         <h1 class="h3 mb-0 text-gray-800">Pengaturan PPDB</h1>
     </div>
 
-    <form method="post" enctype="multipart/form-data">
+    <form action="<?= base_url('admin/pengaturan'); ?>" method="POST" enctype="multipart/form-data">
         <div class="row">
             <div class="col-lg-6">
                 <div class="card shadow mb-4">

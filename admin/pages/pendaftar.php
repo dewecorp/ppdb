@@ -1,7 +1,7 @@
 <?php
 function redirect_to_pendaftar(): void
 {
-    echo '<script>window.location.href="' . base_url('admin/index.php?page=pendaftar') . '";</script>';
+    echo '<script>window.location.href="' . base_url('admin/pendaftar') . '";</script>';
     exit;
 }
 
