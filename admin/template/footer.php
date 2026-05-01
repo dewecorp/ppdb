@@ -8,6 +8,7 @@ if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
     }
     $res->free();
 }
+$tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
 ?>
             </div>
 
@@ -52,6 +53,8 @@ if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
             var APP_NAME = <?= json_encode('Sistem PPDB Online'); ?>;
             var MADRASAH_NAME = <?= json_encode($madrasah_name); ?>;
             var TODAY = <?= json_encode(date('d-m-Y')); ?>;
+            var ACADEMIC_YEAR = <?= json_encode($tahun_ajaran); ?>;
+            var ACADEMIC_YEAR_SLUG = (ACADEMIC_YEAR || '').replace(/[^\w-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
             (function initAdminClock() {
                 var $clock = $('#adminClock');
@@ -156,8 +159,8 @@ if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-sm btn-success',
-                        title: APP_NAME + ' - ' + MADRASAH_NAME + ' - ' + TODAY,
-                        filename: 'export',
+                        title: APP_NAME + ' - ' + MADRASAH_NAME + ' - TA ' + ACADEMIC_YEAR + ' - ' + TODAY,
+                        filename: 'export_ta_' + (ACADEMIC_YEAR_SLUG || 'default'),
                         customize: function (xlsx) {
                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
                             var pageSetup = $('<pageSetup/>').attr('paperSize', '14').attr('orientation', 'landscape');
@@ -167,12 +170,12 @@ if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
                     {
                         extend: 'pdfHtml5',
                         className: 'btn btn-sm btn-danger',
-                        title: APP_NAME + ' - ' + MADRASAH_NAME + ' - ' + TODAY,
+                        title: APP_NAME + ' - ' + MADRASAH_NAME + ' - TA ' + ACADEMIC_YEAR + ' - ' + TODAY,
                         customize: function (doc) {
                             doc.pageSize = { width: 935, height: 609 };
                             doc.pageMargins = [20, 20, 20, 20];
                             doc.content.unshift({
-                                text: APP_NAME + '\n' + MADRASAH_NAME + '\n' + 'Tanggal: ' + TODAY,
+                                text: APP_NAME + '\n' + MADRASAH_NAME + '\n' + 'TA: ' + ACADEMIC_YEAR + '\nTanggal: ' + TODAY,
                                 alignment: 'center',
                                 margin: [0, 0, 0, 10],
                                 fontSize: 10
@@ -190,8 +193,8 @@ if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
                         {
                             extend: 'excelHtml5',
                             className: 'btn btn-sm btn-success',
-                            title: APP_NAME + ' - ' + MADRASAH_NAME + ' - ' + TODAY,
-                            filename: 'data_pendaftar',
+                            title: APP_NAME + ' - ' + MADRASAH_NAME + ' - TA ' + ACADEMIC_YEAR + ' - ' + TODAY,
+                            filename: 'data_pendaftar_ta_' + (ACADEMIC_YEAR_SLUG || 'default'),
                             exportOptions: {
                                 columns: [1,2,3,4,5,6,7,8,9,10],
                                 format: { body: function (data) { return (data || '').replace(/<[^>]*>/g, '').trim(); } }
@@ -203,23 +206,15 @@ if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
                             }
                         },
                         {
-                            extend: 'pdfHtml5',
+                            text: 'PDF',
                             className: 'btn btn-sm btn-danger',
-                            title: APP_NAME + ' - ' + MADRASAH_NAME + ' - ' + TODAY,
-                            filename: 'data_pendaftar',
-                            exportOptions: {
-                                columns: [1,2,3,4,5,6,7,8,9,10],
-                                format: { body: function (data) { return (data || '').replace(/<[^>]*>/g, '').trim(); } }
-                            },
-                            customize: function (doc) {
-                                doc.pageSize = { width: 935, height: 609 };
-                                doc.pageMargins = [20, 20, 20, 20];
-                                doc.content.unshift({
-                                    text: APP_NAME + '\n' + MADRASAH_NAME + '\n' + 'Tanggal: ' + TODAY,
-                                    alignment: 'center',
-                                    margin: [0, 0, 0, 10],
-                                    fontSize: 10
-                                });
+                            action: function () {
+                                var printUrl = 'laporan_pendaftar.php';
+                                var hasStatusFilter = window.location.search.match(/[?&]status=([^&]+)/);
+                                if (hasStatusFilter && hasStatusFilter[1]) {
+                                    printUrl += '?status=' + encodeURIComponent(decodeURIComponent(hasStatusFilter[1]));
+                                }
+                                window.open(printUrl, '_blank');
                             }
                         }
                     ]

@@ -37,14 +37,25 @@ if ($stmt) {
 $madrasah = [
     'nama' => 'MI SULTAN FATTAH SUKOSONO',
     'alamat' => '',
+    'logo' => '',
+    'hp_kepala' => '',
+    'hp_panitia' => '',
+    'nama_panitia' => '',
 ];
 
-if ($res = $mysqli->query('SELECT nama, alamat FROM madrasah LIMIT 1')) {
+if ($res = $mysqli->query('SELECT nama, alamat, logo, hp_kepala, hp_panitia, nama_panitia FROM madrasah LIMIT 1')) {
     if ($row = $res->fetch_assoc()) {
         $madrasah = $row;
     }
     $res->free();
 }
+
+$tanggalCetak = date('d-m-Y');
+$tahunAjaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
+$namaPanitia = trim((string)$madrasah['nama_panitia']) !== '' ? (string)$madrasah['nama_panitia'] : 'Panitia PPDB';
+$lokasiCetak = 'Jepara';
+$qrPanitiaText = 'Validasi TTD Panitia PPDB | ' . (string)$madrasah['nama'] . ' | ' . $tanggalCetak . ' | Panitia: ' . $namaPanitia . ' | HP: ' . (string)$madrasah['hp_panitia'];
+$qrPanitiaUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=95x95&data=' . rawurlencode($qrPanitiaText);
 
 $total = count_pendaftar();
 $totalDiterima = count_pendaftar('diterima');
@@ -56,12 +67,12 @@ $totalProses = count_pendaftar('proses');
 
 <head>
     <meta charset="utf-8">
-    <title>Laporan Rekap Pendaftar</title>
+    <title>Laporan Rekap Pendaftar - TA <?= esc($tahunAjaran); ?></title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 18px;
             font-size: 12px;
         }
         @page {
@@ -70,18 +81,38 @@ $totalProses = count_pendaftar('proses');
         }
 
         .header {
+            display: flex;
+            align-items: center;
+            border-bottom: 3px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .header-logo {
+            width: 70px;
             text-align: center;
-            margin-bottom: 12px;
+            margin-right: 12px;
+        }
+
+        .header-logo img {
+            max-width: 64px;
+            max-height: 64px;
+            object-fit: contain;
+        }
+
+        .header-text {
+            flex: 1;
+            text-align: center;
         }
 
         .header h1 {
             margin: 0;
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .header h2 {
             margin: 2px 0 0 0;
-            font-size: 16px;
+            font-size: 17px;
         }
 
         .header p {
@@ -90,6 +121,7 @@ $totalProses = count_pendaftar('proses');
 
         .info {
             margin-bottom: 10px;
+            font-size: 11px;
         }
 
         .info span {
@@ -117,20 +149,85 @@ $totalProses = count_pendaftar('proses');
             font-size: 11px;
         }
 
+        .action-print {
+            text-align: right;
+            margin-bottom: 8px;
+        }
+
+        .action-print button {
+            border: 1px solid #000;
+            background: #fff;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .ttd-wrapper {
+            margin-top: 56px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .ttd-col {
+            width: 31%;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .ttd-date {
+            margin-bottom: 14px;
+        }
+
+        .ttd-role {
+            margin-bottom: 8px;
+        }
+
+        .ttd-qr {
+            margin: 6px 0;
+            min-height: 95px;
+        }
+
+        .ttd-qr img {
+            width: 95px;
+            height: 95px;
+            object-fit: contain;
+            border: 1px solid #000;
+            padding: 2px;
+        }
+
+        .ttd-name {
+            margin-top: 4px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
         @media print {
             body {
                 padding: 0;
+            }
+
+            .action-print {
+                display: none;
             }
         }
     </style>
 </head>
 
-<body onload="window.print()">
+<body>
+    <div class="action-print">
+        <button type="button" onclick="window.print()">Print / Simpan PDF</button>
+    </div>
     <div class="header">
-        <h1>REKAP PENDAFTAR PESERTA DIDIK BARU</h1>
-        <h2><?= esc($madrasah['nama']); ?></h2>
-        <p><?= esc($madrasah['alamat']); ?></p>
-        <p>Tahun Pelajaran <?= date('Y'); ?>/<?= date('Y') + 1; ?></p>
+        <div class="header-logo">
+            <?php if (!empty($madrasah['logo'])): ?>
+                <img src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo Madrasah">
+            <?php endif; ?>
+        </div>
+        <div class="header-text">
+            <h1>REKAP PENDAFTAR PESERTA DIDIK BARU</h1>
+            <h2><?= esc($madrasah['nama']); ?></h2>
+            <p><?= esc($madrasah['alamat']); ?></p>
+            <p>Tahun Pelajaran <?= esc($tahunAjaran); ?></p>
+        </div>
     </div>
 
     <div class="info">
@@ -138,6 +235,7 @@ $totalProses = count_pendaftar('proses');
         <span>Diterima: <?= $totalDiterima; ?></span>
         <span>Ditolak: <?= $totalDitolak; ?></span>
         <span>Proses: <?= $totalProses; ?></span>
+        <span>Tanggal Cetak: <?= esc($tanggalCetak); ?></span>
     </div>
 
     <table>
@@ -172,6 +270,25 @@ $totalProses = count_pendaftar('proses');
             <?php endforeach; ?>
         </tbody>
     </table>
+    <div class="ttd-wrapper">
+        <div class="ttd-col">
+            <div class="ttd-date"><?= esc($lokasiCetak); ?>, <?= esc($tanggalCetak); ?></div>
+            <div class="ttd-role">Panitia PPDB</div>
+            <div class="ttd-qr">
+                <img src="<?= esc($qrPanitiaUrl); ?>" alt="QR Tanda Tangan Panitia PPDB">
+            </div>
+            <div class="ttd-name"><?= esc($namaPanitia); ?></div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            window.addEventListener('load', function () {
+                setTimeout(function () {
+                    window.print();
+                }, 300);
+            });
+        })();
+    </script>
 </body>
 
 </html>
