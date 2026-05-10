@@ -378,6 +378,12 @@ $error_message = flash('error');
         .contact-item a:hover {
             text-decoration: underline;
         }
+
+        .hero-tahun-ajaran {
+            font-size: clamp(1.35rem, 3.5vw, 1.85rem);
+            font-weight: 700;
+            letter-spacing: 0.06em;
+        }
     </style>
 </head>
 
@@ -416,7 +422,7 @@ $error_message = flash('error');
         <div class="container hero-inner">
             <h1 class="display-4 font-weight-bold mb-2">SELAMAT DATANG</h1>
             <h2 class="h4 mb-3" style="text-transform: uppercase;">PPDB ONLINE <?= esc($madrasah['nama']); ?></h2>
-            <p class="lead mb-4">Tahun Ajaran <?= esc($tahun_ajaran); ?></p>
+            <p class="lead mb-4 hero-tahun-ajaran text-uppercase">Tahun Ajaran <?= esc($tahun_ajaran); ?></p>
             <div class="hero-status">
                 <?php if ($status_pendaftaran === 'buka') : ?>
                 <button class="btn btn-lg btn-danger mb-3 px-4">

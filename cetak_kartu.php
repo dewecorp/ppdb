@@ -29,14 +29,23 @@ $madrasah = [
     'alamat' => '',
     'logo' => '',
     'nama_panitia' => '',
+    'nama_kepala' => '',
 ];
 
-if ($res = $mysqli->query('SELECT nama, alamat, logo, nama_panitia FROM madrasah LIMIT 1')) {
+if ($res = $mysqli->query('SELECT nama, alamat, logo, nama_panitia, nama_kepala FROM madrasah LIMIT 1')) {
     if ($row = $res->fetch_assoc()) {
         $madrasah = $row;
     }
     $res->free();
 }
+
+$namaKetua = trim((string)($madrasah['nama_panitia'] ?? '')) !== '' ? trim((string)$madrasah['nama_panitia']) : '—';
+$namaKepalaMdr = trim((string)($madrasah['nama_kepala'] ?? '')) !== '' ? trim((string)$madrasah['nama_kepala']) : '—';
+$tglCetak = date('d-m-Y');
+$qrKetuaText = 'Tanda Tangan Digital | Ketua Panitia PPDB | ' . $namaKetua . ' | ' . ($madrasah['nama'] ?? '') . ' | ' . $tglCetak;
+$qrKepalaText = 'Tanda Tangan Digital | Kepala Madrasah | ' . $namaKepalaMdr . ' | ' . ($madrasah['nama'] ?? '') . ' | ' . $tglCetak;
+$qrKetuaUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=' . rawurlencode($qrKetuaText);
+$qrKepalaUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=' . rawurlencode($qrKepalaText);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -51,7 +60,13 @@ if ($res = $mysqli->query('SELECT nama, alamat, logo, nama_panitia FROM madrasah
         .kartu-header-text { flex: 1; text-align: center; }
         .kartu-header h1 { font-size: 20px; margin: 0; }
         .kartu-header h2 { font-size: 18px; margin: 4px 0 0 0; }
-        .kartu-header p { margin: 4px 0; font-size: 12px; }
+        .kartu-header .kartu-tahun-ajaran {
+            margin: 8px 0 4px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
         .kartu-no { text-align: center; margin: 16px 0; font-size: 16px; font-weight: bold; padding: 8px; border: 1px dashed #4b5563; }
         .section-title { font-weight: bold; margin-top: 16px; margin-bottom: 8px; font-size: 14px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
@@ -60,8 +75,21 @@ if ($res = $mysqli->query('SELECT nama, alamat, logo, nama_panitia FROM madrasah
         .sep { width: 2%; text-align: center; white-space: nowrap; }
         .value { width: 50%; }
         .ttd-col { width: 18%; text-align: center; }
-        .ttd-place { margin-bottom: 60px; white-space: nowrap; }
         .ttd-space { height: 60px; }
+        .ttd-signature-area { margin-top: 80px; }
+        .ttd-sign-meta-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 20px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        .ttd-place-ketua { white-space: nowrap; text-align: center; margin: 0; }
+        .ttd-row-print { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+        .ttd-box-print { flex: 1; text-align: center; font-size: 12px; max-width: 48%; }
+        .ttd-box-print img.ttd-qr { width: 100px; height: 100px; display: block; margin: 0 auto; }
+        .ttd-jabatan { font-weight: bold; margin-bottom: 6px; }
+        .ttd-nama { font-weight: bold; text-decoration: underline; margin-top: 8px; }
         @media print { body { background-color: #ffffff; padding: 0; } .kartu-wrapper { border: none; margin: 0; } }
     </style>
 </head>
@@ -74,7 +102,7 @@ if ($res = $mysqli->query('SELECT nama, alamat, logo, nama_panitia FROM madrasah
             <div class="kartu-header-text">
                 <h1>FORMULIR PENDAFTARAN PESERTA DIDIK BARU</h1>
                 <h2><?= esc(strtoupper($madrasah['nama'])); ?></h2>
-                <p>Tahun Ajaran <?= date('Y'); ?>/<?= date('Y') + 1; ?></p>
+                <p class="kartu-tahun-ajaran">Tahun Ajaran <?= date('Y'); ?>/<?= date('Y') + 1; ?></p>
             </div>
         </div>
 
@@ -103,18 +131,31 @@ if ($res = $mysqli->query('SELECT nama, alamat, logo, nama_panitia FROM madrasah
             <tr><td class="label">Pekerjaan Wali</td><td class="sep">:</td><td class="value"><?= esc($data['pekerjaan_wali']); ?></td></tr>
             <tr><td class="label">Email</td><td class="sep">:</td><td class="value"><?= esc($data['email']); ?></td></tr>
             <tr><td class="label">No HP/WA</td><td class="sep">:</td><td class="value"><?= esc($data['hp']); ?></td></tr>
-
+        </table>
 
         <div class="section-title">C. Informasi Program Bantuan</div>
         <table>
-            <tr><td class="label">Memiliki KIP</td><td class="sep">:</td><td class="value"><?= esc($data['kip']); ?></td><td class="ttd-col"></td></tr>
-            <tr>
-                <td class="label">Peserta PKH</td>
-                <td class="sep">:</td>
-                <td class="value"><?= esc($data['pkh']); ?></td>
-            </tr>
-            <tr><td class="label"></td><td class="sep"></td><td class="value"></td><td class="ttd-col"><div class="ttd-place">Jepara, <?= date('d-m-Y'); ?></div><div class="ttd-name"><?= esc($madrasah['nama_panitia'] !== '' ? $madrasah['nama_panitia'] : 'Panitia PPDB'); ?></div></td></tr>
+            <tr><td class="label">Memiliki KIP</td><td class="sep">:</td><td class="value"><?= esc($data['kip']); ?></td></tr>
+            <tr><td class="label">Peserta PKH</td><td class="sep">:</td><td class="value"><?= esc($data['pkh']); ?></td></tr>
         </table>
+        <div class="ttd-signature-area">
+            <div class="ttd-sign-meta-row">
+                <div aria-hidden="true"></div>
+                <div class="ttd-place-ketua">Jepara, <?= esc($tglCetak); ?></div>
+            </div>
+            <div class="ttd-row-print">
+                <div class="ttd-box-print">
+                    <div class="ttd-jabatan">Kepala Madrasah</div>
+                    <img class="ttd-qr" src="<?= esc($qrKepalaUrl); ?>" alt="QR Kepala Madrasah">
+                    <div class="ttd-nama"><?= esc($namaKepalaMdr); ?></div>
+                </div>
+                <div class="ttd-box-print">
+                    <div class="ttd-jabatan">Ketua Panitia</div>
+                    <img class="ttd-qr" src="<?= esc($qrKetuaUrl); ?>" alt="QR Ketua Panitia">
+                    <div class="ttd-nama"><?= esc($namaKetua); ?></div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

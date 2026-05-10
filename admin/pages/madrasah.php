@@ -1,7 +1,7 @@
 <?php
 
-// Pastikan kolom terbaru tersedia (logo, nama_panitia)
-if ($chk = $mysqli->prepare("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'madrasah' AND COLUMN_NAME IN ('logo','nama_panitia')")) {
+// Pastikan kolom terbaru tersedia (logo, nama_panitia, nama_kepala)
+if ($chk = $mysqli->prepare("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'madrasah' AND COLUMN_NAME IN ('logo','nama_panitia','nama_kepala')")) {
     $chk->execute();
     $res = $chk->get_result();
     $existing = [];
@@ -15,6 +15,9 @@ if ($chk = $mysqli->prepare("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
     if (!in_array('nama_panitia', $existing, true)) {
         $mysqli->query("ALTER TABLE madrasah ADD COLUMN nama_panitia VARCHAR(150) DEFAULT NULL");
     }
+    if (!in_array('nama_kepala', $existing, true)) {
+        $mysqli->query("ALTER TABLE madrasah ADD COLUMN nama_kepala VARCHAR(150) DEFAULT NULL");
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -25,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hp_kepala = isset($_POST['hp_kepala']) ? trim($_POST['hp_kepala']) : '';
     $hp_panitia = isset($_POST['hp_panitia']) ? trim($_POST['hp_panitia']) : '';
     $nama_panitia = isset($_POST['nama_panitia']) ? trim($_POST['nama_panitia']) : '';
+    $nama_kepala = isset($_POST['nama_kepala']) ? trim($_POST['nama_kepala']) : '';
     $logoName = null;
 
     if ($nama === '') {
@@ -66,16 +70,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($logoName === null) {
             $logoName = $row['logo'] ?? null;
         }
-        $stmt = $mysqli->prepare('UPDATE madrasah SET nama=?, alamat=?, email=?, website=?, hp_kepala=?, hp_panitia=?, nama_panitia=?, logo=? WHERE id=?');
+        $stmt = $mysqli->prepare('UPDATE madrasah SET nama=?, alamat=?, email=?, website=?, hp_kepala=?, hp_panitia=?, nama_panitia=?, nama_kepala=?, logo=? WHERE id=?');
         if ($stmt) {
-            $stmt->bind_param('ssssssssi', $nama, $alamat, $email, $website, $hp_kepala, $hp_panitia, $nama_panitia, $logoName, $id);
+            $stmt->bind_param('sssssssssi', $nama, $alamat, $email, $website, $hp_kepala, $hp_panitia, $nama_panitia, $nama_kepala, $logoName, $id);
             $stmt->execute();
             $stmt->close();
         }
     } else {
-        $stmt = $mysqli->prepare('INSERT INTO madrasah (nama, alamat, email, website, hp_kepala, hp_panitia, nama_panitia, logo) VALUES (?,?,?,?,?,?,?,?)');
+        $stmt = $mysqli->prepare('INSERT INTO madrasah (nama, alamat, email, website, hp_kepala, hp_panitia, nama_panitia, nama_kepala, logo) VALUES (?,?,?,?,?,?,?,?,?)');
         if ($stmt) {
-            $stmt->bind_param('ssssssss', $nama, $alamat, $email, $website, $hp_kepala, $hp_panitia, $nama_panitia, $logoName);
+            $stmt->bind_param('sssssssss', $nama, $alamat, $email, $website, $hp_kepala, $hp_panitia, $nama_panitia, $nama_kepala, $logoName);
             $stmt->execute();
             $stmt->close();
         }
@@ -98,6 +102,7 @@ $madrasah = [
     'hp_kepala' => '',
     'hp_panitia' => '',
     'nama_panitia' => '',
+    'nama_kepala' => '',
     'logo' => '',
 ];
 
@@ -119,10 +124,6 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
-                        <?php if (!empty($madrasah['logo'])): ?>
-                        <img src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo Madrasah"
-                            style="height:48px; margin-right:12px;">
-                        <?php endif; ?>
                         <h6 class="m-0 font-weight-bold text-primary">Informasi Madrasah</h6>
                     </div>
                     <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modalMadrasah">
@@ -162,6 +163,20 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                             <div>
                                 <?= esc($madrasah['website']); ?>
                             </div>
+                            <div class="mt-3">
+                                <div class="text-muted small mb-1">
+                                    <i class="fas fa-image mr-1"></i> Logo Madrasah
+                                </div>
+                                <div class="d-inline-flex align-items-center justify-content-start border rounded p-3 bg-light"
+                                    style="min-height: 80px; min-width: 88px;">
+                                    <?php if (!empty($madrasah['logo'])): ?>
+                                    <img src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo Madrasah"
+                                        style="max-height: 72px; max-width: 140px; object-fit: contain;">
+                                    <?php else: ?>
+                                    <span class="text-muted small mb-0">Belum ada logo</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-4 mb-3">
                             <div class="text-muted small mb-1">
@@ -169,6 +184,12 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                             </div>
                             <div>
                                 <?= esc($madrasah['hp_kepala']); ?>
+                            </div>
+                            <div class="text-muted small mb-1 mt-3">
+                                <i class="fas fa-id-card mr-1"></i> Nama Kepala Madrasah
+                            </div>
+                            <div>
+                                <?= esc($madrasah['nama_kepala'] ?? ''); ?>
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
@@ -178,9 +199,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                             <div>
                                 <?= esc($madrasah['hp_panitia']); ?>
                             </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="text-muted small mb-1">
+                            <div class="text-muted small mb-1 mt-3">
                                 <i class="fas fa-user-check mr-1"></i> Nama Panitia
                             </div>
                             <div>
@@ -214,12 +233,14 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                     </div>
                     <div class="form-group">
                         <label>Logo Madrasah</label>
-                        <?php if (!empty($madrasah['logo'])): ?>
-                        <div class="mb-2"><img src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo" style="max-height:60px"></div>
-                        <?php endif; ?>
-                        <input type="file" name="logo" class="form-control-file">
-                        <small class="text-muted">Format: JPG/PNG</small>
-                        <img id="previewLogo" src="<?= !empty($madrasah['logo']) ? esc(base_url('uploads/' . $madrasah['logo'])) : '' ?>" alt="" style="max-height:60px; <?= !empty($madrasah['logo']) ? '' : 'display:none'; ?>">
+                        <div class="mb-2">
+                            <img id="previewLogo"
+                                src="<?= !empty($madrasah['logo']) ? esc(base_url('uploads/' . $madrasah['logo'])) : '' ?>"
+                                alt="Pratinjau logo"
+                                style="max-height:60px; <?= !empty($madrasah['logo']) ? '' : 'display:none;'; ?>">
+                        </div>
+                        <input type="file" name="logo" class="form-control-file" accept="image/jpeg,image/png,.jpg,.jpeg,.png">
+                        <small class="text-muted d-block">Format: JPG/PNG</small>
                     </div>
                     <div class="form-group">
                         <label>Alamat Madrasah</label>
@@ -239,6 +260,11 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                         <label>HP Kepala</label>
                         <input type="text" name="hp_kepala" class="form-control"
                             value="<?= esc($madrasah['hp_kepala']); ?>">
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Kepala Madrasah</label>
+                        <input type="text" name="nama_kepala" class="form-control"
+                            value="<?= esc($madrasah['nama_kepala'] ?? ''); ?>">
                     </div>
                     <div class="form-group">
                         <label>HP Panitia</label>
