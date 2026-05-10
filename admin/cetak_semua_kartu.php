@@ -14,7 +14,147 @@ if ($stmt) {
 }
 
 if (empty($pendaftar)) {
-    echo 'Belum ada data pendaftar.';
+    $urlPendaftar = esc(base_url('admin/index.php?page=pendaftar'));
+    $urlDasbor = esc(base_url('admin/index.php'));
+    header('Content-Type: text/html; charset=utf-8');
+    ?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Cetak Semua Kartu — Belum Ada Data</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,400,600,700" rel="stylesheet">
+    <style>
+        :root { --primary: #4e73df; --primary-dark: #224abe; --text: #5a5c69; --muted: #858796; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Nunito, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(165deg, #f8f9fc 0%, #e3e6f0 45%, #dde1e9 100%);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+        }
+        .shell { width: 100%; max-width: 520px; }
+        .card {
+            background: #fff;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 2rem rgba(78, 115, 223, 0.12), 0 0.15rem 0.5rem rgba(0,0,0,.08);
+            overflow: hidden;
+        }
+        .card-top {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 1.75rem 1.5rem;
+            text-align: center;
+        }
+        .card-top .icon-circle {
+            width: 4.25rem;
+            height: 4.25rem;
+            margin: 0 auto 1rem;
+            background: rgba(255,255,255,.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+        .card-top h1 { margin: 0; font-size: 1.35rem; font-weight: 700; letter-spacing: .02em; }
+        .card-top p { margin: 0.5rem 0 0; font-size: 0.92rem; opacity: .95; line-height: 1.45; }
+        .card-body { padding: 1.5rem 1.5rem 1.35rem; }
+        .card-body .lead {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text);
+            margin: 0 0 1rem;
+        }
+        .tips {
+            background: #f8f9fc;
+            border: 1px solid #e3e6f0;
+            border-radius: 0.35rem;
+            padding: 1rem 1rem 1rem 2.65rem;
+            margin: 0 0 1.25rem;
+            font-size: 0.875rem;
+            color: var(--muted);
+            position: relative;
+        }
+        .tips i.fa-lightbulb {
+            position: absolute;
+            left: 0.9rem;
+            top: 1rem;
+            color: #f6c23e;
+        }
+        .tips ul { margin: 0.35rem 0 0; padding-left: 1.1rem; }
+        .tips li { margin-bottom: 0.35rem; }
+        .btn-row { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            padding: 0.55rem 1.1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 0.35rem;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform .08s ease, box-shadow .15s ease;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 0.125rem 0.25rem rgba(78,115,223,.35);
+        }
+        .btn-primary:hover { background: var(--primary-dark); color: #fff; }
+        .btn-outline {
+            background: #fff;
+            color: var(--text);
+            border: 1px solid #d1d3e2;
+        }
+        .btn-outline:hover { background: #f8f9fc; color: var(--text); }
+        .footnote { text-align: center; font-size: 0.78rem; color: #b7b9cc; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <div class="card">
+            <div class="card-top">
+                <div class="icon-circle"><i class="fas fa-print" aria-hidden="true"></i></div>
+                <h1>Belum ada data untuk dicetak</h1>
+                <p>Kartu formulir pendaftaran membutuhkan minimal satu pendaftar di database.</p>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Saat ini tabel pendaftar kosong, sehingga <strong>Cetak Semua Kartu</strong> tidak bisa dijalankan.
+                    Setelah ada pendaftar, Anda dapat membuka kembali halaman ini untuk mencetak sekaligus.
+                </p>
+                <div class="tips">
+                    <i class="fas fa-lightbulb" aria-hidden="true"></i>
+                    <strong style="color: var(--text);">Yang bisa Anda lakukan:</strong>
+                    <ul>
+                        <li>Buka <strong>Data Pendaftar</strong> untuk melihat daftar atau memantau pendaftaran baru.</li>
+                        <li>Pastikan calon peserta sudah menyelesai proses daftar di laman publik PPDB (jika sudah dibuka).</li>
+                    </ul>
+                </div>
+                <div class="btn-row">
+                    <a class="btn btn-primary" href="<?= $urlPendaftar; ?>"><i class="fas fa-users" aria-hidden="true"></i> Ke Data Pendaftar</a>
+                    <a class="btn btn-outline" href="<?= $urlDasbor; ?>"><i class="fas fa-tachometer-alt" aria-hidden="true"></i> Dashboard</a>
+                </div>
+            </div>
+        </div>
+        <p class="footnote">PPDB Online — Cetak Semua Kartu</p>
+    </div>
+</body>
+</html>
+    <?php
     exit;
 }
 
