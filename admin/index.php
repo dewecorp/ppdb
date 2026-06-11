@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../config.php';
+require_once dirname(dirname(__FILE__)) . '/config.php';
 require_login();
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';

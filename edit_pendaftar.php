@@ -1,5 +1,5 @@
 <?php
-require 'config.php';
+require_once dirname(__FILE__) . '/config.php';
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $pendaftar = null;

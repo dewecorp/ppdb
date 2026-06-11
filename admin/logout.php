@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../config.php';
+require_once dirname(dirname(__FILE__)) . '/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $uid = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;

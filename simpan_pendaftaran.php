@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/config.php';
+require_once dirname(__FILE__) . '/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ' . base_url());

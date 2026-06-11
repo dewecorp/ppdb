@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/config.php';
+require_once dirname(__FILE__) . '/config.php';
 
 if (!isset($_GET['id'])) {
     echo 'Data tidak ditemukan.';

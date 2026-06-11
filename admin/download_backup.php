@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../config.php';
+require_once dirname(dirname(__FILE__)) . '/config.php';
 
 if (!is_logged_in()) {
     header('Location: ' . base_url('admin/login.php'));
