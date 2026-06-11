@@ -370,7 +370,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                 var $this = $(this);
                 var id = $this.data('id');
                 var href = $this.attr('href');
-                var $span = $this.find('span');
+                var $span = $this.find('span.notif-text');
                 
                 if ($span.hasClass('font-weight-bold')) {
                     $.post('api/mark_read.php', { id: id }, function(response) {
@@ -388,6 +388,21 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                         window.location.href = href;
                     }
                 }
+            });
+
+            // Mark All as Read
+            $('#markAllReadBtn').on('click', function(e) {
+                e.preventDefault();
+                var $btn = $(this);
+                $btn.prop('disabled', true);
+                $.post('api/mark_all_read.php', function(response) {
+                    // Update UI
+                    $('.notif-item span.notif-text').removeClass('font-weight-bold');
+                    $('.badge-counter').remove();
+                    $('#alertsDropdown').dropdown('toggle');
+                }, 'json').fail(function() {
+                    $btn.prop('disabled', false);
+                });
             });
         });
     </script>

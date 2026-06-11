@@ -50,6 +50,48 @@ table.dataTable tbody th, table.dataTable tbody td,
     color: #000 !important;
 }
 
+/* Notification Customization */
+.dropdown-menu-right {
+    right: 0 !important;
+    left: auto !important;
+}
+
+.dropdown-list {
+    width: 340px;
+    max-width: 90vw;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+}
+
+.notif-scroll {
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+}
+
+.dropdown-list .dropdown-item {
+    white-space: normal;
+    overflow: hidden;
+    padding: 0.5rem 1rem;
+    box-sizing: border-box;
+}
+
+.notif-text-wrapper {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.notif-text {
+    display: block;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-all;
+    white-space: normal;
+    line-height: 1.5;
+    box-sizing: border-box;
+}
+
 /* Mobile Navbar Customization */
 @media (max-width: 576px) {
     .navbar-brand {

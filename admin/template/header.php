@@ -178,6 +178,44 @@ if ($notif_res = $mysqli->query($notif_sql)) {
             }
         }
 
+        /* Notification Customization - Direct to override cache */
+        .dropdown-menu-right {
+            right: 0 !important;
+            left: auto !important;
+        }
+
+        .dropdown-list {
+            width: 340px !important;
+            max-width: 90vw !important;
+            box-sizing: border-box !important;
+        }
+
+        .notif-scroll {
+            box-sizing: border-box !important;
+        }
+
+        .dropdown-list .dropdown-item {
+            white-space: normal !important;
+            padding: 0.5rem 1rem !important;
+            box-sizing: border-box !important;
+        }
+
+        .notif-text-wrapper {
+            min-width: 0 !important;
+            flex: 1 !important;
+            box-sizing: border-box !important;
+        }
+
+        .notif-text {
+            display: block !important;
+            overflow-wrap: break-word !important;
+            word-wrap: break-word !important;
+            word-break: break-word !important;
+            white-space: normal !important;
+            line-height: 1.5 !important;
+            box-sizing: border-box !important;
+        }
+
         .timeline {
             position: relative;
             margin: 0;
@@ -314,8 +352,9 @@ if ($notif_res = $mysqli->query($notif_sql)) {
                             <!-- Dropdown - Alerts -->
                             <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="alertsDropdown">
-                                <h6 class="dropdown-header">
+                                <h6 class="dropdown-header d-flex justify-content-between align-items-center">
                                     Notifikasi Pendaftaran
+                                    <button id="markAllReadBtn" class="btn btn-sm btn-primary ml-auto" style="font-size: 0.75rem;">Tandai semua dibaca</button>
                                 </h6>
                                 <div class="notif-scroll" style="max-height: 300px; overflow-y: auto;">
                                 <?php if (empty($notifications)): ?>
@@ -344,9 +383,9 @@ if ($notif_res = $mysqli->query($notif_sql)) {
                                                 <i class="fas fa-file-alt text-white"></i>
                                             </div>
                                         </div>
-                                        <div>
+                                        <div class="notif-text-wrapper">
                                             <div class="small text-gray-500"><?= date('d F Y, H:i', strtotime($waktu)); ?></div>
-                                            <span class="<?= $font_weight; ?>">
+                                            <span class="<?= $font_weight; ?> notif-text">
                                                 Pendaftaran baru atas nama <?= esc($nama); ?> dengan nomor pendaftaran <?= esc($no_reg); ?>
                                             </span>
                                         </div>
