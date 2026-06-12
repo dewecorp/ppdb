@@ -124,7 +124,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
             <div class="col-md-8">
                 <form action="" method="GET">
                     <div class="input-group">
-                        <input type="text" name="q" class="form-control form-control-lg bg-white border-0 small" placeholder="Cari Nama Siswa atau Masukkan No Pendaftaran..." aria-label="Search" aria-describedby="basic-addon2" value="<?= isset($_GET['q']) ? esc($_GET['q']) : '' ?>">
+                        <input type="text" name="q" class="form-control form-control-lg bg-white border-0 small" placeholder="Masukkan No Pendaftaran..." aria-label="Search" aria-describedby="basic-addon2" value="<?= isset($_GET['q']) ? esc($_GET['q']) : '' ?>">
                         <div class="input-group-append">
                             <button class="btn btn-primary" type="submit">
                                 <i class="fas fa-search fa-sm"></i> Cari
@@ -151,7 +151,6 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>No Pendaftaran</th>
                                 <th>Nama Pendaftar</th>
                                 <th>Jenis Kelamin</th>
                                 <th>Alamat</th>
@@ -197,7 +196,6 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
 
                                     echo '<tr>';
                                     echo '<td>' . $no++ . '</td>';
-                                    echo '<td>' . esc($row['no_pendaftaran']) . '</td>';
                                     echo '<td>' . esc($row['nama_lengkap']) . '</td>';
                                     echo '<td>' . esc($row['jenis_kelamin']) . '</td>';
                                     echo '<td>' . esc($row['alamat']) . '</td>';
