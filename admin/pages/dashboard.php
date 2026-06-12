@@ -48,8 +48,7 @@ if ($result = $mysqli->query('SELECT id, user_id, action, message, created_at FR
 $activity_count = count($activity_logs);
 
 // Data Grafik Pendaftaran (Semua Waktu)
-$chart_labels = [];
-$chart_data = [];
+$chart_data_assoc = [];
 
 $query_chart = "SELECT DATE(created_at) as tgl, COUNT(*) as jumlah 
           FROM pendaftar 
@@ -58,11 +57,17 @@ $query_chart = "SELECT DATE(created_at) as tgl, COUNT(*) as jumlah
 
 if ($result_chart = $mysqli->query($query_chart)) {
     while ($row_chart = $result_chart->fetch_assoc()) {
-        $chart_labels[] = date('d M Y', strtotime($row_chart['tgl']));
-        $chart_data[] = $row_chart['jumlah'];
+        $tgl_formatted = date('d M Y', strtotime($row_chart['tgl']));
+        if (!isset($chart_data_assoc[$tgl_formatted])) {
+            $chart_data_assoc[$tgl_formatted] = 0;
+        }
+        $chart_data_assoc[$tgl_formatted] += $row_chart['jumlah'];
     }
     $result_chart->free();
 }
+
+$chart_labels = array_keys($chart_data_assoc);
+$chart_data = array_values($chart_data_assoc);
 
 // Data Pendaftar Terbaru
 $recent_registrants = [];
@@ -389,11 +394,16 @@ var myAreaChart = new Chart(ctx, {
       }],
       yAxes: [{
         ticks: {
+          precision: 0,
+          stepSize: 1,
           maxTicksLimit: 5,
           padding: 10,
           beginAtZero: true,
           callback: function(value, index, values) {
-            return number_format(value);
+            if (value === Math.floor(value)) {
+              return number_format(value);
+            }
+            return '';
           }
         },
         gridLines: {
