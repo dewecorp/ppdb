@@ -245,9 +245,21 @@ $totalProses = count_pendaftar('proses');
                 <th>No Pendaftaran</th>
                 <th>Nama Pendaftar</th>
                 <th>Jenis Kelamin</th>
+                <th>Tempat, Tgl Lahir</th>
                 <th>NIK</th>
                 <th>KK</th>
                 <th>Alamat</th>
+                <th>Status Keluarga</th>
+                <th>Anak Ke/Jml Saudara</th>
+                <th>Asal TK/RA</th>
+                <th>Nama Ayah</th>
+                <th>Pekerjaan Ayah</th>
+                <th>Nama Ibu</th>
+                <th>Pekerjaan Ibu</th>
+                <th>Nama Wali</th>
+                <th>Pekerjaan Wali</th>
+                <th>Email</th>
+                <th>No HP</th>
                 <th>KIP</th>
                 <th>PKH</th>
                 <th>Status Daftar</th>
@@ -260,9 +272,21 @@ $totalProses = count_pendaftar('proses');
                 <td><?= esc($row['no_pendaftaran']); ?></td>
                 <td><?= esc($row['nama_lengkap']); ?></td>
                 <td><?= esc($row['jenis_kelamin']); ?></td>
+                <td><?= esc($row['tempat_lahir']); ?>, <?= esc($row['tanggal_lahir']); ?></td>
                 <td><?= esc($row['nik']); ?></td>
                 <td><?= esc($row['kk']); ?></td>
                 <td><?= esc($row['alamat']); ?></td>
+                <td><?= esc($row['status_keluarga']); ?></td>
+                <td><?= esc((string)$row['anak_ke']); ?> / <?= esc((string)$row['jumlah_saudara']); ?></td>
+                <td><?= esc($row['asal_tk']); ?></td>
+                <td><?= esc($row['nama_ayah']); ?></td>
+                <td><?= esc($row['pekerjaan_ayah']); ?></td>
+                <td><?= esc($row['nama_ibu']); ?></td>
+                <td><?= esc($row['pekerjaan_ibu']); ?></td>
+                <td><?= esc($row['nama_wali']); ?></td>
+                <td><?= esc($row['pekerjaan_wali']); ?></td>
+                <td><?= esc($row['email']); ?></td>
+                <td><?= esc($row['hp']); ?></td>
                 <td><?= esc($row['kip']); ?></td>
                 <td><?= esc($row['pkh']); ?></td>
                 <td><?= esc($row['status_daftar']); ?></td>

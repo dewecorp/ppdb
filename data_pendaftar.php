@@ -151,10 +151,16 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                         <thead>
                             <tr>
                                 <th>No</th>
+                                <th>No Pendaftaran</th>
                                 <th>Nama Pendaftar</th>
                                 <th>Jenis Kelamin</th>
-                                <th>NIK</th>
-                                <th>KK</th>
+                                <th>Alamat</th>
+                                <th>Nama Ayah</th>
+                                <th>Pekerjaan Ayah</th>
+                                <th>Nama Ibu</th>
+                                <th>Pekerjaan Ibu</th>
+                                <th>Nama Wali</th>
+                                <th>Pekerjaan Wali</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
@@ -191,10 +197,16 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
 
                                     echo '<tr>';
                                     echo '<td>' . $no++ . '</td>';
+                                    echo '<td>' . esc($row['no_pendaftaran']) . '</td>';
                                     echo '<td>' . esc($row['nama_lengkap']) . '</td>';
                                     echo '<td>' . esc($row['jenis_kelamin']) . '</td>';
-                                    echo '<td>' . esc($row['nik']) . '</td>';
-                                    echo '<td>' . esc($row['kk']) . '</td>';
+                                    echo '<td>' . esc($row['alamat']) . '</td>';
+                                    echo '<td>' . esc($row['nama_ayah']) . '</td>';
+                                    echo '<td>' . esc($row['pekerjaan_ayah']) . '</td>';
+                                    echo '<td>' . esc($row['nama_ibu']) . '</td>';
+                                    echo '<td>' . esc($row['pekerjaan_ibu']) . '</td>';
+                                    echo '<td>' . esc($row['nama_wali']) . '</td>';
+                                    echo '<td>' . esc($row['pekerjaan_wali']) . '</td>';
                                     echo '<td><span class="badge badge-' . $statusClass . '">' . $statusText . '</span></td>';
                                     echo '<td class="text-center">';
                                     if ($show_edit) {
