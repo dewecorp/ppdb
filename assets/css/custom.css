@@ -109,3 +109,16 @@ table.dataTable tbody th, table.dataTable tbody td,
         width: auto;
     }
 }
+
+/* Sticky Table Header */
+.table-responsive {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+#tablePendaftar thead th {
+    position: sticky;
+    top: 0;
+    background-color: #ffffff;
+    z-index: 10;
+}

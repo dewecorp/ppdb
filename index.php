@@ -587,11 +587,11 @@ $error_message = flash('error');
                             </div>
                             <div class="form-group col-md-3">
                                 <label>NIK *</label>
-                                <input type="text" name="nik" class="form-control" required>
+                                <input type="text" name="nik" class="form-control" inputmode="numeric" pattern="[0-9]*" required>
                             </div>
                             <div class="form-group col-md-3">
                                 <label>No Kartu Keluarga *</label>
-                                <input type="text" name="kk" class="form-control" required>
+                                <input type="text" name="kk" class="form-control" inputmode="numeric" pattern="[0-9]*" required>
                             </div>
                         </div>
                         <div class="form-row">
@@ -672,7 +672,7 @@ $error_message = flash('error');
                             </div>
                             <div class="form-group col-md-4">
                                 <label>No HP / WA *</label>
-                                <input type="text" name="hp" class="form-control" required>
+                                <input type="text" name="hp" class="form-control" inputmode="numeric" pattern="[0-9]*" required>
                             </div>
                         </div>
 
@@ -737,6 +737,17 @@ $error_message = flash('error');
                     showConfirmButton: false
                 });
             }
+
+            // Prevent non-numeric input for NIK, KK, HP
+            $('input[name="nik"], input[name="kk"], input[name="hp"]').on('keypress', function(e) {
+                if (e.which < 48 || e.which > 57) {
+                    e.preventDefault();
+                }
+            }).on('paste', function(e) {
+                e.preventDefault();
+                var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                this.value = text.replace(/[^0-9]/g, '');
+            });
         });
     </script>
 </body>

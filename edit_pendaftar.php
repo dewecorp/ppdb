@@ -171,27 +171,27 @@ if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
                             
                             <div class="form-row">
                                 <div class="form-group col-md-6">
-                                    <label>NIK</label>
-                                    <input type="text" name="nik" class="form-control" value="<?= esc($pendaftar['nik']); ?>" required>
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <label>KK</label>
-                                    <input type="text" name="kk" class="form-control" value="<?= esc($pendaftar['kk']); ?>" required>
-                                </div>
+                                <label>NIK</label>
+                                <input type="text" name="nik" class="form-control" inputmode="numeric" pattern="[0-9]*" value="<?= esc($pendaftar['nik']); ?>" required>
                             </div>
+                            <div class="form-group col-md-6">
+                                <label>KK</label>
+                                <input type="text" name="kk" class="form-control" inputmode="numeric" pattern="[0-9]*" value="<?= esc($pendaftar['kk']); ?>" required>
+                            </div>
+                        </div>
                             
                             <div class="form-group">
                                 <label>Jenis Kelamin</label>
                                 <select name="jk" class="form-control" required>
-                                    <option value="L" <?= $pendaftar['jenis_kelamin'] == 'L' ? 'selected' : ''; ?>>Laki-laki</option>
-                                    <option value="P" <?= $pendaftar['jenis_kelamin'] == 'P' ? 'selected' : ''; ?>>Perempuan</option>
+                                    <option value="Laki-laki" <?= $pendaftar['jenis_kelamin'] == 'Laki-laki' || $pendaftar['jenis_kelamin'] == 'L' ? 'selected' : ''; ?>>Laki-laki</option>
+                                    <option value="Perempuan" <?= $pendaftar['jenis_kelamin'] == 'Perempuan' || $pendaftar['jenis_kelamin'] == 'P' ? 'selected' : ''; ?>>Perempuan</option>
                                 </select>
                             </div>
                             
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label>No. HP / WhatsApp</label>
-                                    <input type="text" name="hp" class="form-control" value="<?= esc($pendaftar['hp']); ?>">
+                                    <input type="text" name="hp" class="form-control" inputmode="numeric" pattern="[0-9]*" value="<?= esc($pendaftar['hp']); ?>">
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label>Email</label>
@@ -225,5 +225,19 @@ if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/sb-admin-2.min.js"></script>
+    <script>
+        $(function () {
+            // Prevent non-numeric input for NIK, KK, HP
+            $('input[name="nik"], input[name="kk"], input[name="hp"]').on('keypress', function(e) {
+                if (e.which < 48 || e.which > 57) {
+                    e.preventDefault();
+                }
+            }).on('paste', function(e) {
+                e.preventDefault();
+                var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                this.value = text.replace(/[^0-9]/g, '');
+            });
+        });
+    </script>
 </body>
 </html>
