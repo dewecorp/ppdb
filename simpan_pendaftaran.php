@@ -40,8 +40,34 @@ $hp = post('hp');
 $kip = isset($_POST['kip']) ? 'Ya' : 'Tidak';
 $pkh = isset($_POST['pkh']) ? 'Ya' : 'Tidak';
 
+function validate_name($name) {
+    // Only allow letters (including Indonesian accented), spaces, apostrophes, dots, commas, and hyphens
+    return preg_match('/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\'.,-]*$/u', $name) === 1;
+}
+
 if ($nama_lengkap === '' || $nik === '' || $kk === '' || $jenis_kelamin === '' || $tempat_lahir === '' || $tanggal_lahir === '' || $alamat === '' || $nama_ayah === '' || $nama_ibu === '' || $hp === '') {
     flash('error', 'Mohon lengkapi seluruh isian wajib.');
+    header('Location: ' . base_url());
+    exit;
+}
+
+if (!validate_name($nama_lengkap)) {
+    flash('error', 'Nama lengkap hanya boleh mengandung huruf, spasi, apostrof, titik, koma, dan tanda hubung.');
+    header('Location: ' . base_url());
+    exit;
+}
+if (!validate_name($nama_ayah)) {
+    flash('error', 'Nama ayah hanya boleh mengandung huruf, spasi, apostrof, titik, koma, dan tanda hubung.');
+    header('Location: ' . base_url());
+    exit;
+}
+if (!validate_name($nama_ibu)) {
+    flash('error', 'Nama ibu hanya boleh mengandung huruf, spasi, apostrof, titik, koma, dan tanda hubung.');
+    header('Location: ' . base_url());
+    exit;
+}
+if (!empty($nama_wali) && !validate_name($nama_wali)) {
+    flash('error', 'Nama wali hanya boleh mengandung huruf, spasi, apostrof, titik, koma, dan tanda hubung.');
     header('Location: ' . base_url());
     exit;
 }

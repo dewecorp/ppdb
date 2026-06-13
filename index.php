@@ -583,7 +583,10 @@ $error_message = flash('error');
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label>Nama Lengkap *</label>
-                                <input type="text" name="nama_lengkap" class="form-control" required>
+                                <input type="text" name="nama_lengkap" class="form-control" 
+                                       pattern="^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s'.,-]*$" 
+                                       title="Nama hanya boleh mengandung huruf, spasi, apostrof, titik, koma, dan tanda hubung" 
+                                       required>
                             </div>
                             <div class="form-group col-md-3">
                                 <label>NIK *</label>
@@ -640,11 +643,17 @@ $error_message = flash('error');
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label>Nama Ayah *</label>
-                                <input type="text" name="nama_ayah" class="form-control" required>
+                                <input type="text" name="nama_ayah" class="form-control" 
+                                       pattern="^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s'.,-]*$" 
+                                       title="Nama hanya boleh mengandung huruf, spasi, apostrof, titik, koma, dan tanda hubung" 
+                                       required>
                             </div>
                             <div class="form-group col-md-6">
                                 <label>Nama Ibu *</label>
-                                <input type="text" name="nama_ibu" class="form-control" required>
+                                <input type="text" name="nama_ibu" class="form-control" 
+                                       pattern="^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s'.,-]*$" 
+                                       title="Nama hanya boleh mengandung huruf, spasi, apostrof, titik, koma, dan tanda hubung" 
+                                       required>
                             </div>
                         </div>
                         <div class="form-row">
@@ -658,7 +667,9 @@ $error_message = flash('error');
                             </div>
                             <div class="form-group col-md-4">
                                 <label>Nama Wali</label>
-                                <input type="text" name="nama_wali" class="form-control">
+                                <input type="text" name="nama_wali" class="form-control" 
+                                       pattern="^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s'.,-]*$" 
+                                       title="Nama hanya boleh mengandung huruf, spasi, apostrof, titik, koma, dan tanda hubung">
                             </div>
                         </div>
                         <div class="form-row">
@@ -747,6 +758,11 @@ $error_message = flash('error');
                 e.preventDefault();
                 var text = (e.originalEvent || e).clipboardData.getData('text/plain');
                 this.value = text.replace(/[^0-9]/g, '');
+            });
+
+            // Prevent special characters and icons in name fields
+            $('input[name="nama_lengkap"], input[name="nama_ayah"], input[name="nama_ibu"], input[name="nama_wali"]').on('input', function() {
+                this.value = this.value.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s'.,-]/g, '');
             });
         });
     </script>

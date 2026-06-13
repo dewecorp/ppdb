@@ -5,6 +5,11 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $pendaftar = null;
 
 // Handle Update
+function validate_name($name) {
+    // Only allow letters (including Indonesian accented), spaces, apostrophes, dots, commas, and hyphens
+    return preg_match('/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\'.,-]*$/u', $name) === 1;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $id = (int)$_POST['id'];
     $nama = $_POST['nama_lengkap'] ?? '';
@@ -15,10 +20,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $email = $_POST['email'] ?? '';
     $alamat = $_POST['alamat'] ?? '';
 
-    $stmt = $mysqli->prepare("UPDATE pendaftar SET nama_lengkap=?, nik=?, kk=?, jenis_kelamin=?, hp=?, email=?, alamat=? WHERE id=?");
-    if ($stmt) {
-        $stmt->bind_param("sssssssi", $nama, $nik, $kk, $jk, $hp, $email, $alamat, $id);
-        if ($stmt->execute()) {
+    if ($nama === '') {
+        $error = 'Mohon lengkapi seluruh isian wajib.';
+    } elseif (!validate_name($nama)) {
+        $error = 'Nama lengkap hanya boleh mengandung huruf, spasi, apostrof, titik, koma, dan tanda hubung.';
+    }
+
+    if (!isset($error)) {
+        $stmt = $mysqli->prepare("UPDATE pendaftar SET nama_lengkap=?, nik=?, kk=?, jenis_kelamin=?, hp=?, email=?, alamat=? WHERE id=?");
+        if ($stmt) {
+            $stmt->bind_param("sssssssi", $nama, $nik, $kk, $jk, $hp, $email, $alamat, $id);
+            if ($stmt->execute()) {
                 echo "<!DOCTYPE html>
                 <html>
                 <head>
@@ -40,11 +52,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
                 </html>";
                 exit;
             } else {
-            $error = "Gagal memperbarui data: " . $stmt->error;
+                $error = "Gagal memperbarui data: " . $stmt->error;
+            }
+            $stmt->close();
+        } else {
+            $error = "Gagal menyiapkan query.";
         }
-        $stmt->close();
-    } else {
-        $error = "Gagal menyiapkan query.";
     }
 }
 
@@ -166,7 +179,10 @@ if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
                             
                             <div class="form-group">
                                 <label>Nama Lengkap</label>
-                                <input type="text" name="nama_lengkap" class="form-control" value="<?= esc($pendaftar['nama_lengkap']); ?>" required>
+                                <input type="text" name="nama_lengkap" class="form-control" 
+                                       pattern="^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s'.,-]*$" 
+                                       title="Nama hanya boleh mengandung huruf, spasi, apostrof, titik, koma, dan tanda hubung" 
+                                       value="<?= esc($pendaftar['nama_lengkap']); ?>" required>
                             </div>
                             
                             <div class="form-row">
@@ -236,6 +252,11 @@ if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
                 e.preventDefault();
                 var text = (e.originalEvent || e).clipboardData.getData('text/plain');
                 this.value = text.replace(/[^0-9]/g, '');
+            });
+
+            // Prevent special characters and icons in name fields
+            $('input[name="nama_lengkap"]').on('input', function() {
+                this.value = this.value.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s'.,-]/g, '');
             });
         });
     </script>
