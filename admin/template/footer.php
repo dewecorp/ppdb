@@ -425,15 +425,18 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                     // Show loading modal
                     Swal.fire({
                         title: 'Mengupdate sistem...',
-                        html: 'Mengambil perubahan dari GitHub, mohon tunggu.<br><i class="fas fa-spinner fa-spin fa-2x mt-3 text-primary"></i>',
+                        html: '<i class="fas fa-spinner fa-spin fa-2x text-primary"></i>',
                         allowOutsideClick: false,
                         allowEscapeKey: false,
                         showConfirmButton: false,
+                        customClass: { popup: 'swal-no-scroll' },
                         didOpen: function() {
-                            // Fire the AJAX request
+                            // Suppress scrollbar flicker
+                            document.documentElement.style.overflow = 'hidden';
                             fetch('api/update_system.php', { method: 'POST' })
                                 .then(function(r) { return r.json(); })
                                 .then(function(data) {
+                                    document.documentElement.style.overflow = '';
                                     if (data.success) {
                                         Swal.fire({
                                             icon: 'success',
@@ -459,6 +462,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                                     }
                                 })
                                 .catch(function(err) {
+                                    document.documentElement.style.overflow = '';
                                     Swal.fire({
                                         icon: 'error',
                                         title: 'Error',

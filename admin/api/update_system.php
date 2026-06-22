@@ -4,6 +4,21 @@ require_login();
 
 header('Content-Type: application/json');
 
+// Block update di local environment (Laragon, XAMPP, dll)
+$host = strtolower($_SERVER['HTTP_HOST'] ?? '');
+$isLocal = (
+    strpos($host, 'localhost') !== false ||
+    strpos($host, '127.0.0.1') !== false ||
+    preg_match('/\.test$|\.local$|\.dev$/', $host)
+);
+if ($isLocal) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Update sistem hanya dapat dijalankan di server hosting, bukan di local.'
+    ]);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
