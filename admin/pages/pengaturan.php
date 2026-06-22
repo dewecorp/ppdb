@@ -27,7 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $alur_pendaftaran = isset($_POST['alur_pendaftaran']) ? $_POST['alur_pendaftaran'] : '';
     $tahun_ajaran = isset($_POST['tahun_ajaran']) ? trim($_POST['tahun_ajaran']) : '';
     $wa_token = isset($_POST['wa_token']) ? trim($_POST['wa_token']) : '';
-    $wa_phone_id = isset($_POST['wa_phone_id']) ? trim($_POST['wa_phone_id']) : '';
     $pendaftaran_start_at = isset($_POST['pendaftaran_start_at']) ? trim($_POST['pendaftaran_start_at']) : '';
     $pendaftaran_end_at = isset($_POST['pendaftaran_end_at']) ? trim($_POST['pendaftaran_end_at']) : '';
 
@@ -51,7 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         set_option('tahun_ajaran', $tahun_ajaran);
     }
     set_option('wa_token', $wa_token);
-    set_option('wa_phone_id', $wa_phone_id);
     if ($pendaftaran_start_at !== '') {
         $dtStart = str_replace('T', ' ', $pendaftaran_start_at) . ':00';
         set_option('pendaftaran_start_at', $dtStart);
@@ -108,7 +106,6 @@ $header_background = get_option('header_background', '');
 $default_tahun = date('Y') . '/' . (date('Y') + 1);
 $tahun_ajaran = get_option('tahun_ajaran', $default_tahun);
 $wa_token = get_option('wa_token', '');
-$wa_phone_id = get_option('wa_phone_id', '');
 $_start_raw = get_option('pendaftaran_start_at', '');
 $_end_raw = get_option('pendaftaran_end_at', '');
 $_start_val = $_start_raw !== '' ? date('Y-m-d\TH:i', strtotime($_start_raw)) : '';
@@ -224,12 +221,24 @@ $_end_val = $_end_raw !== '' ? date('Y-m-d\TH:i', strtotime($_end_raw)) : '';
                     </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label>WhatsApp Cloud Token</label>
-                            <input type="password" name="wa_token" class="form-control" value="<?= esc($wa_token); ?>" placeholder="Token API">
+                            <label>Fonnte Token <span class="text-success">(WhatsApp API)</span></label>
+                            <input type="password" name="wa_token" class="form-control" value="<?= esc($wa_token); ?>" placeholder="Contoh: abc123xyz...">
+                            <small class="text-muted">
+                                Dapatkan token di <a href="https://md.fonnte.com/" target="_blank">md.fonnte.com</a> &rarr; Login &rarr; Menu <strong>Device</strong> &rarr; sambungkan nomor WA Anda &rarr; salin <strong>Token</strong>.
+                            </small>
                         </div>
                         <div class="form-group">
-                            <label>WhatsApp Phone Number ID</label>
-                            <input type="text" name="wa_phone_id" class="form-control" value="<?= esc($wa_phone_id); ?>" placeholder="Contoh: 123456789012345">
+                            <label>Uji Coba Kirim WA</label>
+                            <div class="input-group">
+                                <input type="text" id="waTestNumber" class="form-control" placeholder="Nomor tujuan tes (kosongkan = HP Panitia)">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-info" id="btnTestWA">
+                                        <i class="fas fa-paper-plane"></i> Test Kirim
+                                    </button>
+                                </div>
+                            </div>
+                            <small class="text-muted">Kirim pesan uji coba untuk memastikan konfigurasi WA benar.</small>
+                            <div id="waTestResult" class="mt-2" style="display:none;"></div>
                         </div>
                     </div>
                 </div>
@@ -345,5 +354,43 @@ $_end_val = $_end_raw !== '' ? date('Y-m-d\TH:i', strtotime($_end_raw)) : '';
             $('#info_pendaftaran,#alur_pendaftaran,#syarat_pendaftaran,#fasilitas_siswa').wysihtml5();
         })(jQuery);
     };
+
+    // Test WhatsApp handler
+    (function() {
+        var btn = document.getElementById('btnTestWA');
+        if (!btn) return;
+        btn.addEventListener('click', function() {
+            var resultDiv = document.getElementById('waTestResult');
+            var testNum = document.getElementById('waTestNumber').value.trim();
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+            resultDiv.style.display = 'none';
+            resultDiv.innerHTML = '';
+
+            var fd = new FormData();
+            fd.append('test_number', testNum);
+            fetch('<?= base_url('admin/api/test_wa.php'); ?>', { method: 'POST', body: fd })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    resultDiv.style.display = 'block';
+                    if (data.success) {
+                        resultDiv.className = 'mt-2 alert alert-success py-2';
+                        resultDiv.textContent = data.message;
+                    } else {
+                        resultDiv.className = 'mt-2 alert alert-danger py-2';
+                        resultDiv.textContent = data.message;
+                    }
+                })
+                .catch(function(err) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.className = 'mt-2 alert alert-danger py-2';
+                    resultDiv.textContent = 'Error: ' + err.message;
+                })
+                .finally(function() {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Test Kirim';
+                });
+        });
+    })();
 </script>
 

@@ -396,11 +396,13 @@ function normalize_phone(string $hp): string
     if ($digits === '') {
         return '';
     }
+    // Fonnte menerima format 08xxx (countryCode default 62)
+    // atau 628xxx. Kembalikan format apa adanya selama valid.
     if (strpos($digits, '62') === 0) {
         return $digits;
     }
     if (strpos($digits, '0') === 0) {
-        return '62' . substr($digits, 1);
+        return $digits; // biarkan 08xxx, Fonnte auto-convert
     }
     return $digits;
 }
@@ -408,42 +410,49 @@ function normalize_phone(string $hp): string
 function send_whatsapp(string $to, string $message): bool
 {
     $token = get_option('wa_token', '');
-    $phoneId = get_option('wa_phone_id', '');
-    if ($token === '' || $phoneId === '') {
+    if ($token === '') {
+        log_activity('whatsapp_error', 'Token Fonnte belum diisi. Simpan token di Pengaturan.');
         return false;
     }
     $to = normalize_phone($to);
     if ($to === '') {
+        log_activity('whatsapp_error', 'Nomor tujuan WA kosong atau tidak valid.');
         return false;
     }
-    $url = 'https://graph.facebook.com/v17.0/' . $phoneId . '/messages';
-    $payload = [
-        'messaging_product' => 'whatsapp',
-        'to' => $to,
-        'type' => 'text',
-        'text' => [
-            'preview_url' => false,
-            'body' => $message
-        ]
-    ];
+    $url = 'https://api.fonnte.com/send';
     $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Authorization: Bearer ' . $token,
-        'Content-Type: application/json'
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING       => '',
+        CURLOPT_MAXREDIRS      => 10,
+        CURLOPT_TIMEOUT        => 30,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST  => 'POST',
+        CURLOPT_POSTFIELDS     => http_build_query([
+            'target'      => $to,
+            'message'     => $message,
+            'countryCode' => '62',
+        ]),
+        CURLOPT_HTTPHEADER     => [
+            'Authorization: ' . $token,  // Fonnte: tanpa "Bearer"
+        ],
     ]);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-    $resp = curl_exec($ch);
-    $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    
-    if ($httpCode < 200 || $httpCode >= 300) {
-        $err = curl_error($ch);
-        log_activity('whatsapp_error', "To: $to, Code: $httpCode, CurlErr: $err, Resp: $resp");
+    $resp     = curl_exec($ch);
+    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlErr  = curl_error($ch);
+    curl_close($ch);
+
+    $respData    = json_decode($resp, true);
+    $apiSuccess  = isset($respData['status']) && $respData['status'] === true;
+    $apiReason   = isset($respData['reason']) ? $respData['reason'] : '';
+
+    if ($httpCode < 200 || $httpCode >= 300 || !$apiSuccess) {
+        $detail = $curlErr ?: ($apiReason ?: ($resp ?: 'no response'));
+        log_activity('whatsapp_error', "To: $to, HTTP: $httpCode, CurlErr: $curlErr, Reason: $apiReason, Resp: $resp");
+        return false;
     }
 
-    curl_close($ch);
-    return $httpCode >= 200 && $httpCode < 300;
+    log_activity('whatsapp_sent', "WA terkirim ke: $to via Fonnte, HTTP: $httpCode");
+    return true;
 }

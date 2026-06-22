@@ -61,8 +61,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (send_whatsapp((string)$rowEmail['hp'], $message)) {
                         $flash .= ' WhatsApp terkirim.';
                     } else {
-                        $flash .= ' WhatsApp gagal.';
+                        $flash .= ' <strong>WhatsApp gagal</strong> (cek Activity Log untuk detail error).';
                     }
+                } else {
+                    $flash .= ' WhatsApp dilewati (nomor HP kosong).';
                 }
                 flash('success', $flash);
             } else {
