@@ -16,6 +16,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
                         <span style="color: #ffffff !important;">Sistem Penerimaan Peserta Didik Baru MI Sultan Fattah Sukosono @ <?= date('Y'); ?></span>
+                        <span style="color: rgba(255,255,255,0.5) !important; font-size: 0.75rem; margin-left: 0.5rem;">v<?= APP_VERSION; ?></span>
                     </div>
                 </div>
             </footer>
@@ -408,7 +409,6 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
             // Update Sistem
             $('#btnUpdateSistem').on('click', function(e) {
                 e.preventDefault();
-                // Close the dropdown first
                 $('#userDropdown').dropdown('toggle');
 
                 Swal.fire({
@@ -422,51 +422,56 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                 }).then(function(result) {
                     if (!result.isConfirmed) return;
 
-                    // Show loading modal
-                    Swal.fire({
-                        title: 'Mengupdate sistem...',
-                        html: '<i class="fas fa-spinner fa-spin fa-2x text-primary"></i>',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        showConfirmButton: false,
-                        customClass: { container: 'swal2-container-no-scroll' },
-                        didOpen: function() {
-                            fetch('api/update_system.php', { method: 'POST' })
-                                .then(function(r) { return r.json(); })
-                                .then(function(data) {
-                                    if (data.success) {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'Update Berhasil!',
-                                            text: data.message || 'Sistem berhasil diperbarui.',
-                                            confirmButtonText: 'Muat Ulang Halaman',
-                                            confirmButtonColor: '#4e73df'
-                                        }).then(function() {
-                                            location.reload();
-                                        });
-                                    } else {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: 'Update Gagal',
-                                            text: data.message || 'Terjadi kesalahan.',
-                                            confirmButtonText: 'Tutup'
-                                        });
-                                    }
-                                })
-                                .catch(function(err) {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error',
-                                        text: 'Tidak dapat terhubung ke server: ' + err.message,
-                                        confirmButtonText: 'Tutup'
-                                    });
+                    // Custom overlay — no SweetAlert2, no scroll
+                    var overlay = document.getElementById('updateOverlay');
+                    overlay.style.display = 'flex';
+
+                    fetch('api/update_system.php', { method: 'POST' })
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            overlay.style.display = 'none';
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Update Berhasil!',
+                                    text: data.message || 'Sistem berhasil diperbarui.',
+                                    confirmButtonText: 'Muat Ulang Halaman',
+                                    confirmButtonColor: '#4e73df'
+                                }).then(function() {
+                                    location.reload();
                                 });
-                        }
-                    });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Update Gagal',
+                                    text: data.message || 'Terjadi kesalahan.',
+                                    confirmButtonText: 'Tutup'
+                                });
+                            }
+                        })
+                        .catch(function(err) {
+                            overlay.style.display = 'none';
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Tidak dapat terhubung ke server: ' + err.message,
+                                confirmButtonText: 'Tutup'
+                            });
+                        });
                 });
             });
         });
     </script>
+
+    <!-- Custom loading overlay for update — pure HTML, no scroll -->
+    <div id="updateOverlay" style="display:none; position:fixed; inset:0; z-index:99999;
+         background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:12px; padding:2rem 3rem; text-align:center;
+                    box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+            <i class="fas fa-spinner fa-spin fa-2x text-primary mb-3"></i>
+            <div style="font-weight:600; color:#333;">Memperbarui sistem...</div>
+        </div>
+    </div>
 </body>
 
 </html>

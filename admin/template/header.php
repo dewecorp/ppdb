@@ -314,10 +314,6 @@ if ($notif_res = $mysqli->query($notif_sql)) {
             padding: 1rem 0 !important;
             min-height: 64px !important;
         }
-
-        .swal2-container-no-scroll {
-            overflow: hidden !important;
-        }
     </style>
 </head>
 

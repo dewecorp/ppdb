@@ -5,6 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
 date_default_timezone_set('Asia/Jakarta');
 
+define('APP_VERSION', date('YmdHis'));
+
 $db_host = 'localhost';
 $db_user = 'root';
 $db_pass = '';
