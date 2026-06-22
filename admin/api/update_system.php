@@ -105,7 +105,7 @@ function recursiveRemove(string $dir): void
     @rmdir($dir);
 }
 
-// ── Step 1: Download ZIP dari GitHub ─────────────────────────────────────────
+// ── Step 1: Download ZIP dari repository ─────────────────────────────────────────────────────────────────────
 $log        = [];
 $zipUrl     = null;
 $zipFile    = $projectRoot . DIRECTORY_SEPARATOR . '_update_' . time() . '.zip';
@@ -115,9 +115,9 @@ $ghToken    = trim(get_option('github_token', ''));
 $headers = ['Accept: application/vnd.github+json'];
 if ($ghToken !== '') {
     $headers[] = 'Authorization: token ' . $ghToken;
-    $log[] = '>> Autentikasi GitHub: menggunakan Personal Access Token';
+    $log[] = '>> Autentikasi: menggunakan Personal Access Token';
 } else {
-    $log[] = '>> Autentikasi GitHub: tanpa token (hanya untuk repository public)';
+    $log[] = '>> Autentikasi: tanpa token (repository public)';
 }
 
 foreach ($BRANCHES as $branch) {
@@ -152,11 +152,11 @@ foreach ($BRANCHES as $branch) {
 if (!$zipUrl) {
     @unlink($zipFile);
     $hint = $ghToken === ''
-        ? 'Repository tidak ditemukan atau private. Pastikan repository <strong>public</strong>, atau isi GitHub Token di Pengaturan jika private.'
-        : 'Token tidak valid atau repository tidak ditemukan. Cek token dan pastikan URL repository benar: <strong>github.com/' . $GITHUB_USER . '/' . $GITHUB_REPO . '</strong>';
+        ? 'Repository tidak ditemukan atau private. Pastikan repository bersifat <strong>public</strong>.'
+        : 'Token tidak valid atau repository tidak ditemukan. Periksa konfigurasi repository.';
     echo json_encode([
         'success' => false,
-        'message' => 'Gagal download ZIP dari GitHub. ' . $hint,
+        'message' => 'Gagal mengunduh file update. ' . $hint,
         'output'  => implode("\n", $log)
     ]);
     exit;
@@ -191,7 +191,7 @@ $zip->extractTo($extractDir);
 $zip->close();
 @unlink($zipFile);
 
-// GitHub ZIP berisi satu folder di level teratas: ppdb-main/ atau ppdb-master/
+// ZIP berisi satu folder di level teratas: ppdb-main/ atau ppdb-master/
 $extractedRoot = null;
 $items = scandir($extractDir);
 foreach ($items as $item) {
@@ -235,7 +235,7 @@ echo json_encode([
     'success'    => !$hasErrors,
     'message'    => $hasErrors
         ? 'Update selesai dengan beberapa error. Cek log di bawah.'
-        : 'Sistem berhasil diperbarui dari GitHub.',
+        : 'Sistem berhasil diperbarui.',
     'output'     => implode("\n", $log),
     'copied'     => $result['copied'],
     'skipped'    => $result['skipped'],

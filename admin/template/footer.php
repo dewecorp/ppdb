@@ -429,19 +429,11 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                         allowOutsideClick: false,
                         allowEscapeKey: false,
                         showConfirmButton: false,
+                        customClass: { container: 'swal2-container-no-scroll' },
                         didOpen: function() {
-                            // Kill scroll on both html and swal container
-                            var html = document.documentElement;
-                            html.style.overflow = 'hidden';
-                            html.style.paddingRight = '0';
-                            var containers = document.querySelectorAll('.swal2-container');
-                            containers.forEach(function(c) { c.style.overflow = 'hidden'; });
-
                             fetch('api/update_system.php', { method: 'POST' })
                                 .then(function(r) { return r.json(); })
                                 .then(function(data) {
-                                    html.style.overflow = '';
-                                    html.style.paddingRight = '';
                                     if (data.success) {
                                         Swal.fire({
                                             icon: 'success',
@@ -462,8 +454,6 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                                     }
                                 })
                                 .catch(function(err) {
-                                    html.style.overflow = '';
-                                    html.style.paddingRight = '';
                                     Swal.fire({
                                         icon: 'error',
                                         title: 'Error',
