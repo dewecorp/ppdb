@@ -16,7 +16,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
                         <span style="color: #ffffff !important;">Sistem Penerimaan Peserta Didik Baru MI Sultan Fattah Sukosono @ <?= date('Y'); ?></span>
-                        <span style="color: rgba(255,255,255,0.5) !important; font-size: 0.75rem; margin-left: 0.5rem;">v<?= APP_VERSION; ?></span>
+                        <span style="color: rgba(255,255,255,0.5) !important; font-size: 0.75rem; margin-left: 0.5rem;">v<?= app_version(); ?></span>
                     </div>
                 </div>
             </footer>
@@ -434,7 +434,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Update Berhasil!',
-                                    text: data.message || 'Sistem berhasil diperbarui.',
+                                    text: (data.message || 'Sistem berhasil diperbarui.') + (data.version ? ' (v' + data.version + ')' : ''),
                                     confirmButtonText: 'Muat Ulang Halaman',
                                     confirmButtonColor: '#4e73df'
                                 }).then(function() {

@@ -5,7 +5,10 @@ if (session_status() === PHP_SESSION_NONE) {
 
 date_default_timezone_set('Asia/Jakarta');
 
-define('APP_VERSION', date('YmdHis'));
+// APP_VERSION dibaca dari database, hanya berubah saat update berhasil
+function app_version(): string {
+    return get_option('app_version', '00000000000000');
+}
 
 $db_host = 'localhost';
 $db_user = 'root';

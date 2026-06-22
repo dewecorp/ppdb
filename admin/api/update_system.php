@@ -231,11 +231,20 @@ $log[] = '>> Folder sementara dihapus.';
 
 // ── Step 5: Response ─────────────────────────────────────────────────────────
 $hasErrors = !empty($result['errors']);
+
+// Simpan versi baru hanya jika update sukses
+$newVersion = '';
+if (!$hasErrors) {
+    $newVersion = date('YmdHis');
+    set_option('app_version', $newVersion);
+}
+
 echo json_encode([
     'success'    => !$hasErrors,
     'message'    => $hasErrors
         ? 'Update selesai dengan beberapa error. Cek log di bawah.'
         : 'Sistem berhasil diperbarui.',
+    'version'    => $newVersion,
     'output'     => implode("\n", $log),
     'copied'     => $result['copied'],
     'skipped'    => $result['skipped'],
