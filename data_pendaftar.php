@@ -88,7 +88,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
 
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color:#005f4f;">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="index">
+            <a class="navbar-brand d-flex align-items-center" href="<?= esc(base_url()); ?>">
                 <?php if (!empty($madrasah['logo'])): ?>
                 <img src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo" class="navbar-logo mr-2">
                 <?php endif; ?>
@@ -103,12 +103,12 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item"><a class="nav-link" href="index#alur">Alur</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index#informasi">Info</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index#syarat">Syarat</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index#fasilitas">Fasilitas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index#kontak">Kontak</a></li>
-                    <li class="nav-item active"><a class="nav-link" href="data_pendaftar">Data Pendaftar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('#alur')); ?>">Alur</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('#informasi')); ?>">Info</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('#syarat')); ?>">Syarat</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('#fasilitas')); ?>">Fasilitas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('#kontak')); ?>">Kontak</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="<?= esc(base_url('data_pendaftar')); ?>">Data Pendaftar</a></li>
                     <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('admin/login')); ?>" target="_blank" rel="noopener" title="Login Admin"><i class="fas fa-cog"></i></a></li>
                 </ul>
             </div>
@@ -130,7 +130,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                                 <i class="fas fa-search fa-sm"></i> Cari
                             </button>
                             <?php if(isset($_GET['q']) && $_GET['q'] !== ''): ?>
-                                <a href="data_pendaftar" class="btn btn-secondary">
+                                <a href="<?= esc(base_url('data_pendaftar')); ?>" class="btn btn-secondary">
                                     Reset
                                 </a>
                             <?php endif; ?>
@@ -208,7 +208,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                                     echo '<td><span class="badge badge-' . $statusClass . '">' . $statusText . '</span></td>';
                                     echo '<td class="text-center">';
                                     if ($show_edit) {
-                                        echo '<a href="edit_pendaftar?id=' . $row['id'] . '" class="btn btn-sm btn-warning">
+                                        echo '<a href="' . esc(base_url('edit_pendaftar')) . '?id=' . $row['id'] . '" class="btn btn-sm btn-warning">
                                                 <i class="fas fa-edit"></i> Edit
                                               </a>';
                                     } else {

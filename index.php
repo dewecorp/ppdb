@@ -410,7 +410,7 @@ $error_message = flash('error');
                     <li class="nav-item"><a class="nav-link" href="#syarat">Syarat</a></li>
                     <li class="nav-item"><a class="nav-link" href="#fasilitas">Fasilitas</a></li>
                     <li class="nav-item"><a class="nav-link" href="#kontak">Kontak</a></li>
-                <li class="nav-item"><a class="nav-link" href="data_pendaftar">Data Pendaftar</a></li>
+                <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('data_pendaftar')); ?>">Data Pendaftar</a></li>
                 <li class="nav-item"><a class="nav-link" href="<?= esc(base_url('admin/login')); ?>" target="_blank" rel="noopener" title="Login Admin"><i class="fas fa-cog"></i></a></li>
                 </ul>
             </div>
@@ -577,7 +577,7 @@ $error_message = flash('error');
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="simpan_pendaftaran" method="post">
+                <form action="<?= esc(base_url('simpan_pendaftaran')); ?>" method="post">
                     <div class="modal-body">
                         <h6 class="font-weight-bold text-primary mb-3">A. Identitas Calon Peserta Didik</h6>
                         <div class="form-row">

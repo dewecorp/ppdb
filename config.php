@@ -23,23 +23,17 @@ function base_url(string $path = ''): string
 {
     $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    
-    // Find the relative path from DOCUMENT_ROOT to current directory (project root)
-    // dirname($_SERVER['SCRIPT_NAME']) is usually the most reliable way to find the public path
-    // We use the entry script path (index.php) as reference.
-    
-    // If we are in admin/index.php, dirname is /admin. We need the parent.
-    // If we are in index.php, dirname is /.
-    
-    // Let's use the actual directory structure:
-    $doc_root = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
+
+    // str_ireplace (case-insensitive) supaya aman di Windows
+    // di mana DOCUMENT_ROOT bisa D:\... sedangkan __DIR__ d:\...
+    $doc_root    = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
     $project_dir = str_replace('\\', '/', __DIR__);
-    $base_path = str_replace($doc_root, '', $project_dir);
-    $base_path = '/' . ltrim($base_path, '/');
-    $base_path = rtrim($base_path, '/');
+    $base_path   = str_ireplace($doc_root, '', $project_dir);
+    $base_path   = '/' . ltrim($base_path, '/');
+    $base_path   = rtrim($base_path, '/');
 
     $base = $protocol . "://" . $host . $base_path;
-    
+
     if ($path === '') {
         return $base . '/';
     }
