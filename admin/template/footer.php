@@ -404,6 +404,72 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                     $btn.prop('disabled', false);
                 });
             });
+
+            // Update Sistem from GitHub
+            $('#btnUpdateSistem').on('click', function(e) {
+                e.preventDefault();
+                // Close the dropdown first
+                $('#userDropdown').dropdown('toggle');
+
+                Swal.fire({
+                    title: 'Update Sistem?',
+                    html: 'Sistem akan diperbarui dari <strong>GitHub</strong>.<br>Pastikan Anda sudah push semua perubahan ke repository.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-cloud-download-alt"></i> Ya, Update',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#1cc88a'
+                }).then(function(result) {
+                    if (!result.isConfirmed) return;
+
+                    // Show loading modal
+                    Swal.fire({
+                        title: 'Mengupdate sistem...',
+                        html: 'Mengambil perubahan dari GitHub, mohon tunggu.<br><i class="fas fa-spinner fa-spin fa-2x mt-3 text-primary"></i>',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: function() {
+                            // Fire the AJAX request
+                            fetch('api/update_system.php', { method: 'POST' })
+                                .then(function(r) { return r.json(); })
+                                .then(function(data) {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Update Berhasil!',
+                                            html: '<p>' + (data.message || '') + '</p>'
+                                                + (data.commit ? '<p class="small text-muted mb-1">Commit: ' + data.commit + '</p>' : '')
+                                                + '<details class="mt-2"><summary class="small text-muted" style="cursor:pointer;">Log detail</summary>'
+                                                + '<pre class="small text-left mt-2 p-2 bg-light" style="max-height:200px;overflow:auto;">' + (data.output || '') + '</pre></details>',
+                                            confirmButtonText: 'Muat Ulang Halaman',
+                                            confirmButtonColor: '#4e73df'
+                                        }).then(function() {
+                                            location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Update Gagal',
+                                            html: '<p>' + (data.message || 'Terjadi kesalahan.') + '</p>'
+                                                + '<details class="mt-2"><summary class="small text-muted" style="cursor:pointer;">Log detail</summary>'
+                                                + '<pre class="small text-left mt-2 p-2 bg-light" style="max-height:200px;overflow:auto;">' + (data.output || '') + '</pre></details>',
+                                            confirmButtonText: 'Tutup'
+                                        });
+                                    }
+                                })
+                                .catch(function(err) {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Tidak dapat terhubung ke server: ' + err.message,
+                                        confirmButtonText: 'Tutup'
+                                    });
+                                });
+                        }
+                    });
+                });
+            });
         });
     </script>
 </body>
