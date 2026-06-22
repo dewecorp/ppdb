@@ -231,6 +231,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
         <div class="container">
             <span>Sistem Penerimaan Peserta Didik Baru <?= esc($madrasah['nama']); ?> @
                 <?= date('Y'); ?></span>
+            <span style="color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-left: 0.5rem;">v<?= app_version(); ?></span>
         </div>
     </footer>
 
