@@ -14,7 +14,7 @@ $projectRoot = dirname(dirname(dirname(__FILE__)));
 // ── Konfigurasi ──────────────────────────────────────────────────────────────
 $GITHUB_USER   = 'dewecorp';
 $GITHUB_REPO   = 'ppdb';
-$BRANCHES      = ['main', 'master']; // coba main dulu, fallback ke master
+$BRANCHES      = ['master', 'main']; // coba master dulu, fallback ke main
 
 // File/folder yang TIDAK akan ditimpa (data lokal)
 $PROTECTED = [
@@ -91,10 +91,19 @@ function recursiveRemove(string $dir): void
 }
 
 // ── Step 1: Download ZIP dari GitHub ─────────────────────────────────────────
-$log      = [];
-$zipUrl   = null;
-$zipFile  = $projectRoot . DIRECTORY_SEPARATOR . '_update_' . time() . '.zip';
+$log        = [];
+$zipUrl     = null;
+$zipFile    = $projectRoot . DIRECTORY_SEPARATOR . '_update_' . time() . '.zip';
 $extractDir = $projectRoot . DIRECTORY_SEPARATOR . '_update_extract_' . time();
+$ghToken    = trim(get_option('github_token', ''));
+
+$headers = ['Accept: application/vnd.github+json'];
+if ($ghToken !== '') {
+    $headers[] = 'Authorization: token ' . $ghToken;
+    $log[] = '>> Autentikasi GitHub: menggunakan Personal Access Token';
+} else {
+    $log[] = '>> Autentikasi GitHub: tanpa token (hanya untuk repository public)';
+}
 
 foreach ($BRANCHES as $branch) {
     $url = "https://github.com/$GITHUB_USER/$GITHUB_REPO/archive/refs/heads/$branch.zip";
@@ -108,6 +117,7 @@ foreach ($BRANCHES as $branch) {
         CURLOPT_TIMEOUT        => 120,
         CURLOPT_SSL_VERIFYPEER => false,
         CURLOPT_USERAGENT      => 'PPDB-Updater/1.0',
+        CURLOPT_HTTPHEADER     => $headers,
     ]);
     $data     = curl_exec($ch);
     $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -126,9 +136,12 @@ foreach ($BRANCHES as $branch) {
 
 if (!$zipUrl) {
     @unlink($zipFile);
+    $hint = $ghToken === ''
+        ? 'Repository tidak ditemukan atau private. Pastikan repository <strong>public</strong>, atau isi GitHub Token di Pengaturan jika private.'
+        : 'Token tidak valid atau repository tidak ditemukan. Cek token dan pastikan URL repository benar: <strong>github.com/' . $GITHUB_USER . '/' . $GITHUB_REPO . '</strong>';
     echo json_encode([
         'success' => false,
-        'message' => 'Gagal download ZIP dari GitHub. Pastikan repository dan branch tersedia.',
+        'message' => 'Gagal download ZIP dari GitHub. ' . $hint,
         'output'  => implode("\n", $log)
     ]);
     exit;
