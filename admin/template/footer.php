@@ -405,7 +405,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                 });
             });
 
-            // Update Sistem from GitHub
+            // Update Sistem
             $('#btnUpdateSistem').on('click', function(e) {
                 e.preventDefault();
                 // Close the dropdown first
@@ -413,7 +413,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
 
                 Swal.fire({
                     title: 'Update Sistem?',
-                    html: 'Sistem akan diperbarui dari <strong>GitHub</strong>.<br>Pastikan Anda sudah push semua perubahan ke repository.',
+                    text: 'Sistem akan diperbarui ke versi terbaru.',
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonText: '<i class="fas fa-cloud-download-alt"></i> Ya, Update',
@@ -429,22 +429,24 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                         allowOutsideClick: false,
                         allowEscapeKey: false,
                         showConfirmButton: false,
-                        customClass: { popup: 'swal-no-scroll' },
                         didOpen: function() {
-                            // Suppress scrollbar flicker
-                            document.documentElement.style.overflow = 'hidden';
+                            // Kill scroll on both html and swal container
+                            var html = document.documentElement;
+                            html.style.overflow = 'hidden';
+                            html.style.paddingRight = '0';
+                            var containers = document.querySelectorAll('.swal2-container');
+                            containers.forEach(function(c) { c.style.overflow = 'hidden'; });
+
                             fetch('api/update_system.php', { method: 'POST' })
                                 .then(function(r) { return r.json(); })
                                 .then(function(data) {
-                                    document.documentElement.style.overflow = '';
+                                    html.style.overflow = '';
+                                    html.style.paddingRight = '';
                                     if (data.success) {
                                         Swal.fire({
                                             icon: 'success',
                                             title: 'Update Berhasil!',
-                                            html: '<p>' + (data.message || '') + '</p>'
-                                                + (data.commit ? '<p class="small text-muted mb-1">Commit: ' + data.commit + '</p>' : '')
-                                                + '<details class="mt-2"><summary class="small text-muted" style="cursor:pointer;">Log detail</summary>'
-                                                + '<pre class="small text-left mt-2 p-2 bg-light" style="max-height:200px;overflow:auto;">' + (data.output || '') + '</pre></details>',
+                                            text: data.message || 'Sistem berhasil diperbarui.',
                                             confirmButtonText: 'Muat Ulang Halaman',
                                             confirmButtonColor: '#4e73df'
                                         }).then(function() {
@@ -454,15 +456,14 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                                         Swal.fire({
                                             icon: 'error',
                                             title: 'Update Gagal',
-                                            html: '<p>' + (data.message || 'Terjadi kesalahan.') + '</p>'
-                                                + '<details class="mt-2"><summary class="small text-muted" style="cursor:pointer;">Log detail</summary>'
-                                                + '<pre class="small text-left mt-2 p-2 bg-light" style="max-height:200px;overflow:auto;">' + (data.output || '') + '</pre></details>',
+                                            text: data.message || 'Terjadi kesalahan.',
                                             confirmButtonText: 'Tutup'
                                         });
                                     }
                                 })
                                 .catch(function(err) {
-                                    document.documentElement.style.overflow = '';
+                                    html.style.overflow = '';
+                                    html.style.paddingRight = '';
                                     Swal.fire({
                                         icon: 'error',
                                         title: 'Error',
