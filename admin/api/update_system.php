@@ -11,108 +11,205 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $projectRoot = dirname(dirname(dirname(__FILE__)));
 
-// Check if exec/shell_exec is available
-$disabled = array_map('trim', explode(',', ini_get('disable_functions')));
-$canExec = !in_array('exec', $disabled) && !in_array('shell_exec', $disabled) && !in_array('proc_open', $disabled);
+// ── Konfigurasi ──────────────────────────────────────────────────────────────
+$GITHUB_USER   = 'dewecorp';
+$GITHUB_REPO   = 'ppdb';
+$BRANCHES      = ['main', 'master']; // coba main dulu, fallback ke master
 
-if (!$canExec) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Fungsi exec/shell_exec dinonaktifkan di server ini. Hubungi penyedia hosting untuk mengaktifkannya.',
-        'output'  => 'Disabled functions: ' . implode(', ', $disabled)
-    ]);
-    exit;
-}
+// File/folder yang TIDAK akan ditimpa (data lokal)
+$PROTECTED = [
+    'uploads',
+    'backups',
+    'config.php',
+    '.htaccess',
+];
 
-// Helper: run shell command and capture output
-function runCmd(string $cmd, string $cwd): array
+// ── Helper ───────────────────────────────────────────────────────────────────
+function recursiveCopy(string $src, string $dst, array $protected, string $rootDir): array
 {
-    $descriptors = [
-        0 => ['pipe', 'r'],
-        1 => ['pipe', 'w'],
-        2 => ['pipe', 'w'],
-    ];
-    $env = ['GIT_TERMINAL_PROMPT' => '0'];
-    $process = proc_open($cmd, $descriptors, $pipes, $cwd, $env);
+    $copied  = 0;
+    $skipped = 0;
+    $errors  = [];
 
-    if (!is_resource($process)) {
-        return ['exit_code' => -1, 'stdout' => '', 'stderr' => 'Gagal menjalankan perintah.'];
+    $dir = opendir($src);
+    if (!$dir) {
+        $errors[] = "Gagal buka direktori: $src";
+        return compact('copied', 'skipped', 'errors');
     }
 
-    fclose($pipes[0]);
-    $stdout = stream_get_contents($pipes[1]); fclose($pipes[1]);
-    $stderr = stream_get_contents($pipes[2]); fclose($pipes[2]);
-    $exitCode = proc_close($process);
+    while (($file = readdir($dir)) !== false) {
+        if ($file === '.' || $file === '..') continue;
 
-    return ['exit_code' => $exitCode, 'stdout' => trim($stdout), 'stderr' => trim($stderr)];
+        $srcPath = $src . DIRECTORY_SEPARATOR . $file;
+        $dstPath = $dst . DIRECTORY_SEPARATOR . $file;
+
+        // Relatif terhadap root project (untuk cek protected list)
+        // str_ireplace supaya aman dari perbedaan case di Windows (D:\ vs d:\)
+        $relPath = ltrim(str_ireplace($rootDir, '', $dstPath), DIRECTORY_SEPARATOR . '/\\');
+        $relTop  = explode(DIRECTORY_SEPARATOR, $relPath)[0];
+        $relTop  = explode('/', $relTop)[0];
+
+        // Cek apakah di-protect (cek folder top-level ATAU nama file langsung)
+        if (in_array($relTop, $protected, true) || in_array($file, $protected, true)) {
+            $skipped++;
+            continue;
+        }
+
+        if (is_dir($srcPath)) {
+            if (!is_dir($dstPath)) {
+                if (!mkdir($dstPath, 0755, true)) {
+                    $errors[] = "Gagal buat folder: $dstPath";
+                    continue;
+                }
+            }
+            $sub = recursiveCopy($srcPath, $dstPath, $protected, $rootDir);
+            $copied  += $sub['copied'];
+            $skipped += $sub['skipped'];
+            $errors   = array_merge($errors, $sub['errors']);
+        } else {
+            if (@copy($srcPath, $dstPath)) {
+                $copied++;
+            } else {
+                $errors[] = "Gagal copy: $file";
+            }
+        }
+    }
+    closedir($dir);
+    return compact('copied', 'skipped', 'errors');
 }
 
-$log   = [];
-$ok    = true;
+function recursiveRemove(string $dir): void
+{
+    if (!is_dir($dir)) return;
+    $items = scandir($dir);
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') continue;
+        $path = $dir . DIRECTORY_SEPARATOR . $item;
+        is_dir($path) ? recursiveRemove($path) : @unlink($path);
+    }
+    @rmdir($dir);
+}
 
-// Step 1: Verify it's a git repo
-$check = runCmd('git rev-parse --is-inside-work-tree', $projectRoot);
-if ($check['exit_code'] !== 0) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Direktori project bukan git repository. Pastikan hosting sudah di-clone dari GitHub.',
-        'output'  => $check['stderr'] ?: $check['stdout']
+// ── Step 1: Download ZIP dari GitHub ─────────────────────────────────────────
+$log      = [];
+$zipUrl   = null;
+$zipFile  = $projectRoot . DIRECTORY_SEPARATOR . '_update_' . time() . '.zip';
+$extractDir = $projectRoot . DIRECTORY_SEPARATOR . '_update_extract_' . time();
+
+foreach ($BRANCHES as $branch) {
+    $url = "https://github.com/$GITHUB_USER/$GITHUB_REPO/archive/refs/heads/$branch.zip";
+    $log[] = ">> Mencoba download: $url";
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS      => 5,
+        CURLOPT_TIMEOUT        => 120,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_USERAGENT      => 'PPDB-Updater/1.0',
     ]);
-    exit;
+    $data     = curl_exec($ch);
+    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlErr  = curl_error($ch);
+    curl_close($ch);
+
+    if ($httpCode === 200 && strlen($data) > 1024) {
+        $log[] = ">> Download berhasil (branch: $branch, size: " . round(strlen($data) / 1024) . " KB)";
+        file_put_contents($zipFile, $data);
+        $zipUrl = $url;
+        break;
+    } else {
+        $log[] = ">> Branch '$branch' tidak tersedia (HTTP $httpCode): $curlErr";
+    }
 }
 
-// Step 2: git fetch origin
-$log[] = '>> git fetch origin';
-$fetch = runCmd('git fetch origin', $projectRoot);
-$log[] = $fetch['stdout'] ?: $fetch['stderr'];
-if ($fetch['exit_code'] !== 0) {
+if (!$zipUrl) {
+    @unlink($zipFile);
     echo json_encode([
         'success' => false,
-        'message' => 'Gagal fetch dari GitHub. Pastikan koneksi internet dan akses repository tersedia.',
+        'message' => 'Gagal download ZIP dari GitHub. Pastikan repository dan branch tersedia.',
         'output'  => implode("\n", $log)
     ]);
     exit;
 }
 
-// Step 3: Detect default branch (main or master)
-$log[] = '>> Detecting branch...';
-$branchDetect = runCmd('git symbolic-ref refs/remotes/origin/HEAD', $projectRoot);
-$branch = 'main'; // fallback
-if ($branchDetect['exit_code'] === 0 && preg_match('#refs/remotes/origin/(.+)$#', $branchDetect['stdout'], $m)) {
-    $branch = trim($m[1]);
-} else {
-    // Fallback: check which branch exists on origin
-    $checkMain   = runCmd('git rev-parse --verify origin/main', $projectRoot);
-    $checkMaster = runCmd('git rev-parse --verify origin/master', $projectRoot);
-    if ($checkMain['exit_code'] === 0) {
-        $branch = 'main';
-    } elseif ($checkMaster['exit_code'] === 0) {
-        $branch = 'master';
-    }
-}
-$log[] = "Branch: $branch";
+// ── Step 2: Extract ZIP ──────────────────────────────────────────────────────
+$log[] = '>> Mengekstrak ZIP...';
 
-// Step 4: git reset --hard origin/<branch>  (force overwrite local changes)
-$log[] = ">> git reset --hard origin/$branch";
-$reset = runCmd("git reset --hard origin/$branch", $projectRoot);
-$log[] = $reset['stdout'] ?: $reset['stderr'];
-
-if ($reset['exit_code'] !== 0) {
+$zip = new ZipArchive();
+if ($zip->open($zipFile) !== true) {
+    @unlink($zipFile);
     echo json_encode([
         'success' => false,
-        'message' => 'Gagal update. Cek log di bawah untuk detail.',
+        'message' => 'Gagal mengekstrak file ZIP.',
         'output'  => implode("\n", $log)
     ]);
     exit;
 }
 
-// Step 5: Get current commit hash for display
-$hash = runCmd('git log -1 --format="%h %s (%ai)"', $projectRoot);
-$log[] = '>> Latest commit: ' . ($hash['stdout'] ?: 'unknown');
+if (!mkdir($extractDir, 0755, true)) {
+    $zip->close();
+    @unlink($zipFile);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Gagal membuat folder sementara.',
+        'output'  => implode("\n", $log)
+    ]);
+    exit;
+}
 
+$zip->extractTo($extractDir);
+$zip->close();
+@unlink($zipFile);
+
+// GitHub ZIP berisi satu folder di level teratas: ppdb-main/ atau ppdb-master/
+$extractedRoot = null;
+$items = scandir($extractDir);
+foreach ($items as $item) {
+    if ($item === '.' || $item === '..') continue;
+    $candidate = $extractDir . DIRECTORY_SEPARATOR . $item;
+    if (is_dir($candidate)) {
+        $extractedRoot = $candidate;
+        break;
+    }
+}
+
+if (!$extractedRoot) {
+    recursiveRemove($extractDir);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Struktur ZIP tidak valid (tidak ditemukan folder utama).',
+        'output'  => implode("\n", $log)
+    ]);
+    exit;
+}
+
+$log[] = '>> ZIP diekstrak ke: ' . basename($extractedRoot);
+
+// ── Step 3: Copy file ke project root ────────────────────────────────────────
+$log[] = '>> Menyalin file (melindungi: ' . implode(', ', $PROTECTED) . ')...';
+
+$result = recursiveCopy($extractedRoot, $projectRoot, $PROTECTED, $projectRoot);
+
+$log[] = ">> File disalin: {$result['copied']}, dilewati: {$result['skipped']}";
+if (!empty($result['errors'])) {
+    $log[] = '>> Error: ' . implode(', ', array_slice($result['errors'], 0, 5));
+}
+
+// ── Step 4: Cleanup ──────────────────────────────────────────────────────────
+recursiveRemove($extractDir);
+$log[] = '>> Folder sementara dihapus.';
+
+// ── Step 5: Response ─────────────────────────────────────────────────────────
+$hasErrors = !empty($result['errors']);
 echo json_encode([
-    'success' => true,
-    'message' => 'Sistem berhasil diperbarui ke versi terbaru.',
-    'output'  => implode("\n", $log),
-    'commit'  => $hash['stdout'] ?: ''
+    'success'    => !$hasErrors,
+    'message'    => $hasErrors
+        ? 'Update selesai dengan beberapa error. Cek log di bawah.'
+        : 'Sistem berhasil diperbarui dari GitHub.',
+    'output'     => implode("\n", $log),
+    'copied'     => $result['copied'],
+    'skipped'    => $result['skipped'],
+    'errors'     => $result['errors'],
 ]);
