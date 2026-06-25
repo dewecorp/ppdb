@@ -1,5 +1,6 @@
 <?php
 require_once dirname(dirname(dirname(__FILE__))) . '/config.php';
+require_once dirname(dirname(__FILE__)) . '/bootstrap.php';
 require_admin();
 
 header('Content-Type: application/json');
