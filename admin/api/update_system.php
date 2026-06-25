@@ -1,6 +1,6 @@
 <?php
 require_once dirname(dirname(dirname(__FILE__))) . '/config.php';
-require_login();
+require_admin();
 
 header('Content-Type: application/json');
 

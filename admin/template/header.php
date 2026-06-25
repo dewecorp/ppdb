@@ -14,6 +14,7 @@ if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
 }
 
 $user = current_user();
+$is_admin_user = is_admin();
 
 // Cleanup old notifications
 $mysqli->query("DELETE FROM notifications WHERE created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)");
@@ -87,9 +88,55 @@ if ($notif_res = $mysqli->query($notif_sql)) {
             font-weight: 600 !important;
         }
 
+        .sidebar.bg-gradient-primary {
+            background-color: #047857 !important;
+            background-image: linear-gradient(180deg, #047857 10%, #065f46 100%) !important;
+        }
+
+        .sidebar .sidebar-brand {
+            background: rgba(6, 78, 59, 0.28);
+        }
+
+        .sidebar .sidebar-heading,
+        .sidebar .nav-item .nav-link,
+        .sidebar .nav-item .nav-link i,
+        .sidebar .nav-item .nav-link span {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        .sidebar .nav-item.active .nav-link,
+        .sidebar .nav-item .nav-link:hover {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .sidebar .sidebar-divider {
+            border-top-color: rgba(255, 255, 255, 0.18) !important;
+        }
+
         .topbar-fixed .nav-link {
             font-size: 1.05rem !important;
             font-weight: 600 !important;
+        }
+
+        .topbar-fixed {
+            background-color: #047857 !important;
+            background-image: linear-gradient(90deg, #065f46, #047857) !important;
+        }
+
+        .topbar-fixed .nav-link,
+        .topbar-fixed .nav-link i,
+        .topbar-fixed #adminClock,
+        .topbar-user-name {
+            color: #ffffff !important;
+        }
+
+        .topbar-fixed .topbar-divider {
+            border-right-color: rgba(255, 255, 255, 0.25) !important;
+        }
+
+        #sidebarToggleTop {
+            color: #ffffff !important;
         }
 
         .sidebar {
@@ -122,11 +169,32 @@ if ($notif_res = $mysqli->query($notif_sql)) {
         .topbar-user-name {
             font-size: 1.15rem !important;
             font-weight: 700 !important;
-            color: #374151 !important;
+            color: #ffffff !important;
         }
 
         .img-profile {
             border-radius: 0 !important;
+        }
+
+        .avatar-initial {
+            width: 2.5rem;
+            height: 2.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0;
+            background: linear-gradient(135deg, #4e73df, #1cc88a);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 0;
+            text-transform: uppercase;
+        }
+
+        .avatar-initial-sm {
+            width: 40px;
+            height: 40px;
+            font-size: 0.85rem;
         }
 
         .sidebar-overlay {
@@ -403,16 +471,23 @@ if ($notif_res = $mysqli->query($notif_sql)) {
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span
                                     class="mr-2 d-none d-lg-inline topbar-user-name"><?= esc($user['username'] ?? 'Admin'); ?></span>
-                                <img class="img-profile"
-                                    src="<?= esc(isset($user['foto']) && $user['foto'] !== '' ? base_url('uploads/' . $user['foto']) : 'https://via.placeholder.com/60'); ?>">
+                                <?php if (isset($user['foto']) && $user['foto'] !== ''): ?>
+                                <img class="img-profile" src="<?= esc(base_url('uploads/' . $user['foto'])); ?>" alt="Foto profil">
+                                <?php else: ?>
+                                <span class="avatar-initial" aria-label="Avatar <?= esc($user['username'] ?? 'User'); ?>">
+                                    <?= esc(user_initials($user['username'] ?? 'User')); ?>
+                                </span>
+                                <?php endif; ?>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
+                                <?php if ($is_admin_user): ?>
                                 <a class="dropdown-item" href="#" id="btnUpdateSistem">
                                     <i class="fas fa-cloud-download-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Update Sistem
                                 </a>
                                 <div class="dropdown-divider"></div>
+                                <?php endif; ?>
                                 <a class="dropdown-item" href="#" id="btnLogout">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout

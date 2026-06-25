@@ -25,6 +25,8 @@ if (!$data) {
     exit;
 }
 
+log_activity('print_card', 'Cetak kartu pendaftar ' . $data['nama_lengkap'] . ' (' . $data['no_pendaftaran'] . ')');
+
 $madrasah = [
     'nama' => 'MI SULTAN FATTAH SUKOSONO',
     'alamat' => '',

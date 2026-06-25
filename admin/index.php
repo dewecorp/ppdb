@@ -5,6 +5,10 @@ require_login();
 $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 $allowed_pages = ['dashboard', 'madrasah', 'pendaftar', 'pengaturan', 'pengguna', 'backup'];
 
+if (!is_admin()) {
+    $allowed_pages = ['dashboard', 'madrasah', 'pendaftar', 'backup'];
+}
+
 if (!in_array($page, $allowed_pages, true)) {
     $page = 'dashboard';
 }
@@ -19,4 +23,3 @@ if (file_exists($page_file)) {
 }
 
 include __DIR__ . '/template/footer.php';
-

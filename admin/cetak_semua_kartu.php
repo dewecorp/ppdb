@@ -13,6 +13,8 @@ if ($stmt) {
     $stmt->close();
 }
 
+log_activity('print_all_cards', 'Cetak semua kartu pendaftar sebanyak ' . count($pendaftar) . ' data');
+
 if (empty($pendaftar)) {
     $urlPendaftar = esc(base_url('admin/index.php?page=pendaftar'));
     $urlDasbor = esc(base_url('admin/index.php'));

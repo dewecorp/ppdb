@@ -1,4 +1,6 @@
 <?php
+require_admin();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $aksi = isset($_POST['aksi']) ? $_POST['aksi'] : '';
     if ($aksi === 'reset_no') {
@@ -393,4 +395,3 @@ $_end_val = $_end_raw !== '' ? date('Y-m-d\TH:i', strtotime($_end_raw)) : '';
         });
     })();
 </script>
-

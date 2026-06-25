@@ -1,4 +1,5 @@
 <?php
+$madrasah_readonly = !is_admin();
 
 // Pastikan kolom terbaru tersedia (logo, nama_panitia, nama_kepala)
 if ($chk = $mysqli->prepare("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'madrasah' AND COLUMN_NAME IN ('logo','nama_panitia','nama_kepala')")) {
@@ -21,6 +22,12 @@ if ($chk = $mysqli->prepare("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($madrasah_readonly) {
+        flash('error', 'Data madrasah hanya dapat dilihat oleh panitia.');
+        echo '<script>window.location.href="' . esc(base_url('admin/madrasah')) . '";</script>';
+        exit;
+    }
+
     $nama = isset($_POST['nama']) ? trim($_POST['nama']) : '';
     $alamat = isset($_POST['alamat']) ? trim($_POST['alamat']) : '';
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
@@ -113,6 +120,61 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
     $result->free();
 }
 ?>
+<style>
+    .madrasah-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+
+    .madrasah-info-col {
+        min-width: 0;
+    }
+
+    .madrasah-info-item {
+        padding: 0.95rem 1rem;
+        border: 1px solid #e3e6f0;
+        border-radius: 0.35rem;
+        background: #fff;
+        min-height: 76px;
+    }
+
+    .madrasah-info-label {
+        color: #858796;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 0.4rem;
+    }
+
+    .madrasah-info-value {
+        color: #3a3b45;
+        font-size: 0.95rem;
+        overflow-wrap: anywhere;
+    }
+
+    .madrasah-logo-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 150px;
+        border: 1px dashed #d1d3e2;
+        border-radius: 0.35rem;
+        background: #f8f9fc;
+    }
+
+    .madrasah-logo-box img {
+        max-height: 120px;
+        max-width: 220px;
+        object-fit: contain;
+    }
+
+    @media (max-width: 768px) {
+        .madrasah-info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 <div class="container-fluid">
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -126,84 +188,88 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                     <div class="d-flex align-items-center">
                         <h6 class="m-0 font-weight-bold text-primary">Informasi Madrasah</h6>
                     </div>
+                    <?php if (!$madrasah_readonly): ?>
                     <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modalMadrasah">
                         <i class="fas fa-edit"></i> Edit
                     </button>
+                    <?php endif; ?>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <div class="text-muted small mb-1">
-                                <i class="fas fa-school mr-1"></i> Nama Madrasah
+                    <div class="madrasah-info-grid">
+                        <div class="madrasah-info-col">
+                            <div class="madrasah-info-item mb-3">
+                                <div class="madrasah-info-label">
+                                    <i class="fas fa-school mr-1"></i> Nama Madrasah
+                                </div>
+                                <div class="madrasah-info-value font-weight-bold">
+                                    <?= esc($madrasah['nama']); ?>
+                                </div>
                             </div>
-                            <div class="font-weight-bold">
-                                <?= esc($madrasah['nama']); ?>
+
+                            <div class="madrasah-info-item mb-3">
+                                <div class="madrasah-info-label">
+                                    <i class="fas fa-map-marker-alt mr-1"></i> Alamat
+                                </div>
+                                <div class="madrasah-info-value">
+                                    <?= esc($madrasah['alamat']); ?>
+                                </div>
+                            </div>
+
+                            <div class="madrasah-info-item mb-3">
+                                <div class="madrasah-info-label">
+                                    <i class="fas fa-envelope mr-1"></i> Email
+                                </div>
+                                <div class="madrasah-info-value">
+                                    <?= esc($madrasah['email']); ?>
+                                </div>
+                            </div>
+
+                            <div class="madrasah-info-item">
+                                <div class="madrasah-info-label">
+                                    <i class="fas fa-globe mr-1"></i> Website
+                                </div>
+                                <div class="madrasah-info-value">
+                                    <?= esc($madrasah['website']); ?>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="text-muted small mb-1">
-                                <i class="fas fa-map-marker-alt mr-1"></i> Alamat
-                            </div>
-                            <div>
-                                <?= esc($madrasah['alamat']); ?>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="text-muted small mb-1">
-                                <i class="fas fa-envelope mr-1"></i> Email
-                            </div>
-                            <div>
-                                <?= esc($madrasah['email']); ?>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="text-muted small mb-1">
-                                <i class="fas fa-globe mr-1"></i> Website
-                            </div>
-                            <div>
-                                <?= esc($madrasah['website']); ?>
-                            </div>
-                            <div class="mt-3">
-                                <div class="text-muted small mb-1">
+
+                        <div class="madrasah-info-col">
+                            <div class="madrasah-info-item mb-3">
+                                <div class="madrasah-info-label">
                                     <i class="fas fa-image mr-1"></i> Logo Madrasah
                                 </div>
-                                <div class="d-inline-flex align-items-center justify-content-start border rounded p-3 bg-light"
-                                    style="min-height: 80px; min-width: 88px;">
+                                <div class="madrasah-logo-box">
                                     <?php if (!empty($madrasah['logo'])): ?>
-                                    <img src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo Madrasah"
-                                        style="max-height: 72px; max-width: 140px; object-fit: contain;">
+                                    <img src="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>" alt="Logo Madrasah">
                                     <?php else: ?>
                                     <span class="text-muted small mb-0">Belum ada logo</span>
                                     <?php endif; ?>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="text-muted small mb-1">
-                                <i class="fas fa-user-tie mr-1"></i> HP Kepala
+
+                            <div class="madrasah-info-item mb-3">
+                                <div class="madrasah-info-label">
+                                    <i class="fas fa-user-tie mr-1"></i> Kepala Madrasah
+                                </div>
+                                <div class="madrasah-info-value font-weight-bold">
+                                    <?= esc($madrasah['nama_kepala'] ?? ''); ?>
+                                </div>
+                                <div class="madrasah-info-value text-muted mt-1">
+                                    HP: <?= esc($madrasah['hp_kepala']); ?>
+                                </div>
                             </div>
-                            <div>
-                                <?= esc($madrasah['hp_kepala']); ?>
-                            </div>
-                            <div class="text-muted small mb-1 mt-3">
-                                <i class="fas fa-id-card mr-1"></i> Nama Kepala Madrasah
-                            </div>
-                            <div>
-                                <?= esc($madrasah['nama_kepala'] ?? ''); ?>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="text-muted small mb-1">
-                                <i class="fas fa-users mr-1"></i> HP Panitia
-                            </div>
-                            <div>
-                                <?= esc($madrasah['hp_panitia']); ?>
-                            </div>
-                            <div class="text-muted small mb-1 mt-3">
-                                <i class="fas fa-user-check mr-1"></i> Nama Panitia
-                            </div>
-                            <div>
-                                <?= esc($madrasah['nama_panitia']); ?>
+
+                            <div class="madrasah-info-item">
+                                <div class="madrasah-info-label">
+                                    <i class="fas fa-users mr-1"></i> Panitia PPDB
+                                </div>
+                                <div class="madrasah-info-value font-weight-bold">
+                                    <?= esc($madrasah['nama_panitia']); ?>
+                                </div>
+                                <div class="madrasah-info-value text-muted mt-1">
+                                    HP: <?= esc($madrasah['hp_panitia']); ?>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -214,6 +280,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
 
 </div>
 
+<?php if (!$madrasah_readonly): ?>
 <div class="modal fade" id="modalMadrasah" tabindex="-1" role="dialog" aria-labelledby="modalMadrasahLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -303,3 +370,4 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
+<?php endif; ?>

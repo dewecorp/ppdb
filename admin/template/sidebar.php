@@ -1,5 +1,6 @@
 <?php
 $current_page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+$is_admin_user = is_admin();
 
 function active_menu(string $page, string $current): string
 {
@@ -67,6 +68,7 @@ function active_menu(string $page, string $current): string
             <span>Data Pendaftar</span></a>
     </li>
 
+    <?php if ($is_admin_user): ?>
     <li class="nav-item <?= active_menu('pengaturan', $current_page); ?>">
         <a class="nav-link" href="<?= base_url('admin/pengaturan'); ?>">
             <i class="fas fa-fw fa-cogs"></i>
@@ -78,6 +80,7 @@ function active_menu(string $page, string $current): string
             <i class="fas fa-fw fa-user-cog"></i>
             <span>Pengguna</span></a>
     </li>
+    <?php endif; ?>
 
     <li class="nav-item <?= active_menu('backup', $current_page); ?>">
         <a class="nav-link" href="<?= base_url('admin/backup'); ?>">

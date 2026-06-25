@@ -12,7 +12,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
 ?>
             </div>
 
-            <footer class="sticky-footer" style="background: linear-gradient(135deg, #062c21, #064e3b); padding: 1rem 0; display: flex; align-items: center;">
+            <footer class="sticky-footer" style="background: linear-gradient(135deg, #065f46, #047857); padding: 1rem 0; display: flex; align-items: center;">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
                         <span style="color: #ffffff !important;">Sistem Penerimaan Peserta Didik Baru MI Sultan Fattah Sukosono @ <?= date('Y'); ?></span>
@@ -197,7 +197,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                             title: APP_NAME + ' - ' + MADRASAH_NAME + ' - TA ' + ACADEMIC_YEAR + ' - ' + TODAY,
                             filename: 'data_pendaftar_ta_' + (ACADEMIC_YEAR_SLUG || 'default'),
                             exportOptions: {
-                                columns: [1,2,3,4,5,6,7,8,9,10],
+                                columns: ':visible:not(:last-child)',
                                 format: { body: function (data) { return (data || '').replace(/<[^>]*>/g, '').trim(); } }
                             },
                             customize: function (xlsx) {
@@ -316,6 +316,44 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                             $('#formPendaftar').submit();
                         }
                     });
+                });
+
+                $(document).on('click', '.btn-edit-pendaftar', function () {
+                    var raw = $(this).attr('data-pendaftar') || '{}';
+                    var data = {};
+                    try {
+                        data = JSON.parse(raw);
+                    } catch (e) {
+                        data = {};
+                    }
+                    var $form = $('#formEditPendaftar');
+                    $form[0].reset();
+                    Object.keys(data).forEach(function (key) {
+                        var $field = $form.find('[name="' + key + '"]');
+                        if (!$field.length) return;
+                        if ($field.attr('type') === 'checkbox') {
+                            $field.prop('checked', data[key] === 'Ya');
+                        } else {
+                            $field.val(data[key]);
+                        }
+                    });
+                    $form.find('[name="id"]').val(data.id || '');
+                    $('#modalEditPendaftar').modal('show');
+                });
+
+                $('#modalTambahPendaftar').on('hidden.bs.modal', function () {
+                    var form = $(this).find('form')[0];
+                    if (form) form.reset();
+                });
+
+                $('#modalTambahPendaftar, #modalEditPendaftar').on('keypress', 'input[name="nik"], input[name="kk"], input[name="hp"]', function(e) {
+                    if (e.which < 48 || e.which > 57) {
+                        e.preventDefault();
+                    }
+                }).on('paste', 'input[name="nik"], input[name="kk"], input[name="hp"]', function(e) {
+                    e.preventDefault();
+                    var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                    this.value = text.replace(/[^0-9]/g, '');
                 });
 
                 $('#btnHapusTerpilih').on('click', function () {

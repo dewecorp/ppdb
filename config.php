@@ -68,6 +68,17 @@ if ($chk = @$mysqli->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WH
     }
 }
 
+// User roles bootstrap. Existing users become admin so older installations keep working.
+if ($chk = @$mysqli->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'role'")) {
+    @$chk->execute();
+    @$chk->bind_result($cntRole);
+    @$chk->fetch();
+    @$chk->close();
+    if ((int)$cntRole === 0) {
+        @$mysqli->query("ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'admin' AFTER password");
+    }
+}
+
 function esc($value): string
 {
     if ($value === null) {
@@ -83,6 +94,30 @@ function esc($value): string
         return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
     }
     return '';
+}
+
+function user_initials(string $name): string
+{
+    $name = trim($name);
+    if ($name === '') {
+        return 'U';
+    }
+
+    $parts = preg_split('/\s+/', $name);
+    $initials = '';
+    foreach ($parts as $part) {
+        if ($part === '') {
+            continue;
+        }
+        if (preg_match('/./u', $part, $match)) {
+            $initials .= strtoupper($match[0]);
+        }
+        if (strlen($initials) >= 2) {
+            break;
+        }
+    }
+
+    return $initials !== '' ? $initials : 'U';
 }
 
 function get_option(string $name, string $default = ''): string
@@ -158,6 +193,28 @@ function require_login(): void
     }
 }
 
+function current_user_role(): string
+{
+    $user = current_user();
+    $role = isset($user['role']) ? (string)$user['role'] : 'admin';
+    return $role === 'panitia' ? 'panitia' : 'admin';
+}
+
+function is_admin(): bool
+{
+    return current_user_role() === 'admin';
+}
+
+function require_admin(): void
+{
+    require_login();
+    if (!is_admin()) {
+        flash('error', 'Anda tidak memiliki akses ke halaman tersebut.');
+        header('Location: ' . base_url('admin/dashboard'));
+        exit;
+    }
+}
+
 function current_user(): ?array
 {
     global $mysqli;
@@ -170,7 +227,7 @@ function current_user(): ?array
         return $cachedUser;
     }
 
-    $stmt = $mysqli->prepare('SELECT id, username, foto FROM users WHERE id = ? LIMIT 1');
+    $stmt = $mysqli->prepare('SELECT id, username, foto, role FROM users WHERE id = ? LIMIT 1');
     if (!$stmt) {
         return null;
     }
@@ -447,11 +504,20 @@ function send_whatsapp(string $to, string $message): bool
     $apiReason   = isset($respData['reason']) ? $respData['reason'] : '';
 
     if ($httpCode < 200 || $httpCode >= 300 || !$apiSuccess) {
-        $detail = $curlErr ?: ($apiReason ?: ($resp ?: 'no response'));
-        log_activity('whatsapp_error', "To: $to, HTTP: $httpCode, CurlErr: $curlErr, Reason: $apiReason, Resp: $resp");
+        $reasonLower = strtolower((string)$apiReason);
+        if ($to === '' || strpos($reasonLower, 'target') !== false || strpos($reasonLower, 'invalid') !== false) {
+            $messageLog = 'WhatsApp tidak terkirim karena nomor tujuan tidak valid atau belum terisi.';
+        } elseif ($token === '') {
+            $messageLog = 'WhatsApp tidak terkirim karena token WA belum diatur.';
+        } elseif ($curlErr !== '') {
+            $messageLog = 'WhatsApp tidak terkirim karena koneksi ke layanan WA bermasalah.';
+        } else {
+            $messageLog = 'WhatsApp tidak terkirim. Periksa nomor tujuan, token WA, dan status perangkat WA.';
+        }
+        log_activity('whatsapp_error', $messageLog);
         return false;
     }
 
-    log_activity('whatsapp_sent', "WA terkirim ke: $to via Fonnte, HTTP: $httpCode");
+    log_activity('whatsapp_sent', 'WhatsApp berhasil terkirim ke nomor tujuan.');
     return true;
 }

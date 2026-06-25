@@ -39,7 +39,7 @@ $ditolak = count_pendaftar('ditolak');
 $proses = count_pendaftar('proses');
 
 $activity_logs = [];
-if ($result = $mysqli->query('SELECT id, user_id, action, message, created_at FROM activity_logs ORDER BY created_at DESC LIMIT 10')) {
+if ($result = $mysqli->query("SELECT al.id, al.user_id, al.action, al.message, al.created_at, u.username, u.role FROM activity_logs al LEFT JOIN users u ON u.id = al.user_id ORDER BY al.created_at DESC LIMIT 20")) {
     while ($row = $result->fetch_assoc()) {
         $activity_logs[] = $row;
     }
@@ -79,9 +79,17 @@ if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_da
 }
 ?>
 <style>
-    .activity-scroll, .recent-registrants-scroll {
+        .activity-scroll, .recent-registrants-scroll {
         max-height: 400px;
         overflow-y: auto;
+    }
+
+    .timeline-actor {
+        font-size: 0.78rem;
+        color: #858796;
+        margin-top: 0.15rem;
+        margin-bottom: 0.4rem;
+        font-weight: 700;
     }
 </style>
 <div class="container-fluid">
@@ -255,11 +263,23 @@ if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_da
                                 if ($log['action'] === 'login') {
                                     $icon = 'fas fa-sign-in-alt';
                                     $bg = 'bg-success';
-                                    $title = 'Login Admin';
+                                    $title = 'Login Pengguna';
+                                } elseif ($log['action'] === 'logout') {
+                                    $icon = 'fas fa-sign-out-alt';
+                                    $bg = 'bg-secondary';
+                                    $title = 'Logout Pengguna';
                                 } elseif ($log['action'] === 'pendaftaran_baru' || $log['action'] === 'submit_pendaftaran') {
                                     $icon = 'fas fa-user-plus';
                                     $bg = 'bg-success';
                                     $title = 'Pendaftaran Baru';
+                                } elseif ($log['action'] === 'create_pendaftar') {
+                                    $icon = 'fas fa-user-plus';
+                                    $bg = 'bg-success';
+                                    $title = 'Tambah Data Pendaftar';
+                                } elseif ($log['action'] === 'update_pendaftar') {
+                                    $icon = 'fas fa-user-edit';
+                                    $bg = 'bg-warning';
+                                    $title = 'Edit Data Pendaftar';
                                 } elseif ($log['action'] === 'update_pendaftar_status') {
                                     $icon = 'fas fa-user-check';
                                     $bg = 'bg-info';
@@ -276,10 +296,49 @@ if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_da
                                     $icon = 'fas fa-school';
                                     $bg = 'bg-primary';
                                     $title = 'Pengaturan Madrasah';
+                                } elseif ($log['action'] === 'backup' || $log['action'] === 'restore') {
+                                    $icon = 'fas fa-database';
+                                    $bg = 'bg-info';
+                                    $title = 'Backup & Restore';
                                 } elseif ($log['action'] === 'delete_backup') {
                                     $icon = 'fas fa-database';
                                     $bg = 'bg-danger';
                                     $title = 'Penghapusan Backup';
+                                } elseif ($log['action'] === 'download_backup') {
+                                    $icon = 'fas fa-download';
+                                    $bg = 'bg-success';
+                                    $title = 'Unduh Backup';
+                                } elseif ($log['action'] === 'export_pendaftar_excel') {
+                                    $icon = 'fas fa-file-excel';
+                                    $bg = 'bg-success';
+                                    $title = 'Ekspor Excel Pendaftar';
+                                } elseif ($log['action'] === 'print_pendaftar_report') {
+                                    $icon = 'fas fa-print';
+                                    $bg = 'bg-secondary';
+                                    $title = 'Cetak Rekap Pendaftar';
+                                } elseif ($log['action'] === 'print_all_cards' || $log['action'] === 'print_card') {
+                                    $icon = 'fas fa-id-card';
+                                    $bg = 'bg-info';
+                                    $title = 'Cetak Kartu Pendaftar';
+                                } elseif ($log['action'] === 'whatsapp_error') {
+                                    $icon = 'fab fa-whatsapp';
+                                    $bg = 'bg-warning';
+                                    $title = 'WhatsApp Tidak Terkirim';
+                                } elseif ($log['action'] === 'whatsapp_sent') {
+                                    $icon = 'fab fa-whatsapp';
+                                    $bg = 'bg-success';
+                                    $title = 'WhatsApp Terkirim';
+                                }
+
+                                $actorText = trim((string)($log['username'] ?? '')) !== '' ? (string)$log['username'] : 'Sistem';
+                                $messageText = (string)($log['message'] ?? '');
+                                if ($log['action'] === 'whatsapp_error') {
+                                    $messageLower = strtolower($messageText);
+                                    if (strpos($messageLower, 'target input invalid') !== false || strpos($messageLower, 'http:') !== false || strpos($messageLower, 'curlerr') !== false || strpos($messageLower, 'resp:') !== false) {
+                                        $messageText = 'WhatsApp tidak terkirim karena nomor tujuan tidak valid atau belum terisi.';
+                                    } elseif ($messageText === '') {
+                                        $messageText = 'WhatsApp tidak terkirim. Periksa nomor tujuan, token WA, dan status perangkat WA.';
+                                    }
                                 }
                             ?>
                                 <?php if ($date_label !== $current_date_label): ?>
@@ -296,9 +355,10 @@ if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_da
                                             <?= esc($time_label); ?> (<?= esc($time_ago); ?>)
                                         </span>
                                         <h3 class="timeline-header"><?= esc($title); ?></h3>
+                                        <div class="timeline-actor">Oleh: <?= esc($actorText); ?></div>
                                         <div class="timeline-body">
-                                            <?php if (!empty($log['message'])): ?>
-                                                <?= esc($log['message']); ?>
+                                            <?php if ($messageText !== ''): ?>
+                                                <?= esc($messageText); ?>
                                             <?php else: ?>
                                                 Aktivitas tercatat.
                                             <?php endif; ?>

@@ -19,9 +19,10 @@ if (!is_file($path)) {
     exit('File tidak ditemukan.');
 }
 
+log_activity('download_backup', 'Unduh file backup ' . $file . ' (' . number_format(filesize($path) / 1024, 2) . ' KB)');
+
 header('Content-Type: application/sql');
 header('Content-Disposition: attachment; filename="' . $file . '"');
 header('Content-Length: ' . filesize($path));
 readfile($path);
 exit;
-

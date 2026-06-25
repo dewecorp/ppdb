@@ -34,6 +34,9 @@ if ($stmt) {
     $stmt->close();
 }
 
+$statusLabelLog = $status !== '' ? ' status ' . $status : ' semua status';
+log_activity('print_pendaftar_report', 'Cetak rekap pendaftar' . $statusLabelLog . ' sebanyak ' . count($pendaftar) . ' data');
+
 $madrasah = [
     'nama' => 'MI SULTAN FATTAH SUKOSONO',
     'alamat' => '',

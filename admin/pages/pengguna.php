@@ -1,10 +1,13 @@
 <?php
+require_admin();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $aksi = isset($_POST['aksi']) ? $_POST['aksi'] : '';
 
     if ($aksi === 'tambah') {
         $username = isset($_POST['username']) ? trim($_POST['username']) : '';
         $password = isset($_POST['password']) ? (string)$_POST['password'] : '';
+        $role = isset($_POST['role']) && $_POST['role'] === 'panitia' ? 'panitia' : 'admin';
 
         if ($username === '' || $password === '') {
             flash('error', 'Username dan password wajib diisi.');
@@ -30,9 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
 
-        $stmt = $mysqli->prepare('INSERT INTO users (foto, username, password) VALUES (?, ?, ?)');
+        $stmt = $mysqli->prepare('INSERT INTO users (foto, username, password, role) VALUES (?, ?, ?, ?)');
         if ($stmt) {
-            $stmt->bind_param('sss', $fotoName, $username, $hash);
+            $stmt->bind_param('ssss', $fotoName, $username, $hash, $role);
             if ($stmt->execute()) {
                 flash('success', 'Pengguna baru berhasil ditambahkan.');
                 log_activity('create_user', 'Tambah pengguna ' . $username);
@@ -51,11 +54,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
         $username = isset($_POST['username']) ? trim($_POST['username']) : '';
         $password = isset($_POST['password']) ? (string)$_POST['password'] : '';
+        $role = isset($_POST['role']) && $_POST['role'] === 'panitia' ? 'panitia' : 'admin';
         $fotoName = null;
 
         $current = null;
         if ($id > 0) {
-            $stmt = $mysqli->prepare('SELECT id, username, foto, password FROM users WHERE id = ? LIMIT 1');
+            $stmt = $mysqli->prepare('SELECT id, username, foto, password, role FROM users WHERE id = ? LIMIT 1');
             if ($stmt) {
                 $stmt->bind_param('i', $id);
                 $stmt->execute();
@@ -65,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         if (!$current && $username !== '') {
-            $stmt = $mysqli->prepare('SELECT id, username, foto, password FROM users WHERE username = ? LIMIT 1');
+            $stmt = $mysqli->prepare('SELECT id, username, foto, password, role FROM users WHERE username = ? LIMIT 1');
             if ($stmt) {
                 $stmt->bind_param('s', $username);
                 $stmt->execute();
@@ -106,9 +110,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $newFoto = $fotoName !== null ? $fotoName : (string)$current['foto'];
         $newPass = $password !== '' ? password_hash($password, PASSWORD_DEFAULT) : (string)$current['password'];
 
-        $stmt = $mysqli->prepare('UPDATE users SET foto = ?, username = ?, password = ? WHERE id = ?');
+        if ((int)$id === (int)$_SESSION['user_id'] && $role !== 'admin') {
+            flash('error', 'Role akun yang sedang digunakan tidak dapat diubah menjadi panitia.');
+            echo '<script>window.location.href="' . esc(base_url('admin/pengguna')) . '";</script>';
+            exit;
+        }
+
+        $stmt = $mysqli->prepare('UPDATE users SET foto = ?, username = ?, password = ?, role = ? WHERE id = ?');
         if ($stmt) {
-            $stmt->bind_param('sssi', $newFoto, $username, $newPass, $id);
+            $stmt->bind_param('ssssi', $newFoto, $username, $newPass, $role, $id);
             if ($stmt->execute()) {
                 flash('success', 'Pengguna berhasil diperbarui.');
                 log_activity('update_user', 'Perbarui pengguna ID ' . $id . ' (' . $username . ')');
@@ -206,6 +216,7 @@ if ($result = $mysqli->query('SELECT * FROM users ORDER BY id ASC')) {
                             <th>No</th>
                             <th>Foto</th>
                             <th>Username</th>
+                            <th>Role</th>
                             <th>Password</th>
                             <th>Aksi</th>
                         </tr>
@@ -219,16 +230,23 @@ if ($result = $mysqli->query('SELECT * FROM users ORDER BY id ASC')) {
                                 <img src="<?= esc(base_url('uploads/' . $user['foto'])); ?>" alt="Foto"
                                     class="img-profile rounded-circle" width="40" height="40">
                                 <?php else: ?>
-                                <img src="https://via.placeholder.com/40" alt="Foto"
-                                    class="img-profile rounded-circle">
+                                <span class="avatar-initial avatar-initial-sm" aria-label="Avatar <?= esc($user['username']); ?>">
+                                    <?= esc(user_initials((string)$user['username'])); ?>
+                                </span>
                                 <?php endif; ?>
                             </td>
                             <td><?= esc($user['username']); ?></td>
+                            <td>
+                                <span class="badge badge-<?= ($user['role'] ?? 'admin') === 'panitia' ? 'info' : 'primary'; ?>">
+                                    <?= esc(ucfirst((string)($user['role'] ?? 'admin'))); ?>
+                                </span>
+                            </td>
                             <td>********</td>
                             <td>
                                 <button type="button" class="btn btn-sm btn-warning btn-edit-pengguna"
                                     data-id="<?= (int)$user['id']; ?>"
                                     data-username="<?= esc($user['username']); ?>"
+                                    data-role="<?= esc($user['role'] ?? 'admin'); ?>"
                                     data-toggle="modal" data-target="#modalEditPengguna">
                                     Edit
                                 </button>
@@ -282,6 +300,13 @@ if ($result = $mysqli->query('SELECT * FROM users ORDER BY id ASC')) {
                         <label>Password (kosongkan jika tidak diubah)</label>
                         <input type="password" name="password" class="form-control">
                     </div>
+                    <div class="form-group">
+                        <label>Role *</label>
+                        <select name="role" id="editRole" class="form-control" required>
+                            <option value="admin">Admin</option>
+                            <option value="panitia">Panitia</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -317,6 +342,13 @@ if ($result = $mysqli->query('SELECT * FROM users ORDER BY id ASC')) {
                         <label>Password *</label>
                         <input type="password" name="password" class="form-control" required>
                     </div>
+                    <div class="form-group">
+                        <label>Role *</label>
+                        <select name="role" class="form-control" required>
+                            <option value="admin">Admin</option>
+                            <option value="panitia">Panitia</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -328,28 +360,42 @@ if ($result = $mysqli->query('SELECT * FROM users ORDER BY id ASC')) {
 </div>
 
 <script>
-    $(function () {
-        $('.btn-hapus-pengguna').on('click', function () {
-            var form = $(this).closest('form');
-            Swal.fire({
-                title: 'Hapus Pengguna?',
-                text: 'Data pengguna yang dihapus tidak dapat dikembalikan.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, hapus',
-                cancelButtonText: 'Batal'
-            }).then(function (result) {
-                if (result.isConfirmed) {
-                    form.submit();
+    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('click', function (event) {
+            var deleteButton = event.target.closest('.btn-hapus-pengguna');
+            if (deleteButton) {
+                var form = deleteButton.closest('form');
+                Swal.fire({
+                    title: 'Hapus Pengguna?',
+                    text: 'Data pengguna yang dihapus tidak dapat dikembalikan.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, hapus',
+                    cancelButtonText: 'Batal'
+                }).then(function (result) {
+                    if (result.isConfirmed && form) {
+                        form.submit();
+                    }
+                });
+                return;
+            }
+
+            var editButton = event.target.closest('.btn-edit-pengguna');
+            if (editButton) {
+                var idInput = document.getElementById('editUserId');
+                var usernameInput = document.getElementById('editUsername');
+                var roleInput = document.getElementById('editRole');
+
+                if (idInput) {
+                    idInput.value = editButton.getAttribute('data-id') || '';
                 }
-            });
-        });
-        $(document).on('click', '.btn-edit-pengguna', function () {
-            var id = $(this).data('id');
-            var username = $(this).data('username');
-            $('#editUserId').val(id);
-            $('#editUsername').val(username);
-            $('#modalEditPengguna').modal('show');
+                if (usernameInput) {
+                    usernameInput.value = editButton.getAttribute('data-username') || '';
+                }
+                if (roleInput) {
+                    roleInput.value = editButton.getAttribute('data-role') || 'admin';
+                }
+            }
         });
     });
 </script>
