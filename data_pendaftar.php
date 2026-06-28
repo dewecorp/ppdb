@@ -132,7 +132,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
         </div>
     </nav>
 
-    <div class="container-fluid data-pendaftar-shell" style="margin-top: 100px; margin-bottom: 50px;">
+    <div class="container-fluid data-pendaftar-shell" style="margin-top: 24px; margin-bottom: 50px;">
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Data Pendaftar</h1>
         </div>
