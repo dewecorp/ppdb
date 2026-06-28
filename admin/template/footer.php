@@ -82,15 +82,35 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                 setInterval(updateClock, 1000);
             })();
 
-            var initMobileSidebar = function () {
+            var SIDEBAR_STATE_KEY = 'ppdb_admin_sidebar_state';
+
+            var setSidebarCollapsed = function (collapsed) {
                 var $body = $('body');
                 var $sidebar = $('.sidebar');
+
+                $body.toggleClass('sidebar-toggled', collapsed).removeClass('sidebar-open');
+                $sidebar.toggleClass('toggled', collapsed);
+            };
+
+            var getStoredSidebarCollapsed = function () {
+                try {
+                    return window.localStorage.getItem(SIDEBAR_STATE_KEY) === 'collapsed';
+                } catch (e) {
+                    return false;
+                }
+            };
+
+            var storeSidebarCollapsed = function (collapsed) {
+                try {
+                    window.localStorage.setItem(SIDEBAR_STATE_KEY, collapsed ? 'collapsed' : 'expanded');
+                } catch (e) {}
+            };
+
+            var initMobileSidebar = function () {
                 if ($(window).width() <= 768) {
-                    $body.addClass('sidebar-toggled').removeClass('sidebar-open');
-                    $sidebar.addClass('toggled');
+                    setSidebarCollapsed(true);
                 } else {
-                    $body.removeClass('sidebar-toggled sidebar-open');
-                    $sidebar.removeClass('toggled');
+                    setSidebarCollapsed(getStoredSidebarCollapsed());
                 }
             };
 
@@ -114,6 +134,9 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                         $body.removeClass('sidebar-open');
                     } else {
                         $body.addClass('sidebar-open');
+                    }
+                    if ($(window).width() > 768) {
+                        storeSidebarCollapsed($body.hasClass('sidebar-toggled'));
                     }
                 }, 0);
                 adjustAdminTables();
