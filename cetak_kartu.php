@@ -1,5 +1,6 @@
 <?php
 require_once dirname(__FILE__) . '/config.php';
+require_once dirname(__FILE__) . '/admin/bootstrap.php';
 
 if (!isset($_GET['id'])) {
     echo 'Data tidak ditemukan.';

@@ -96,23 +96,6 @@ function esc($value): string
     return '';
 }
 
-function format_tanggal(?string $date): string
-{
-    $date = trim((string)$date);
-    if ($date === '' || $date === '0000-00-00') {
-        return '';
-    }
-
-    $dateOnly = substr($date, 0, 10);
-    $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $dateOnly);
-    if ($parsed instanceof DateTimeImmutable && $parsed->format('Y-m-d') === $dateOnly) {
-        return $parsed->format('d-m-Y');
-    }
-
-    $timestamp = strtotime($date);
-    return $timestamp !== false ? date('d-m-Y', $timestamp) : $date;
-}
-
 function user_initials(string $name): string
 {
     $name = trim($name);
