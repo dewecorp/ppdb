@@ -94,8 +94,18 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                 }
             };
 
+            var adjustAdminTables = function () {
+                if (!$.fn.DataTable) return;
+                setTimeout(function () {
+                    $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+                }, 260);
+            };
+
             initMobileSidebar();
-            $(window).on('resize', initMobileSidebar);
+            $(window).on('resize', function () {
+                initMobileSidebar();
+                adjustAdminTables();
+            });
 
             $('#sidebarToggleTop, #sidebarToggle').on('click', function () {
                 var $body = $('body');
@@ -106,6 +116,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                         $body.addClass('sidebar-open');
                     }
                 }, 0);
+                adjustAdminTables();
             });
 
             $(document).on('click', '.sidebar-overlay', function () {

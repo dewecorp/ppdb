@@ -277,6 +277,11 @@ $qrKepalaUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=' 
             font-size: 13px;
         }
 
+        .section-title + table {
+            width: calc(100% - 18px);
+            margin-left: 18px;
+        }
+
         td {
             padding: 4px 0;
             vertical-align: top;
@@ -392,7 +397,7 @@ $qrKepalaUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=' 
             <tr><td class="label">NIK</td><td class="sep">:</td><td class="value"><?= esc($data['nik']); ?></td></tr>
             <tr><td class="label">No KK</td><td class="sep">:</td><td class="value"><?= esc($data['kk']); ?></td></tr>
             <tr><td class="label">Jenis Kelamin</td><td class="sep">:</td><td class="value"><?= esc($data['jenis_kelamin']); ?></td></tr>
-            <tr><td class="label">Tempat, Tanggal Lahir</td><td class="sep">:</td><td class="value"><?= esc($data['tempat_lahir']); ?>, <?= esc($data['tanggal_lahir']); ?></td></tr>
+            <tr><td class="label">Tempat, Tanggal Lahir</td><td class="sep">:</td><td class="value"><?= esc($data['tempat_lahir']); ?>, <?= esc(format_tanggal($data['tanggal_lahir'])); ?></td></tr>
             <tr><td class="label">Alamat</td><td class="sep">:</td><td class="value"><?= esc($data['alamat']); ?></td></tr>
             <tr><td class="label">Status Dalam Keluarga</td><td class="sep">:</td><td class="value"><?= esc($data['status_keluarga']); ?></td></tr>
             <tr><td class="label">Anak Ke / Jumlah Saudara</td><td class="sep">:</td><td class="value"><?= esc((string)$data['anak_ke']); ?> dari <?= esc((string)$data['jumlah_saudara']); ?> bersaudara</td></tr>

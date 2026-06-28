@@ -81,6 +81,22 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
             background-color: #fff;
             border-bottom: 1px solid #e3e6f0;
         }
+        .data-pendaftar-shell {
+            width: 100%;
+            max-width: none;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        .data-pendaftar-shell .card,
+        #dataTable {
+            width: 100% !important;
+        }
+        @media (min-width: 992px) {
+            .data-pendaftar-shell {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+        }
     </style>
 </head>
 
@@ -115,7 +131,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
         </div>
     </nav>
 
-    <div class="container" style="margin-top: 100px; margin-bottom: 50px;">
+    <div class="container-fluid data-pendaftar-shell" style="margin-top: 100px; margin-bottom: 50px;">
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Data Pendaftar</h1>
         </div>
@@ -153,6 +169,9 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                                 <th>No</th>
                                 <th>Nama Pendaftar</th>
                                 <th>Jenis Kelamin</th>
+                                <th>Tanggal Lahir</th>
+                                <th>NIK</th>
+                                <th>KK</th>
                                 <th>Alamat</th>
                                 <th>Nama Ayah</th>
                                 <th>Pekerjaan Ayah</th>
@@ -198,6 +217,9 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                                     echo '<td>' . $no++ . '</td>';
                                     echo '<td>' . esc($row['nama_lengkap']) . '</td>';
                                     echo '<td>' . esc($row['jenis_kelamin']) . '</td>';
+                                    echo '<td>' . esc(format_tanggal($row['tanggal_lahir'])) . '</td>';
+                                    echo '<td>' . esc($row['nik']) . '</td>';
+                                    echo '<td>' . esc($row['kk']) . '</td>';
                                     echo '<td>' . esc($row['alamat']) . '</td>';
                                     echo '<td>' . esc($row['nama_ayah']) . '</td>';
                                     echo '<td>' . esc($row['pekerjaan_ayah']) . '</td>';

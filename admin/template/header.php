@@ -150,9 +150,17 @@ if ($notif_res = $mysqli->query($notif_sql)) {
             z-index: 1040;
         }
 
+        .sidebar.toggled {
+            width: 6.5rem !important;
+            overflow-x: hidden;
+        }
+
         #content-wrapper {
             margin-left: 14rem;
+            width: calc(100% - 14rem);
             min-height: 100vh;
+            min-width: 0;
+            transition: margin-left 0.2s ease, width 0.2s ease;
         }
 
         .topbar-fixed {
@@ -161,6 +169,40 @@ if ($notif_res = $mysqli->query($notif_sql)) {
             left: 14rem;
             right: 0;
             z-index: 1030;
+            transition: left 0.2s ease;
+        }
+
+        body.sidebar-toggled #content-wrapper {
+            margin-left: 6.5rem;
+            width: calc(100% - 6.5rem);
+        }
+
+        body.sidebar-toggled .topbar-fixed {
+            left: 6.5rem;
+        }
+
+        body.sidebar-toggled .sidebar .nav-item .nav-link {
+            width: 6.5rem;
+            padding-left: 0.45rem;
+            padding-right: 0.45rem;
+            text-align: center;
+        }
+
+        body.sidebar-toggled .sidebar .nav-item .nav-link i {
+            font-size: 0.92rem;
+        }
+
+        body.sidebar-toggled .sidebar .nav-item .nav-link span,
+        body.sidebar-toggled .sidebar .sidebar-heading {
+            font-size: 0.64rem !important;
+            line-height: 1.15;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        body.sidebar-toggled .sidebar #sidebarToggle {
+            width: 2.25rem;
+            height: 2.25rem;
         }
 
         #content {
@@ -230,10 +272,19 @@ if ($notif_res = $mysqli->query($notif_sql)) {
             }
             #content-wrapper {
                 margin-left: 0;
+                width: 100%;
             }
             .sidebar {
                 left: 0;
+                width: 14rem !important;
                 transition: left 0.3s ease;
+            }
+            body.sidebar-toggled #content-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+            body.sidebar-toggled .topbar-fixed {
+                left: 0;
             }
             body.sidebar-toggled .sidebar,
             .sidebar.toggled {

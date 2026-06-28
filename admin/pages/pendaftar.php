@@ -412,7 +412,7 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
                                 <td><?= esc($row['no_pendaftaran']); ?></td>
                                 <td><?= esc($row['nama_lengkap']); ?></td>
                                 <td><?= esc($row['jenis_kelamin']); ?></td>
-                                <td><?= esc($row['tempat_lahir']); ?>, <?= esc($row['tanggal_lahir']); ?></td>
+                                <td><?= esc($row['tempat_lahir']); ?>, <?= esc(format_tanggal($row['tanggal_lahir'])); ?></td>
                                 <td><?= esc($row['nik']); ?></td>
                                 <td><?= esc($row['kk']); ?></td>
                                 <td><?= esc($row['alamat']); ?></td>

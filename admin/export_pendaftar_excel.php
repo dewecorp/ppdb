@@ -61,7 +61,7 @@ $columns = [
             <td><?= esc($row['nama_lengkap']); ?></td>
             <td><?= esc($row['jenis_kelamin']); ?></td>
             <td><?= esc($row['tempat_lahir']); ?></td>
-            <td><?= esc($row['tanggal_lahir']); ?></td>
+            <td><?= esc(format_tanggal($row['tanggal_lahir'])); ?></td>
             <td style="mso-number-format:'\@';"><?= esc($row['nik']); ?></td>
             <td style="mso-number-format:'\@';"><?= esc($row['kk']); ?></td>
             <td><?= esc($row['alamat']); ?></td>
@@ -80,7 +80,7 @@ $columns = [
             <td><?= esc($row['kip']); ?></td>
             <td><?= esc($row['pkh']); ?></td>
             <td><?= esc($row['status_daftar']); ?></td>
-            <td><?= esc($row['created_at']); ?></td>
+            <td><?= esc(format_tanggal($row['created_at'])); ?></td>
         </tr>
         <?php
             endwhile;
