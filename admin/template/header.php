@@ -434,6 +434,14 @@ if ($notif_res = $mysqli->query($notif_sql)) {
             padding: 1rem 0 !important;
             min-height: 64px !important;
         }
+
+        .swal2-styled,
+        .swal2-styled:focus,
+        .swal2-styled:active {
+            border: 0 !important;
+            outline: 0 !important;
+            box-shadow: none !important;
+        }
     </style>
 </head>
 
