@@ -92,6 +92,67 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
         #dataTable {
             width: 100% !important;
         }
+
+        .data-pendaftar-table-wrap {
+            max-height: none;
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
+        #dataTable {
+            font-size: 0.78rem;
+            table-layout: auto;
+        }
+
+        #dataTable thead th {
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+            padding-top: 0.55rem;
+            padding-bottom: 0.55rem;
+        }
+
+        #dataTable tbody td {
+            vertical-align: middle;
+            padding-top: 0.45rem;
+            padding-bottom: 0.45rem;
+            line-height: 1.25;
+            white-space: nowrap;
+        }
+
+        #dataTable th:nth-child(7),
+        #dataTable td:nth-child(7) {
+            max-width: 260px;
+            min-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #dataTable td:last-child {
+            min-width: 76px;
+            white-space: nowrap;
+        }
+
+        #dataTable_wrapper .dataTables_length,
+        #dataTable_wrapper .dataTables_filter {
+            margin-bottom: 0.5rem;
+        }
+
+        #dataTable_wrapper .dataTables_length label,
+        #dataTable_wrapper .dataTables_filter label {
+            margin-bottom: 0;
+        }
+
+        #dataTable_wrapper .dataTables_filter {
+            text-align: right;
+        }
+
+        @media (max-width: 767.98px) {
+            #dataTable_wrapper .dataTables_length,
+            #dataTable_wrapper .dataTables_filter {
+                text-align: left;
+            }
+        }
         @media (min-width: 992px) {
             .data-pendaftar-shell {
                 padding-left: 2rem;
@@ -163,7 +224,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                 <h6 class="m-0 font-weight-bold text-primary">Tabel Data Pendaftar</h6>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
+                <div class="table-responsive data-pendaftar-table-wrap">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
@@ -269,6 +330,10 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
     <script>
         $(document).ready(function() {
             $('#dataTable').DataTable({
+                autoWidth: true,
+                pageLength: 25,
+                lengthMenu: [[5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, 'Semua']],
+                scrollX: true,
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Indonesian.json"
                 }
