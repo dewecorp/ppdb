@@ -95,16 +95,18 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
 
         .data-pendaftar-table-wrap {
             max-height: none;
-            overflow-x: auto;
+            overflow-x: visible;
             overflow-y: visible;
         }
 
-        #dataTable {
+        #dataTable,
+        #dataTable_wrapper table.dataTable {
             font-size: 0.78rem;
-            table-layout: auto;
+            table-layout: auto !important;
         }
 
-        #dataTable thead th {
+        #dataTable thead th,
+        #dataTable_wrapper .dataTables_scrollHead thead th {
             text-align: center;
             vertical-align: middle;
             white-space: nowrap;
@@ -112,12 +114,24 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
             padding-bottom: 0.55rem;
         }
 
-        #dataTable tbody td {
+        #dataTable tbody td,
+        #dataTable_wrapper .dataTables_scrollBody tbody td {
             vertical-align: middle;
             padding-top: 0.45rem;
             padding-bottom: 0.45rem;
             line-height: 1.25;
             white-space: nowrap;
+        }
+
+        #dataTable_wrapper .dataTables_scrollHeadInner,
+        #dataTable_wrapper .dataTables_scrollHeadInner table,
+        #dataTable_wrapper .dataTables_scrollBody table {
+            width: 100% !important;
+        }
+
+        #dataTable_wrapper .dataTables_scrollBody {
+            overflow-x: auto !important;
+            overflow-y: visible !important;
         }
 
         #dataTable th:nth-child(7),
@@ -224,7 +238,7 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                 <h6 class="m-0 font-weight-bold text-primary">Tabel Data Pendaftar</h6>
             </div>
             <div class="card-body">
-                <div class="table-responsive data-pendaftar-table-wrap">
+                <div class="data-pendaftar-table-wrap">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
@@ -329,14 +343,20 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
 
     <script>
         $(document).ready(function() {
-            $('#dataTable').DataTable({
+            var dataPendaftarTable = $('#dataTable').DataTable({
                 autoWidth: true,
                 pageLength: 25,
                 lengthMenu: [[5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, 'Semua']],
                 scrollX: true,
+                scrollCollapse: true,
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Indonesian.json"
                 }
+            });
+
+            dataPendaftarTable.columns.adjust();
+            $(window).on('resize', function () {
+                dataPendaftarTable.columns.adjust();
             });
         });
     </script>
