@@ -81,6 +81,21 @@ function validate_pendaftar_payload(array $data): ?string
 
 $total_pendaftar = count_pendaftar();
 $is_admin_user = is_admin();
+$total_laki_laki = 0;
+$total_perempuan = 0;
+
+if ($genderResult = $mysqli->query("SELECT jenis_kelamin, COUNT(*) AS total FROM pendaftar GROUP BY jenis_kelamin")) {
+    while ($genderRow = $genderResult->fetch_assoc()) {
+        $gender = strtolower(trim((string)($genderRow['jenis_kelamin'] ?? '')));
+        $count = (int)($genderRow['total'] ?? 0);
+        if ($gender === 'laki-laki' || $gender === 'l') {
+            $total_laki_laki += $count;
+        } elseif ($gender === 'perempuan' || $gender === 'p') {
+            $total_perempuan += $count;
+        }
+    }
+    $genderResult->free();
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $aksi = isset($_POST['aksi']) ? $_POST['aksi'] : '';
@@ -301,6 +316,8 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
             <h6 class="m-0 font-weight-bold text-primary">
                 Daftar Pendaftar
                 <span class="badge badge-pill badge-primary ml-2">Total: <?= (int)$total_pendaftar; ?></span>
+                <span class="badge badge-pill badge-info ml-1">Laki-laki: <?= (int)$total_laki_laki; ?></span>
+                <span class="badge badge-pill badge-danger ml-1">Perempuan: <?= (int)$total_perempuan; ?></span>
             </h6>
             <div class="mt-2 mt-sm-0">
                 <a href="export_pendaftar_excel.php" class="btn btn-sm btn-success">
