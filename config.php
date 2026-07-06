@@ -400,6 +400,24 @@ function normalize_pendaftar_duplicate_value(string $field, $value): string
     return function_exists('mb_strtolower') ? mb_strtolower($value, 'UTF-8') : strtolower($value);
 }
 
+function pendaftar_duplicate_sql_expression(string $field): string
+{
+    if (in_array($field, ['nik', 'kk', 'hp'], true)) {
+        $expr = "TRIM(COALESCE(`$field`, ''))";
+        foreach ([' ', '-', '.', '+', '/', '(', ')'] as $char) {
+            $expr = "REPLACE($expr, '$char', '')";
+        }
+
+        return $expr;
+    }
+
+    if (in_array($field, ['anak_ke', 'jumlah_saudara'], true)) {
+        return "COALESCE(NULLIF(TRIM(CAST(`$field` AS CHAR)), ''), '0')";
+    }
+
+    return "LOWER(TRIM(COALESCE(`$field`, '')))";
+}
+
 function pendaftar_duplicate_exists(array $data, ?int $excludeId = null, ?array $fields = null): ?array
 {
     global $mysqli;
@@ -413,7 +431,7 @@ function pendaftar_duplicate_exists(array $data, ?int $excludeId = null, ?array 
         if (!isset($allowed[$field])) {
             continue;
         }
-        $where[] = "LOWER(TRIM(COALESCE(`$field`, ''))) = ?";
+        $where[] = pendaftar_duplicate_sql_expression($field) . ' = ?';
         $params[] = normalize_pendaftar_duplicate_value($field, $data[$field] ?? '');
     }
 

@@ -223,6 +223,8 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
             if ($('#tablePendaftar').length) {
                 $('#tablePendaftar').DataTable({
                     responsive: true,
+                    pageLength: 5,
+                    lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, 'Semua']],
                     dom: 'Bfrtip',
                     buttons: [
                         {

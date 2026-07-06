@@ -79,9 +79,30 @@ if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_da
 }
 ?>
 <style>
-        .activity-scroll, .recent-registrants-scroll {
+    .activity-scroll {
         max-height: 400px;
         overflow-y: auto;
+    }
+
+    .recent-registrants-scroll {
+        overflow: visible;
+    }
+
+    .recent-registrants-table-wrap {
+        max-height: 400px;
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+
+    .recent-registrants-table-wrap .table {
+        margin-bottom: 0;
+    }
+
+    .recent-registrants-table-wrap thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #fff;
     }
 
     .timeline-actor {
@@ -196,7 +217,7 @@ if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_da
                     <?php if (empty($recent_registrants)): ?>
                         <p class="text-center text-muted my-3">Belum ada pendaftar.</p>
                     <?php else: ?>
-                        <div class="table-responsive">
+                        <div class="table-responsive recent-registrants-table-wrap">
                             <table class="table table-bordered table-hover" width="100%" cellspacing="0">
                                 <thead>
                                     <tr>

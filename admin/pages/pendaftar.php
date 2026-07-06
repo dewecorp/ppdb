@@ -308,7 +308,7 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
                 <input type="hidden" name="aksi" id="aksiGlobal" value="">
                 <input type="hidden" name="id" id="idGlobal" value="">
                 <input type="hidden" name="status" id="statusGlobal" value="">
-                <div class="table-responsive">
+                <div class="table-responsive pendaftar-table-wrap">
                     <table id="tablePendaftar" class="table table-bordered datatable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
@@ -418,26 +418,42 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
 <style>
     #tablePendaftar {
         font-size: 0.78rem;
+        table-layout: auto;
+    }
+
+    .pendaftar-table-wrap {
+        max-height: none;
+        overflow-x: auto;
+        overflow-y: visible;
     }
 
     #tablePendaftar thead th {
         text-align: center;
         vertical-align: middle;
         white-space: nowrap;
+        padding-top: 0.55rem;
+        padding-bottom: 0.55rem;
     }
 
     #tablePendaftar tbody td {
         vertical-align: middle;
+        padding-top: 0.45rem;
+        padding-bottom: 0.45rem;
+        line-height: 1.25;
+        white-space: nowrap;
     }
 
-    #tablePendaftar th:nth-child(<?= $is_admin_user ? 20 : 19; ?>),
-    #tablePendaftar td:nth-child(<?= $is_admin_user ? 20 : 19; ?>) {
-        max-width: 150px;
-        min-width: 120px;
-        width: 140px;
-        white-space: normal;
-        overflow-wrap: anywhere;
-        word-break: break-word;
+    #tablePendaftar th:nth-child(<?= $is_admin_user ? 9 : 8; ?>),
+    #tablePendaftar td:nth-child(<?= $is_admin_user ? 9 : 8; ?>) {
+        max-width: 260px;
+        min-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #tablePendaftar td:last-child {
+        min-width: 230px;
+        white-space: nowrap;
     }
 
     #tablePendaftar .btn {
