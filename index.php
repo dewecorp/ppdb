@@ -384,6 +384,33 @@ $error_message = flash('error');
             font-weight: 700;
             letter-spacing: 0.06em;
         }
+
+        .back-to-top-public {
+            position: fixed;
+            right: 1.25rem;
+            bottom: 1.25rem;
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 999px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background-color: #0f766e;
+            color: #fff;
+            box-shadow: 0 0.65rem 1.25rem rgba(15, 118, 110, 0.28);
+            z-index: 1030;
+            text-decoration: none;
+        }
+
+        .back-to-top-public:hover {
+            color: #fff;
+            background-color: #115e59;
+            text-decoration: none;
+        }
+
+        .back-to-top-public.is-visible {
+            display: flex;
+        }
     </style>
 </head>
 
@@ -567,6 +594,10 @@ $error_message = flash('error');
             <span style="color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-left: 0.5rem;">v<?= app_version(); ?></span>
         </div>
     </footer>
+
+    <a href="#page-top" class="back-to-top-public" id="backToTopPublic" aria-label="Kembali ke atas">
+        <i class="fas fa-chevron-up"></i>
+    </a>
 
     <div class="modal fade" id="modalDaftar" tabindex="-1" role="dialog" aria-labelledby="modalDaftarLabel"
         aria-hidden="true">
@@ -765,6 +796,18 @@ $error_message = flash('error');
             // Prevent special characters and icons in name fields
             $('input[name="nama_lengkap"], input[name="nama_ayah"], input[name="nama_ibu"], input[name="nama_wali"]').on('input', function() {
                 this.value = this.value.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s'.,-]/g, '');
+            });
+            var $backToTop = $('#backToTopPublic');
+            var toggleBackToTop = function () {
+                $backToTop.toggleClass('is-visible', $(window).scrollTop() > 260);
+            };
+
+            toggleBackToTop();
+            $(window).on('scroll', toggleBackToTop);
+
+            $backToTop.on('click', function (e) {
+                e.preventDefault();
+                $('html, body').animate({ scrollTop: 0 }, 450, 'easeInOutExpo');
             });
         });
     </script>
