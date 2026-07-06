@@ -72,6 +72,37 @@ if (!empty($nama_wali) && !validate_name($nama_wali)) {
     exit;
 }
 
+$pendaftarData = [
+    'nama_lengkap' => $nama_lengkap,
+    'nik' => $nik,
+    'kk' => $kk,
+    'jenis_kelamin' => $jenis_kelamin,
+    'tempat_lahir' => $tempat_lahir,
+    'tanggal_lahir' => $tanggal_lahir,
+    'alamat' => $alamat,
+    'status_keluarga' => $status_keluarga,
+    'anak_ke' => $anak_ke,
+    'jumlah_saudara' => $jumlah_saudara,
+    'asal_tk' => $asal_tk,
+    'nama_ayah' => $nama_ayah,
+    'nama_ibu' => $nama_ibu,
+    'pekerjaan_ayah' => $pekerjaan_ayah,
+    'pekerjaan_ibu' => $pekerjaan_ibu,
+    'nama_wali' => $nama_wali,
+    'pekerjaan_wali' => $pekerjaan_wali,
+    'email' => $email,
+    'hp' => $hp,
+    'kip' => $kip,
+    'pkh' => $pkh,
+];
+
+$duplicate = pendaftar_duplicate_exists($pendaftarData);
+if ($duplicate !== null) {
+    flash('error', pendaftar_duplicate_message($duplicate));
+    header('Location: ' . base_url());
+    exit;
+}
+
 $no_pendaftaran = generate_no_pendaftaran();
 
 $stmt = $mysqli->prepare('INSERT INTO pendaftar (

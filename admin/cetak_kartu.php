@@ -257,7 +257,7 @@ $qrKepalaUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=' 
             <tr><td class="label">Nama Wali</td><td class="sep">:</td><td class="value"><?= esc($data['nama_wali']); ?></td></tr>
             <tr><td class="label">Pekerjaan Wali</td><td class="sep">:</td><td class="value"><?= esc($data['pekerjaan_wali']); ?></td></tr>
             <tr><td class="label">Email</td><td class="sep">:</td><td class="value"><?= esc($data['email']); ?></td></tr>
-            <tr><td class="label">No HP/WA</td><td class="sep">:</td><td class="value"><?= esc($data['hp']); ?></td></tr>
+            <tr><td class="label">No HP</td><td class="sep">:</td><td class="value"><?= esc($data['hp']); ?></td></tr>
         </table>
 
         <div class="section-title">C. Informasi Program Bantuan</div>

@@ -74,6 +74,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect_to_pendaftar();
         }
 
+        $duplicate = pendaftar_duplicate_exists($data);
+        if ($duplicate !== null) {
+            flash('error', pendaftar_duplicate_message($duplicate));
+            redirect_to_pendaftar();
+        }
+
         $no_pendaftaran = generate_no_pendaftaran();
         $stmt = $mysqli->prepare('INSERT INTO pendaftar (no_pendaftaran, nama_lengkap, nik, kk, jenis_kelamin, tempat_lahir, tanggal_lahir, alamat, status_keluarga, anak_ke, jumlah_saudara, asal_tk, nama_ayah, nama_ibu, pekerjaan_ayah, pekerjaan_ibu, nama_wali, pekerjaan_wali, email, hp, kip, pkh, status_daftar, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? ,"proses", NOW())');
         if ($stmt) {
@@ -121,6 +127,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = validate_pendaftar_payload($data);
         if ($error !== null) {
             flash('error', $error);
+            redirect_to_pendaftar();
+        }
+
+        $duplicate = pendaftar_duplicate_exists($data, $id);
+        if ($duplicate !== null) {
+            flash('error', pendaftar_duplicate_message($duplicate));
             redirect_to_pendaftar();
         }
 
@@ -204,81 +216,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param('si', $status, $id);
             $stmt->execute();
             $stmt->close();
-            $rowEmail = null;
-            if ($res2 = $mysqli->prepare('SELECT nama_lengkap, no_pendaftaran, email, hp FROM pendaftar WHERE id=? LIMIT 1')) {
-                $res2->bind_param('i', $id);
-                $res2->execute();
-                $r = $res2->get_result();
-                $rowEmail = $r->fetch_assoc() ?: null;
-                $res2->close();
-            }
-            if ($rowEmail && !empty($rowEmail['email'])) {
-                $info = madrasah_info();
-                $subject = 'Informasi Status PPDB - ' . (string)$info['nama'];
-                $statusText = $status === 'diterima' ? 'DITERIMA' : ($status === 'ditolak' ? 'DITOLAK' : 'DALAM PROSES');
-                $lines = [];
-                $lines[] = 'Assalamu\'alaikum ' . $rowEmail['nama_lengkap'] . ',';
-                $lines[] = 'Nomor Pendaftaran: ' . $rowEmail['no_pendaftaran'];
-                $lines[] = 'Status Pendaftaran: ' . $statusText;
-                $lines[] = 'Informasi detail dapat dilihat di halaman PPDB: ' . base_url();
-                $message = implode("\r\n", $lines);
-                if (send_email($rowEmail['email'], $subject, $message)) {
-                    $flash = 'Status diperbarui dan email notifikasi terkirim.';
-                } else {
-                    $flash = 'Status diperbarui. Email gagal dikirim.';
-                }
-                if (isset($rowEmail['hp']) ? $rowEmail['hp'] !== '' : false) {
-                    if (send_whatsapp((string)$rowEmail['hp'], $message)) {
-                        $flash .= ' WhatsApp terkirim.';
-                    } else {
-                        $flash .= ' WhatsApp tidak terkirim. Pastikan nomor WA pendaftar valid dan token WA sudah benar.';
-                    }
-                } else {
-                    $flash .= ' WhatsApp tidak dikirim karena nomor WA/HP pendaftar belum diisi.';
-                }
-                flash('success', $flash);
-            } else {
-                flash('success', 'Status pendaftar berhasil diperbarui.');
-            }
+            flash('success', 'Status pendaftar berhasil diperbarui.');
             log_activity('update_pendaftar_status', 'Ubah status pendaftar ID ' . $id . ' menjadi ' . $status);
         } else {
             flash('error', 'Gagal memperbarui status pendaftar.');
-        }
-        redirect_to_pendaftar();
-    }
-
-    if ($aksi === 'kirim_email' && isset($_POST['id'])) {
-        $id = (int)$_POST['id'];
-        $row = null;
-        if ($res = $mysqli->prepare('SELECT nama_lengkap, no_pendaftaran, email, status_daftar FROM pendaftar WHERE id = ? LIMIT 1')) {
-            $res->bind_param('i', $id);
-            $res->execute();
-            $result = $res->get_result();
-            $row = $result->fetch_assoc() ?: null;
-            $res->close();
-        }
-        if ($row && !empty($row['email'])) {
-            $info = madrasah_info();
-            $subject = 'Informasi Status PPDB - ' . (string)$info['nama'];
-            $statusText = $row['status_daftar'] === 'diterima' ? 'DITERIMA' : ($row['status_daftar'] === 'ditolak' ? 'DITOLAK' : 'DALAM PROSES');
-            $bodyLines = [];
-            $bodyLines[] = 'Assalamu\'alaikum ' . $row['nama_lengkap'] . ',';
-            $bodyLines[] = 'Nomor Pendaftaran: ' . $row['no_pendaftaran'];
-            $bodyLines[] = 'Status Pendaftaran: ' . $statusText;
-            $bodyLines[] = 'Informasi detail dapat dilihat di halaman PPDB: ' . base_url();
-            if (!empty($info['hp_panitia']) || !empty($info['hp_kepala'])) {
-                $bodyLines[] = 'Kontak: ' . (!empty($info['hp_panitia']) ? $info['hp_panitia'] : $info['hp_kepala']);
-            }
-            $bodyLines[] = 'Terima kasih.';
-            $message = implode("\r\n", $bodyLines);
-            if (send_email($row['email'], $subject, $message)) {
-                flash('success', 'Notifikasi email berhasil dikirim.');
-                log_activity('send_email_pendaftar', 'Kirim email pendaftar ID ' . $id);
-            } else {
-                flash('error', 'Gagal mengirim email. Pastikan konfigurasi email server tersedia.');
-            }
-        } else {
-            flash('error', 'Email pendaftar tidak tersedia.');
         }
         redirect_to_pendaftar();
     }
@@ -449,25 +390,6 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
                                         Kartu
                                     </a>
                                     <?php if ($is_admin_user): ?>
-                                    <button type="button" class="btn btn-sm btn-primary btn-email mb-1"
-                                        data-id="<?= (int)$row['id']; ?>">
-                                        Email
-                                    </button>
-                                    <?php
-                                        $hp = isset($row['hp']) ? preg_replace('/\D+/', '', (string)$row['hp']) : '';
-                                        // Ensure Indonesian country code
-                                        if (substr($hp, 0, 1) === '0') {
-                                            $hp = '62' . substr($hp, 1);
-                                        }
-                                        $info = madrasah_info();
-                                        $statusText = $row['status_daftar'] === 'diterima' ? 'DITERIMA' : ($row['status_daftar'] === 'ditolak' ? 'DITOLAK' : 'DALAM PROSES');
-                                        $waText = rawurlencode("Assalamu'alaikum " . $row['nama_lengkap'] . "\nNomor: " . $row['no_pendaftaran'] . "\nStatus: " . $statusText . "\nInfo: " . base_url());
-                                    ?>
-                                    <?php if (!empty($hp)): ?>
-                                    <a href="https://api.whatsapp.com/send?phone=<?= esc($hp); ?>&text=<?= $waText; ?>" target="_blank" class="btn btn-sm btn-success mb-1">
-                                        WhatsApp
-                                    </a>
-                                    <?php endif; ?>
                                     <button type="button" class="btn btn-sm btn-success btn-status mb-1"
                                         data-id="<?= (int)$row['id']; ?>" data-status="diterima">
                                         Terima
@@ -620,7 +542,7 @@ function render_pendaftar_modal_fields(): void
             <input type="email" name="email" class="form-control">
         </div>
         <div class="form-group col-md-4">
-            <label>No HP / WA *</label>
+            <label>No HP *</label>
             <input type="text" name="hp" class="form-control" inputmode="numeric" pattern="[0-9]*" required>
         </div>
     </div>

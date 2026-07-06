@@ -683,7 +683,7 @@ $error_message = flash('error');
                                 <input type="email" name="email" class="form-control">
                             </div>
                             <div class="form-group col-md-4">
-                                <label>No HP / WA *</label>
+                                <label>No HP *</label>
                                 <input type="text" name="hp" class="form-control" inputmode="numeric" pattern="[0-9]*" required>
                             </div>
                         </div>

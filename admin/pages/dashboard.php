@@ -320,26 +320,10 @@ if ($res_recent = $mysqli->query("SELECT nama_lengkap, no_pendaftaran, status_da
                                     $icon = 'fas fa-id-card';
                                     $bg = 'bg-info';
                                     $title = 'Cetak Kartu Pendaftar';
-                                } elseif ($log['action'] === 'whatsapp_error') {
-                                    $icon = 'fab fa-whatsapp';
-                                    $bg = 'bg-warning';
-                                    $title = 'WhatsApp Tidak Terkirim';
-                                } elseif ($log['action'] === 'whatsapp_sent') {
-                                    $icon = 'fab fa-whatsapp';
-                                    $bg = 'bg-success';
-                                    $title = 'WhatsApp Terkirim';
                                 }
 
                                 $actorText = trim((string)($log['username'] ?? '')) !== '' ? (string)$log['username'] : 'Sistem';
                                 $messageText = (string)($log['message'] ?? '');
-                                if ($log['action'] === 'whatsapp_error') {
-                                    $messageLower = strtolower($messageText);
-                                    if (strpos($messageLower, 'target input invalid') !== false || strpos($messageLower, 'http:') !== false || strpos($messageLower, 'curlerr') !== false || strpos($messageLower, 'resp:') !== false) {
-                                        $messageText = 'WhatsApp tidak terkirim karena nomor tujuan tidak valid atau belum terisi.';
-                                    } elseif ($messageText === '') {
-                                        $messageText = 'WhatsApp tidak terkirim. Periksa nomor tujuan, token WA, dan status perangkat WA.';
-                                    }
-                                }
                             ?>
                                 <?php if ($date_label !== $current_date_label): ?>
                                     <div class="time-label">

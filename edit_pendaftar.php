@@ -12,18 +12,34 @@ function validate_name($name) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $id = (int)$_POST['id'];
-    $nama = $_POST['nama_lengkap'] ?? '';
-    $nik = $_POST['nik'] ?? '';
-    $kk = $_POST['kk'] ?? '';
-    $jk = $_POST['jk'] ?? '';
-    $hp = $_POST['hp'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $alamat = $_POST['alamat'] ?? '';
+    $nama = trim((string)($_POST['nama_lengkap'] ?? ''));
+    $nik = trim((string)($_POST['nik'] ?? ''));
+    $kk = trim((string)($_POST['kk'] ?? ''));
+    $jk = trim((string)($_POST['jk'] ?? ''));
+    $hp = trim((string)($_POST['hp'] ?? ''));
+    $email = trim((string)($_POST['email'] ?? ''));
+    $alamat = trim((string)($_POST['alamat'] ?? ''));
 
     if ($nama === '') {
         $error = 'Mohon lengkapi seluruh isian wajib.';
     } elseif (!validate_name($nama)) {
         $error = 'Nama lengkap hanya boleh mengandung huruf, spasi, apostrof, titik, koma, dan tanda hubung.';
+    }
+
+    if (!isset($error)) {
+        $duplicate = pendaftar_duplicate_exists([
+            'nama_lengkap' => $nama,
+            'nik' => $nik,
+            'kk' => $kk,
+            'jenis_kelamin' => $jk,
+            'hp' => $hp,
+            'email' => $email,
+            'alamat' => $alamat,
+        ], $id, ['nama_lengkap', 'nik', 'kk', 'jenis_kelamin', 'hp', 'email', 'alamat']);
+
+        if ($duplicate !== null) {
+            $error = pendaftar_duplicate_message($duplicate);
+        }
     }
 
     if (!isset($error)) {
@@ -206,7 +222,7 @@ if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
                             
                             <div class="form-row">
                                 <div class="form-group col-md-6">
-                                    <label>No. HP / WhatsApp</label>
+                                    <label>No. HP</label>
                                     <input type="text" name="hp" class="form-control" inputmode="numeric" pattern="[0-9]*" value="<?= esc($pendaftar['hp']); ?>">
                                 </div>
                                 <div class="form-group col-md-6">

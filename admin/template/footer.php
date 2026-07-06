@@ -295,24 +295,6 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                     });
                 });
 
-                $(document).on('click', '.btn-email', function () {
-                    var id = $(this).data('id');
-                    Swal.fire({
-                        title: 'Kirim Email?',
-                        text: 'Kirim informasi status ke email pendaftar ini?',
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Ya, kirim',
-                        cancelButtonText: 'Batal'
-                    }).then(function (result) {
-                        if (result.isConfirmed) {
-                            $('#aksiGlobal').val('kirim_email');
-                            $('#idGlobal').val(id);
-                            $('#formPendaftar').submit();
-                        }
-                    });
-                });
-
                 $(document).on('click', '.btn-status', function () {
                     var id = $(this).data('id');
                     var status = $(this).data('status');

@@ -353,171 +353,106 @@ function madrasah_info(): array
     return $info;
 }
 
-function send_email(string $to, string $subject, string $message): bool
+function pendaftar_duplicate_fields(): array
 {
-    $host = get_option('smtp_host');
-    
-    // Jika SMTP Host kosong, gunakan mail() bawaan
-    if (empty($host)) {
-        $info = madrasah_info();
-        $fromName = trim((string)$info['nama']) !== '' ? (string)$info['nama'] : 'Panitia PPDB';
-        $fromEmail = trim((string)$info['email']) !== '' ? (string)$info['email'] : 'no-reply@localhost';
-        $headers = [];
-        $headers[] = 'From: ' . $fromName . ' <' . $fromEmail . '>';
-        $headers[] = 'MIME-Version: 1.0';
-        $headers[] = 'Content-Type: text/plain; charset=UTF-8';
-        $headersStr = implode("\r\n", $headers);
-        return @mail($to, $subject, $message, $headersStr);
-    }
-
-    // SMTP Implementation
-    $port = get_option('smtp_port', '465');
-    $user = get_option('smtp_user');
-    $pass = get_option('smtp_pass');
-    $secure = get_option('smtp_secure', 'ssl');
-    $fromEmail = get_option('email_from');
-    $info = madrasah_info();
-    $fromName = $info['nama'];
-
-    if (empty($fromEmail)) $fromEmail = $user;
-
-    $context = stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]);
-    $protocol = ($secure === 'ssl' || $port == 465) ? 'ssl://' : '';
-    $socket = @stream_socket_client($protocol . $host . ':' . $port, $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $context);
-
-    if (!$socket) {
-        log_activity('smtp_error', "Connect failed: $errstr ($errno)");
-        return false;
-    }
-
-    $read = function() use ($socket) {
-        $s = '';
-        while($str = fgets($socket, 515)) {
-            $s .= $str;
-            if(substr($str, 3, 1) == " ") break;
-        }
-        return $s;
-    };
-    $write = function($cmd) use ($socket) {
-        fwrite($socket, $cmd . "\r\n");
-    };
-
-    $read(); // banner
-    $write('EHLO ' . $_SERVER['SERVER_NAME']);
-    $read();
-
-    if ($secure === 'tls' && $port != 465) {
-        $write('STARTTLS');
-        if (substr($read(), 0, 3) != '220') return false;
-        stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
-        $write('EHLO ' . $_SERVER['SERVER_NAME']);
-        $read();
-    }
-
-    if ($user && $pass) {
-        $write('AUTH LOGIN');
-        $read();
-        $write(base64_encode($user));
-        $read();
-        $write(base64_encode($pass));
-        if (substr($read(), 0, 3) != '235') return false;
-    }
-
-    $write("MAIL FROM: <$fromEmail>");
-    $read();
-    $write("RCPT TO: <$to>");
-    $read();
-    $write('DATA');
-    $read();
-
-    $headers = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-    $headers .= "Date: " . date('r') . "\r\n";
-    $headers .= "From: $fromName <$fromEmail>\r\n";
-    $headers .= "To: $to\r\n";
-    $headers .= "Subject: $subject\r\n";
-
-    $write($headers . "\r\n" . $message . "\r\n.");
-    $result = substr($read(), 0, 3) == '250';
-
-    $write('QUIT');
-    fclose($socket);
-
-    return $result;
+    return [
+        'nama_lengkap',
+        'nik',
+        'kk',
+        'jenis_kelamin',
+        'tempat_lahir',
+        'tanggal_lahir',
+        'alamat',
+        'status_keluarga',
+        'anak_ke',
+        'jumlah_saudara',
+        'asal_tk',
+        'nama_ayah',
+        'nama_ibu',
+        'pekerjaan_ayah',
+        'pekerjaan_ibu',
+        'nama_wali',
+        'pekerjaan_wali',
+        'email',
+        'hp',
+        'kip',
+        'pkh',
+    ];
 }
 
-function normalize_phone(string $hp): string
+function normalize_pendaftar_duplicate_value(string $field, $value): string
 {
-    $digits = preg_replace('/\D+/', '', $hp);
-    if ($digits === '') {
-        return '';
+    $value = trim((string)$value);
+
+    if (in_array($field, ['nik', 'kk', 'hp'], true)) {
+        return preg_replace('/\D+/', '', $value) ?? '';
     }
-    // Fonnte menerima format 08xxx (countryCode default 62)
-    // atau 628xxx. Kembalikan format apa adanya selama valid.
-    if (strpos($digits, '62') === 0) {
-        return $digits;
+
+    if (in_array($field, ['anak_ke', 'jumlah_saudara'], true)) {
+        return $value === '' ? '0' : (string)(int)$value;
     }
-    if (strpos($digits, '0') === 0) {
-        return $digits; // biarkan 08xxx, Fonnte auto-convert
+
+    if (in_array($field, ['kip', 'pkh'], true)) {
+        return strtolower($value) === 'ya' ? 'ya' : 'tidak';
     }
-    return $digits;
+
+    $value = preg_replace('/\s+/u', ' ', $value) ?? $value;
+    return function_exists('mb_strtolower') ? mb_strtolower($value, 'UTF-8') : strtolower($value);
 }
 
-function send_whatsapp(string $to, string $message): bool
+function pendaftar_duplicate_exists(array $data, ?int $excludeId = null, ?array $fields = null): ?array
 {
-    $token = get_option('wa_token', '');
-    if ($token === '') {
-        log_activity('whatsapp_error', 'Token Fonnte belum diisi. Simpan token di Pengaturan.');
-        return false;
-    }
-    $to = normalize_phone($to);
-    if ($to === '') {
-        log_activity('whatsapp_error', 'Nomor tujuan WA kosong atau tidak valid.');
-        return false;
-    }
-    $url = 'https://api.fonnte.com/send';
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING       => '',
-        CURLOPT_MAXREDIRS      => 10,
-        CURLOPT_TIMEOUT        => 30,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST  => 'POST',
-        CURLOPT_POSTFIELDS     => http_build_query([
-            'target'      => $to,
-            'message'     => $message,
-            'countryCode' => '62',
-        ]),
-        CURLOPT_HTTPHEADER     => [
-            'Authorization: ' . $token,  // Fonnte: tanpa "Bearer"
-        ],
-    ]);
-    $resp     = curl_exec($ch);
-    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $curlErr  = curl_error($ch);
-    curl_close($ch);
+    global $mysqli;
 
-    $respData    = json_decode($resp, true);
-    $apiSuccess  = isset($respData['status']) && $respData['status'] === true;
-    $apiReason   = isset($respData['reason']) ? $respData['reason'] : '';
+    $fields = $fields ?? pendaftar_duplicate_fields();
+    $allowed = array_flip(pendaftar_duplicate_fields());
+    $where = [];
+    $params = [];
 
-    if ($httpCode < 200 || $httpCode >= 300 || !$apiSuccess) {
-        $reasonLower = strtolower((string)$apiReason);
-        if ($to === '' || strpos($reasonLower, 'target') !== false || strpos($reasonLower, 'invalid') !== false) {
-            $messageLog = 'WhatsApp tidak terkirim karena nomor tujuan tidak valid atau belum terisi.';
-        } elseif ($token === '') {
-            $messageLog = 'WhatsApp tidak terkirim karena token WA belum diatur.';
-        } elseif ($curlErr !== '') {
-            $messageLog = 'WhatsApp tidak terkirim karena koneksi ke layanan WA bermasalah.';
-        } else {
-            $messageLog = 'WhatsApp tidak terkirim. Periksa nomor tujuan, token WA, dan status perangkat WA.';
+    foreach ($fields as $field) {
+        if (!isset($allowed[$field])) {
+            continue;
         }
-        log_activity('whatsapp_error', $messageLog);
-        return false;
+        $where[] = "LOWER(TRIM(COALESCE(`$field`, ''))) = ?";
+        $params[] = normalize_pendaftar_duplicate_value($field, $data[$field] ?? '');
     }
 
-    log_activity('whatsapp_sent', 'WhatsApp berhasil terkirim ke nomor tujuan.');
-    return true;
+    if (empty($where)) {
+        return null;
+    }
+
+    $sql = 'SELECT id, no_pendaftaran, nama_lengkap FROM pendaftar WHERE ' . implode(' AND ', $where);
+    if ($excludeId !== null && $excludeId > 0) {
+        $sql .= ' AND id <> ?';
+        $params[] = $excludeId;
+    }
+    $sql .= ' LIMIT 1';
+
+    $stmt = $mysqli->prepare($sql);
+    if (!$stmt) {
+        return null;
+    }
+
+    $types = str_repeat('s', count($params));
+    if ($excludeId !== null && $excludeId > 0) {
+        $types = substr($types, 0, -1) . 'i';
+    }
+
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result ? ($result->fetch_assoc() ?: null) : null;
+    $stmt->close();
+
+    return $row;
+}
+
+function pendaftar_duplicate_message(array $duplicate): string
+{
+    $no = trim((string)($duplicate['no_pendaftaran'] ?? ''));
+    if ($no !== '') {
+        return 'Data pendaftar yang sama persis sudah ada dengan nomor pendaftaran ' . $no . '. Mohon periksa kembali agar tidak terjadi data ganda.';
+    }
+
+    return 'Data pendaftar yang sama persis sudah ada. Mohon periksa kembali agar tidak terjadi data ganda.';
 }
