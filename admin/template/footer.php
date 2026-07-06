@@ -223,9 +223,9 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
             if ($('#tablePendaftar').length) {
                 $('#tablePendaftar').DataTable({
                     responsive: true,
-                    pageLength: 5,
-                    lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, 'Semua']],
-                    dom: 'Bfrtip',
+                    pageLength: 25,
+                    lengthMenu: [[5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, 'Semua']],
+                    dom: '<"row align-items-center mb-3"<"col-md-4"l><"col-md-4"B><"col-md-4"f>>rt<"row align-items-center mt-3"<"col-md-6"i><"col-md-6"p>>',
                     buttons: [
                         {
                             extend: 'excelHtml5',

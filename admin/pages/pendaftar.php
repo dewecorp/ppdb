@@ -44,7 +44,26 @@ function pendaftar_payload(): array
 
 function validate_pendaftar_payload(array $data): ?string
 {
-    $required = ['nama_lengkap', 'nik', 'kk', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'nama_ayah', 'nama_ibu', 'hp'];
+    $required = [
+        'nama_lengkap',
+        'nik',
+        'kk',
+        'jenis_kelamin',
+        'tempat_lahir',
+        'tanggal_lahir',
+        'alamat',
+        'status_keluarga',
+        'anak_ke',
+        'jumlah_saudara',
+        'asal_tk',
+        'nama_ayah',
+        'nama_ibu',
+        'pekerjaan_ayah',
+        'pekerjaan_ibu',
+        'nama_wali',
+        'pekerjaan_wali',
+        'hp',
+    ];
     foreach ($required as $field) {
         if ($data[$field] === '') {
             return 'Mohon lengkapi seluruh isian wajib.';
@@ -460,6 +479,29 @@ if ($result = $mysqli->query('SELECT * FROM pendaftar ORDER BY created_at DESC')
         font-size: 0.72rem;
         padding: 0.2rem 0.38rem;
     }
+
+    #tablePendaftar_wrapper .dataTables_length,
+    #tablePendaftar_wrapper .dt-buttons,
+    #tablePendaftar_wrapper .dataTables_filter {
+        margin-bottom: 0.5rem;
+    }
+
+    #tablePendaftar_wrapper .dataTables_length label,
+    #tablePendaftar_wrapper .dataTables_filter label {
+        margin-bottom: 0;
+    }
+
+    #tablePendaftar_wrapper .dataTables_filter {
+        text-align: right;
+    }
+
+    @media (max-width: 767.98px) {
+        #tablePendaftar_wrapper .dataTables_length,
+        #tablePendaftar_wrapper .dt-buttons,
+        #tablePendaftar_wrapper .dataTables_filter {
+            text-align: left;
+        }
+    }
 </style>
 
 <?php
@@ -505,21 +547,21 @@ function render_pendaftar_modal_fields(): void
     </div>
     <div class="form-row">
         <div class="form-group col-md-4">
-            <label>Status Dalam Keluarga</label>
-            <input type="text" name="status_keluarga" class="form-control">
+            <label>Status Dalam Keluarga *</label>
+            <input type="text" name="status_keluarga" class="form-control" required>
         </div>
         <div class="form-group col-md-4">
-            <label>Anak Ke</label>
-            <input type="number" name="anak_ke" class="form-control" min="1">
+            <label>Anak Ke *</label>
+            <input type="number" name="anak_ke" class="form-control" min="1" required>
         </div>
         <div class="form-group col-md-4">
-            <label>Jumlah Saudara</label>
-            <input type="number" name="jumlah_saudara" class="form-control" min="0">
+            <label>Jumlah Saudara *</label>
+            <input type="number" name="jumlah_saudara" class="form-control" min="0" required>
         </div>
     </div>
     <div class="form-group">
-        <label>Asal TK / RA</label>
-        <input type="text" name="asal_tk" class="form-control">
+        <label>Asal TK / RA *</label>
+        <input type="text" name="asal_tk" class="form-control" required>
     </div>
 
     <hr>
@@ -536,22 +578,22 @@ function render_pendaftar_modal_fields(): void
     </div>
     <div class="form-row">
         <div class="form-group col-md-4">
-            <label>Pekerjaan Ayah</label>
-            <input type="text" name="pekerjaan_ayah" class="form-control">
+            <label>Pekerjaan Ayah *</label>
+            <input type="text" name="pekerjaan_ayah" class="form-control" required>
         </div>
         <div class="form-group col-md-4">
-            <label>Pekerjaan Ibu</label>
-            <input type="text" name="pekerjaan_ibu" class="form-control">
+            <label>Pekerjaan Ibu *</label>
+            <input type="text" name="pekerjaan_ibu" class="form-control" required>
         </div>
         <div class="form-group col-md-4">
-            <label>Nama Wali</label>
-            <input type="text" name="nama_wali" class="form-control" pattern="^[A-Za-z\s'.,-]*$">
+            <label>Nama Wali *</label>
+            <input type="text" name="nama_wali" class="form-control" pattern="^[A-Za-z\s'.,-]*$" required>
         </div>
     </div>
     <div class="form-row">
         <div class="form-group col-md-4">
-            <label>Pekerjaan Wali</label>
-            <input type="text" name="pekerjaan_wali" class="form-control">
+            <label>Pekerjaan Wali *</label>
+            <input type="text" name="pekerjaan_wali" class="form-control" required>
         </div>
         <div class="form-group col-md-4">
             <label>Email Aktif</label>

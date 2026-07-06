@@ -45,7 +45,7 @@ function validate_name($name) {
     return preg_match('/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\'.,-]*$/u', $name) === 1;
 }
 
-if ($nama_lengkap === '' || $nik === '' || $kk === '' || $jenis_kelamin === '' || $tempat_lahir === '' || $tanggal_lahir === '' || $alamat === '' || $nama_ayah === '' || $nama_ibu === '' || $hp === '') {
+if ($nama_lengkap === '' || $nik === '' || $kk === '' || $jenis_kelamin === '' || $tempat_lahir === '' || $tanggal_lahir === '' || $alamat === '' || $status_keluarga === '' || $anak_ke === '' || $jumlah_saudara === '' || $asal_tk === '' || $nama_ayah === '' || $nama_ibu === '' || $pekerjaan_ayah === '' || $pekerjaan_ibu === '' || $nama_wali === '' || $pekerjaan_wali === '' || $hp === '') {
     flash('error', 'Mohon lengkapi seluruh isian wajib.');
     header('Location: ' . base_url());
     exit;
@@ -66,7 +66,7 @@ if (!validate_name($nama_ibu)) {
     header('Location: ' . base_url());
     exit;
 }
-if (!empty($nama_wali) && !validate_name($nama_wali)) {
+if (!validate_name($nama_wali)) {
     flash('error', 'Nama wali hanya boleh mengandung huruf, spasi, apostrof, titik, koma, dan tanda hubung.');
     header('Location: ' . base_url());
     exit;
