@@ -53,7 +53,13 @@ foreach ($item in $topLevelItems) {
 
 Get-ChildItem -LiteralPath $releaseDir -Filter 'ppdb_hosting_*.zip' -File -ErrorAction SilentlyContinue |
     Where-Object { $_.Name -ne $zipName } |
-    Remove-Item -Force
+    ForEach-Object {
+        try {
+            Remove-Item -LiteralPath $_.FullName -Force -ErrorAction Stop
+        } catch {
+            Write-Warning "ZIP lama terkunci dan dilewati: $($_.Exception.Message)"
+        }
+    }
 
 try {
     Compress-Archive -Path (Join-Path $stageDir '*') -DestinationPath $zipPath -Force
