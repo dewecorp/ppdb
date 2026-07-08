@@ -1,0 +1,21 @@
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteRule ^api/update_system\.php$ - [F,L,NC]
+
+    RewriteRule ^login/?$ login.php [L,QSA]
+    RewriteRule ^logout/?$ logout.php [L,QSA]
+    RewriteRule ^(dashboard|madrasah|pendaftar|pengaturan|pengguna|backup)/?$ index.php?page=$1 [L,QSA]
+    RewriteRule ^(cetak_kartu|cetak_semua_kartu|download_backup|export_pendaftar_excel|laporan_pendaftar)/?$ $1.php [L,QSA]
+</IfModule>
+
+<FilesMatch "(^\.|\.(bak|config|dist|env|ini|log|old|orig|save|sql|swp|zip)$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Deny from all
+    </IfModule>
+</FilesMatch>

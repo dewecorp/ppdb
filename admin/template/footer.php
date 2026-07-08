@@ -428,7 +428,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                 var id = $this.data('id');
                 var href = $this.attr('href');
                 var $span = $this.find('span.notif-text');
-                
+
                 if ($span.hasClass('font-weight-bold')) {
                     $.post('api/mark_read.php', { id: id }, function(response) {
                         // Redirect regardless of success
@@ -462,72 +462,13 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                 });
             });
 
-            // Update Sistem
-            $('#btnUpdateSistem').on('click', function(e) {
-                e.preventDefault();
-                $('#userDropdown').dropdown('toggle');
 
-                Swal.fire({
-                    title: 'Update Sistem?',
-                    text: 'Sistem akan diperbarui ke versi terbaru.',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: '<i class="fas fa-cloud-download-alt"></i> Ya, Update',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: '#1cc88a'
-                }).then(function(result) {
-                    if (!result.isConfirmed) return;
 
                     // Custom overlay — no SweetAlert2, no scroll
-                    var overlay = document.getElementById('updateOverlay');
-                    overlay.style.display = 'flex';
-
-                    fetch('api/update_system.php', { method: 'POST' })
-                        .then(function(r) { return r.json(); })
-                        .then(function(data) {
-                            overlay.style.display = 'none';
-                            if (data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Update Berhasil!',
-                                    text: (data.message || 'Sistem berhasil diperbarui.') + (data.version ? ' (v' + data.version + ')' : ''),
-                                    confirmButtonText: 'Muat Ulang Halaman',
-                                    confirmButtonColor: '#4e73df'
-                                }).then(function() {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Update Gagal',
-                                    text: data.message || 'Terjadi kesalahan.',
-                                    confirmButtonText: 'Tutup'
-                                });
-                            }
-                        })
-                        .catch(function(err) {
-                            overlay.style.display = 'none';
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'Tidak dapat terhubung ke server: ' + err.message,
-                                confirmButtonText: 'Tutup'
-                            });
-                        });
-                });
-            });
         });
     </script>
 
     <!-- Custom loading overlay for update — pure HTML, no scroll -->
-    <div id="updateOverlay" style="display:none; position:fixed; inset:0; z-index:99999;
-         background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
-        <div style="background:#fff; border-radius:12px; padding:2rem 3rem; text-align:center;
-                    box-shadow:0 8px 32px rgba(0,0,0,0.2);">
-            <i class="fas fa-spinner fa-spin fa-2x text-primary mb-3"></i>
-            <div style="font-weight:600; color:#333;">Memperbarui sistem...</div>
-        </div>
-    </div>
 </body>
 
 </html>

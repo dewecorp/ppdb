@@ -1,38 +1,58 @@
-Options -Indexes -MultiViews
+DirectoryIndex index.php
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    
-    # 1. Handle trailing slash (optional but recommended for CI style)
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)/$ $1 [L,R=301]
+    RewriteBase /
 
-    # 2. Redirect /index and /index.php to root ./
-    RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index(\.php)?\ HTTP/
-    RewriteRule ^index(\.php)?$ ./ [R=301,L]
+    # Blok folder WordPress palsu/backdoor pada aplikasi PPDB non-WordPress.
+    RewriteRule ^(wp-admin|wp-content|wp-includes)(/|$) - [F,L,NC]
 
-    # 3. Handle admin subfolder specifically
-    # Admin pages like /admin/dashboard -> /admin/index.php?page=dashboard
+    # Blok folder internal tool/repository dan endpoint updater web.
+    RewriteRule ^(\.git|\.qoder|\.agents|\.codex)(/|$) - [F,L,NC]
+    RewriteRule ^admin/api/update_system\.php$ - [F,L,NC]
+
+    # Jangan izinkan script berbahaya dari folder writable/static.
+    RewriteRule ^(uploads|backups|assets)/.*\.(php[0-9]?|phtml|phar|shtml|cgi|pl|py|sh)$ - [F,L,NC]
+
+    # File backup/arsip tidak boleh diunduh langsung dari web.
+    RewriteRule ^backups/ - [F,L,NC]
+
+    # Bersihkan akses langsung ke index.php tanpa mengganggu proses POST.
+    RewriteCond %{REQUEST_METHOD} GET [NC]
+    RewriteCond %{THE_REQUEST} \s/+index\.php[?\s] [NC]
+    RewriteRule ^index\.php$ ./ [R=301,L]
+
+    RewriteCond %{REQUEST_METHOD} GET [NC]
+    RewriteCond %{THE_REQUEST} \s/+(.+)/index\.php[?\s] [NC]
+    RewriteRule ^(.+)/index\.php$ $1/ [R=301,L]
+
+    # Tampilkan URL tanpa .php untuk link GET, tetapi biarkan form POST tetap aman.
+    RewriteCond %{REQUEST_METHOD} GET [NC]
+    RewriteCond %{THE_REQUEST} \s/+(.+)\.php[?\s] [NC]
+    RewriteRule ^(.+)\.php$ $1 [R=301,L]
+
+    # Route admin eksplisit supaya LiteSpeed tidak menolak URL tanpa .php.
+    RewriteRule ^admin/?$ admin/index.php [L,QSA]
+    RewriteRule ^admin/login/?$ admin/login.php [L,QSA]
+    RewriteRule ^admin/logout/?$ admin/logout.php [L,QSA]
+    RewriteRule ^admin/(cetak_kartu|cetak_semua_kartu|download_backup|export_pendaftar_excel|laporan_pendaftar)(/)?$ admin/$1.php [L,QSA]
+
+    # Route admin singkat: /admin/pendaftar -> /admin/index.php?page=pendaftar
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^admin/(dashboard|madrasah|pendaftar|pengaturan|pengguna|backup)$ admin/index.php?page=$1 [L,QSA]
 
-    # 4. Standard CI style: Remove index.php from URL
-    # This will rewrite /admin/login to /admin/login.php internally
-    # and /data_pendaftar to /data_pendaftar.php internally
+    # Extensionless PHP: /data_pendaftar -> /data_pendaftar.php
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME}.php -f
-    RewriteRule ^(.*)$ $1.php [L]
-
-    # 5. Handle /admin/ to /admin/index.php internally if it's a directory
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteCond %{REQUEST_FILENAME}/index.php -f
-    RewriteRule ^(.*)$ $1/index.php [L]
+    RewriteRule ^(.+)$ $1.php [L,QSA]
 </IfModule>
 
-# Ensure correct MIME types for font files on some hosts
-AddType application/font-woff2 .woff2
-AddType application/font-woff .woff
-AddType application/vnd.ms-fontobject .eot
-AddType font/ttf .ttf
-AddType image/svg+xml .svg
+<FilesMatch "(^\.|\.(bak|config|dist|env|ini|log|old|orig|save|sql|swp|zip)$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Deny from all
+    </IfModule>
+</FilesMatch>

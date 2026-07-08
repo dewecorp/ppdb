@@ -5,6 +5,14 @@ require_admin();
 
 header('Content-Type: application/json');
 
+http_response_code(410);
+echo json_encode([
+    'success' => false,
+    'message' => 'Update sistem lewat web sudah dinonaktifkan permanen demi keamanan. Update aplikasi harus dilakukan manual dari file bersih setelah hosting dipastikan bebas malware.'
+]);
+exit;
+__halt_compiler();
+
 // Block update di local environment (Laragon, XAMPP, dll)
 $host = strtolower($_SERVER['HTTP_HOST'] ?? '');
 $isLocal = (

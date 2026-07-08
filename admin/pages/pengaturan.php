@@ -64,28 +64,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (isset($_FILES['header_background']) && $_FILES['header_background']['error'] === UPLOAD_ERR_OK) {
-        $tmp = $_FILES['header_background']['tmp_name'];
-        $name = $_FILES['header_background']['name'];
-        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png'];
-        if (in_array($ext, $allowed, true)) {
-            $uploadDir = __DIR__ . '/../../uploads';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-
-            // Hapus background lama jika ada
-            $oldBg = get_option('header_background', '');
-            if ($oldBg !== '' && file_exists($uploadDir . '/' . $oldBg)) {
-                unlink($uploadDir . '/' . $oldBg);
-            }
-
-            $newName = 'header-' . date('YmdHis') . '.' . $ext;
-            $dest = $uploadDir . '/' . $newName;
-            if (move_uploaded_file($tmp, $dest)) {
-                set_option('header_background', $newName);
-            }
+        $uploadDir = __DIR__ . '/../../uploads';
+        $uploadError = null;
+        $newName = secure_uploaded_image($_FILES['header_background'], 'header', $uploadDir, $uploadError);
+        if ($newName === null) {
+            flash('error', $uploadError ?: 'Background header tidak valid.');
+            echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=pengaturan')) . '";</script>';
+            exit;
         }
+
+        $oldBg = basename(get_option('header_background', ''));
+        if ($oldBg !== '' && file_exists($uploadDir . '/' . $oldBg)) {
+            unlink($uploadDir . '/' . $oldBg);
+        }
+        set_option('header_background', $newName);
     }
 
     flash('success', 'Pengaturan berhasil disimpan.');

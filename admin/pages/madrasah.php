@@ -45,29 +45,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
-        $tmp = $_FILES['logo']['tmp_name'];
-        $name = $_FILES['logo']['name'];
-        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png'];
-        if (in_array($ext, $allowed, true)) {
-            $uploadDir = __DIR__ . '/../../uploads';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
+        $uploadDir = __DIR__ . '/../../uploads';
+        $uploadError = null;
+        $uploadedLogo = secure_uploaded_image($_FILES['logo'], 'logo', $uploadDir, $uploadError);
+        if ($uploadedLogo !== null) {
+            $logoName = $uploadedLogo;
 
-            // Hapus logo lama jika ada
             $oldLogoQuery = $mysqli->query("SELECT logo FROM madrasah LIMIT 1");
             if ($oldLogoQuery && $oldLogoRow = $oldLogoQuery->fetch_assoc()) {
-                $oldLogo = $oldLogoRow['logo'];
-                if (!empty($oldLogo) && file_exists($uploadDir . '/' . $oldLogo)) {
+                $oldLogo = basename((string)$oldLogoRow['logo']);
+                if ($oldLogo !== '' && file_exists($uploadDir . '/' . $oldLogo)) {
                     unlink($uploadDir . '/' . $oldLogo);
                 }
             }
-
-            $logoName = 'logo-' . date('YmdHis') . '.' . $ext;
-            if (!move_uploaded_file($tmp, $uploadDir . '/' . $logoName)) {
-                $logoName = null;
-            }
+        } else {
+            flash('error', $uploadError ?: 'Logo tidak valid.');
+            echo '<script>window.location.href="' . esc(base_url('admin/index.php?page=madrasah')) . '";</script>';
+            exit;
         }
     }
 

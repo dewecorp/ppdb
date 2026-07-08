@@ -215,6 +215,74 @@ function require_admin(): void
     }
 }
 
+function secure_uploaded_image(array $file, string $prefix, string $uploadDir, ?string &$error = null): ?string
+{
+    $error = null;
+
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        $error = 'Upload file gagal.';
+        return null;
+    }
+
+    $tmp = (string)($file['tmp_name'] ?? '');
+    if ($tmp === '' || !is_uploaded_file($tmp)) {
+        $error = 'File upload tidak valid.';
+        return null;
+    }
+
+    $maxSize = 2 * 1024 * 1024;
+    if ((int)($file['size'] ?? 0) > $maxSize) {
+        $error = 'Ukuran gambar maksimal 2 MB.';
+        return null;
+    }
+
+    $imageInfo = @getimagesize($tmp);
+    if ($imageInfo === false || empty($imageInfo['mime'])) {
+        $error = 'File harus berupa gambar JPG atau PNG yang valid.';
+        return null;
+    }
+
+    $mime = (string)$imageInfo['mime'];
+    $allowed = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+    ];
+    if (!isset($allowed[$mime])) {
+        $error = 'Format gambar hanya boleh JPG atau PNG.';
+        return null;
+    }
+
+    if (function_exists('finfo_open')) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $detected = $finfo ? finfo_file($finfo, $tmp) : false;
+        if ($finfo) {
+            finfo_close($finfo);
+        }
+        if ($detected !== false && $detected !== $mime) {
+            $error = 'Isi file gambar tidak sesuai.';
+            return null;
+        }
+    }
+
+    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
+        $error = 'Folder upload tidak dapat dibuat.';
+        return null;
+    }
+
+    $safePrefix = preg_replace('/[^a-z0-9_-]/i', '-', $prefix);
+    $random = bin2hex(random_bytes(8));
+    $fileName = $safePrefix . '-' . date('YmdHis') . '-' . $random . '.' . $allowed[$mime];
+    $dest = rtrim($uploadDir, '/\\') . DIRECTORY_SEPARATOR . $fileName;
+
+    if (!move_uploaded_file($tmp, $dest)) {
+        $error = 'Gagal menyimpan file upload.';
+        return null;
+    }
+
+    @chmod($dest, 0644);
+    return $fileName;
+}
+
 function current_user(): ?array
 {
     global $mysqli;

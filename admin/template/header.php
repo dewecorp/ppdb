@@ -541,13 +541,6 @@ if ($notif_res = $mysqli->query($notif_sql)) {
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <?php if ($is_admin_user): ?>
-                                <a class="dropdown-item" href="#" id="btnUpdateSistem">
-                                    <i class="fas fa-cloud-download-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Update Sistem
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <?php endif; ?>
                                 <a class="dropdown-item" href="#" id="btnLogout">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout

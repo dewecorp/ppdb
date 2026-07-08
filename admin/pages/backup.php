@@ -1,4 +1,6 @@
 <?php
+require_admin();
+
 function generate_backup_sql(mysqli $mysqli): string
 {
     $sql = "-- Backup database\n";
@@ -76,6 +78,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($aksi === 'restore' && isset($_FILES['file_backup']) && $_FILES['file_backup']['error'] === UPLOAD_ERR_OK) {
         $tmp = $_FILES['file_backup']['tmp_name'];
+        $name = basename((string)$_FILES['file_backup']['name']);
+        $size = (int)($_FILES['file_backup']['size'] ?? 0);
+
+        if (!preg_match('/\.sql$/i', $name) || $size <= 0 || $size > 20 * 1024 * 1024 || !is_uploaded_file($tmp)) {
+            flash('error', 'File restore harus berupa SQL valid dengan ukuran maksimal 20 MB.');
+            echo '<script>window.location.href="' . esc(base_url('admin/backup')) . '";</script>';
+            exit;
+        }
+
         $sql = file_get_contents($tmp);
         if ($sql !== false) {
             $mysqli->multi_query($sql);

@@ -6,12 +6,18 @@ if (!is_logged_in()) {
     exit;
 }
 
+require_admin();
+
 if (!isset($_GET['file'])) {
     http_response_code(400);
     exit('File tidak ditemukan.');
 }
 
 $file = basename($_GET['file']);
+if (!preg_match('/^backup-\d{8}-\d{6}\.sql$/', $file)) {
+    http_response_code(400);
+    exit('Nama file backup tidak valid.');
+}
 $path = __DIR__ . '/../backups/' . $file;
 
 if (!is_file($path)) {

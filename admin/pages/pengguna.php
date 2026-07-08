@@ -17,17 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $fotoName = null;
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
-            $tmp = $_FILES['foto']['tmp_name'];
-            $name = $_FILES['foto']['name'];
-            $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-            $allowed = ['jpg', 'jpeg', 'png'];
-            if (in_array($ext, $allowed, true)) {
-                $uploadDir = __DIR__ . '/../../uploads';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-                $fotoName = 'user-' . date('YmdHis') . '.' . $ext;
-                move_uploaded_file($tmp, $uploadDir . '/' . $fotoName);
+            $uploadError = null;
+            $fotoName = secure_uploaded_image($_FILES['foto'], 'user', __DIR__ . '/../../uploads', $uploadError);
+            if ($fotoName === null) {
+                flash('error', $uploadError ?: 'Foto pengguna tidak valid.');
+                header('Location: ' . base_url('admin/pengguna'));
+                exit;
             }
         }
 
@@ -93,17 +88,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
-            $tmp = $_FILES['foto']['tmp_name'];
-            $name = $_FILES['foto']['name'];
-            $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-            $allowed = ['jpg', 'jpeg', 'png'];
-            if (in_array($ext, $allowed, true)) {
-                $uploadDir = __DIR__ . '/../../uploads';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-                $fotoName = 'user-' . date('YmdHis') . '.' . $ext;
-                move_uploaded_file($tmp, $uploadDir . '/' . $fotoName);
+            $uploadError = null;
+            $fotoName = secure_uploaded_image($_FILES['foto'], 'user', __DIR__ . '/../../uploads', $uploadError);
+            if ($fotoName === null) {
+                flash('error', $uploadError ?: 'Foto pengguna tidak valid.');
+                echo '<script>window.location.href="' . esc(base_url('admin/pengguna')) . '";</script>';
+                exit;
             }
         }
 

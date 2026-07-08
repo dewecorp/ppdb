@@ -7,7 +7,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 $allowed_pages = ['dashboard', 'madrasah', 'pendaftar', 'pengaturan', 'pengguna', 'backup'];
 
 if (!is_admin()) {
-    $allowed_pages = ['dashboard', 'madrasah', 'pendaftar', 'backup'];
+    $allowed_pages = ['dashboard', 'madrasah', 'pendaftar'];
 }
 
 if (!in_array($page, $allowed_pages, true)) {

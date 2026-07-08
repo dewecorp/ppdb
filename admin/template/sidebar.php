@@ -80,13 +80,12 @@ function active_menu(string $page, string $current): string
             <i class="fas fa-fw fa-user-cog"></i>
             <span>Pengguna</span></a>
     </li>
-    <?php endif; ?>
-
     <li class="nav-item <?= active_menu('backup', $current_page); ?>">
         <a class="nav-link" href="<?= base_url('admin/backup'); ?>">
             <i class="fas fa-fw fa-database"></i>
             <span>Backup &amp; Restore</span></a>
     </li>
+    <?php endif; ?>
 
     <hr class="sidebar-divider d-none d-md-block">
 
