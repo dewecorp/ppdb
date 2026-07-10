@@ -8,7 +8,7 @@ DirectoryIndex index.php
     RewriteRule ^(wp-admin|wp-content|wp-includes)(/|$) - [F,L,NC]
 
     # Blok folder internal tool/repository dan endpoint updater web.
-    RewriteRule ^(\.git|\.qoder|\.agents|\.codex)(/|$) - [F,L,NC]
+    RewriteRule ^(\.git|\.qoder|\.agents|\.codex|_release|tools)(/|$) - [F,L,NC]
     RewriteRule ^admin/api/update_system\.php$ - [F,L,NC]
 
     # Jangan izinkan script berbahaya dari folder writable/static.

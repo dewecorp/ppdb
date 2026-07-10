@@ -18,7 +18,7 @@ if (!preg_match('/^backup-\d{8}-\d{6}\.sql$/', $file)) {
     http_response_code(400);
     exit('Nama file backup tidak valid.');
 }
-$path = __DIR__ . '/../backups/' . $file;
+$path = ppdb_private_path('backups/' . $file);
 
 if (!is_file($path)) {
     http_response_code(404);

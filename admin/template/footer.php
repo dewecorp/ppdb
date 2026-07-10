@@ -29,7 +29,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
         <i class="fas fa-angle-up"></i>
     </a>
 
-    <form id="logoutForm" action="logout.php" method="post" style="display:none;"></form>
+    <form id="logoutForm" action="logout.php" method="post" style="display:none;"><?= csrf_input(); ?></form>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -55,7 +55,16 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
             var MADRASAH_NAME = <?= json_encode($madrasah_name); ?>;
             var TODAY = <?= json_encode(date('d-m-Y')); ?>;
             var ACADEMIC_YEAR = <?= json_encode($tahun_ajaran); ?>;
+            var CSRF_TOKEN = <?= json_encode(csrf_token()); ?>;
             var ACADEMIC_YEAR_SLUG = (ACADEMIC_YEAR || '').replace(/[^\w-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+
+            $('form').filter(function () {
+                return String($(this).attr('method') || '').toLowerCase() === 'post';
+            }).each(function () {
+                if ($(this).find('input[name="csrf_token"]').length === 0) {
+                    $('<input>', { type: 'hidden', name: 'csrf_token', value: CSRF_TOKEN }).appendTo(this);
+                }
+            });
 
             (function initAdminClock() {
                 var $clock = $('#adminClock');
@@ -430,7 +439,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                 var $span = $this.find('span.notif-text');
 
                 if ($span.hasClass('font-weight-bold')) {
-                    $.post('api/mark_read.php', { id: id }, function(response) {
+                    $.post('api/mark_read.php', { id: id, csrf_token: CSRF_TOKEN }, function(response) {
                         // Redirect regardless of success
                         if (href && href !== '#') {
                             window.location.href = href;
@@ -452,7 +461,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                 e.preventDefault();
                 var $btn = $(this);
                 $btn.prop('disabled', true);
-                $.post('api/mark_all_read.php', function(response) {
+                $.post('api/mark_all_read.php', { csrf_token: CSRF_TOKEN }, function(response) {
                     // Update UI
                     $('.notif-item span.notif-text').removeClass('font-weight-bold');
                     $('.badge-counter').remove();

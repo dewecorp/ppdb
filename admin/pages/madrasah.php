@@ -22,6 +22,7 @@ if ($chk = $mysqli->prepare("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_valid_csrf(base_url('admin/madrasah'));
     if ($madrasah_readonly) {
         flash('error', 'Data madrasah hanya dapat dilihat oleh panitia.');
         echo '<script>window.location.href="' . esc(base_url('admin/madrasah')) . '";</script>';

@@ -218,9 +218,13 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                         </div>
                     </div>
                 </form>
-                <small class="text-muted mt-2 d-block">* Masukkan <b>Nomor Pendaftaran</b> secara lengkap dan tepat untuk memunculkan tombol <b>Edit</b>.</small>
+                <small class="text-muted mt-2 d-block">* Masukkan <b>Nomor Pendaftaran</b> secara lengkap dan tepat untuk melihat status pendaftaran.</small>
             </div>
         </div>
+
+        <?php if (!isset($_GET['q']) || trim((string)$_GET['q']) === ''): ?>
+            <div class="alert alert-info">Masukkan nomor pendaftaran lengkap untuk melihat data.</div>
+        <?php endif; ?>
 
         <div class="card shadow mb-4">
             <div class="card-header py-3">
@@ -232,36 +236,33 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                         <thead>
                             <tr>
                                 <th>No</th>
+                                <th>No Pendaftaran</th>
                                 <th>Nama Pendaftar</th>
                                 <th>Jenis Kelamin</th>
                                 <th>Tanggal Lahir</th>
-                                <th>NIK</th>
-                                <th>KK</th>
-                                <th>Alamat</th>
-                                <th>Nama Ayah</th>
-                                <th>Pekerjaan Ayah</th>
-                                <th>Nama Ibu</th>
-                                <th>Pekerjaan Ibu</th>
-                                <th>Nama Wali</th>
-                                <th>Pekerjaan Wali</th>
                                 <th>Status</th>
-                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
                             $no = 1;
-                            $q = isset($_GET['q']) ? trim($_GET['q']) : '';
-                            
-                            $sql = "SELECT * FROM pendaftar";
-                            if (!empty($q)) {
-                                $safe_q = $mysqli->real_escape_string($q);
-                                $sql .= " WHERE nama_lengkap LIKE '%$safe_q%' OR no_pendaftaran = '$safe_q' OR nik = '$safe_q' OR kk = '$safe_q'";
-                            }
-                            $sql .= " ORDER BY created_at DESC";
+                            $q = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
+                            $rows = [];
 
-                            if ($result = $mysqli->query($sql)) {
-                                while ($row = $result->fetch_assoc()) {
+                            if ($q !== '') {
+                                $stmt = $mysqli->prepare('SELECT * FROM pendaftar WHERE no_pendaftaran = ? LIMIT 1');
+                                if ($stmt) {
+                                    $stmt->bind_param('s', $q);
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
+                                    while ($row = $result->fetch_assoc()) {
+                                        $rows[] = $row;
+                                    }
+                                    $stmt->close();
+                                }
+                            }
+
+                            foreach ($rows as $row) {
                                     $statusClass = 'secondary';
                                     $statusText = 'Proses';
                                     if ($row['status_daftar'] == 'diterima') {
@@ -272,39 +273,14 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
                                         $statusText = 'Ditolak';
                                     }
                                     
-                                    // Logic tombol edit: hanya muncul jika pencarian persis sama dengan no_pendaftaran
-                                    $show_edit = false;
-                                    if (!empty($q) && $q === $row['no_pendaftaran']) {
-                                        $show_edit = true;
-                                    }
-
                                     echo '<tr>';
                                     echo '<td>' . $no++ . '</td>';
+                                    echo '<td>' . esc($row['no_pendaftaran']) . '</td>';
                                     echo '<td>' . esc($row['nama_lengkap']) . '</td>';
                                     echo '<td>' . esc($row['jenis_kelamin']) . '</td>';
                                     echo '<td>' . esc(format_tanggal($row['tanggal_lahir'])) . '</td>';
-                                    echo '<td>' . esc($row['nik']) . '</td>';
-                                    echo '<td>' . esc($row['kk']) . '</td>';
-                                    echo '<td>' . esc($row['alamat']) . '</td>';
-                                    echo '<td>' . esc($row['nama_ayah']) . '</td>';
-                                    echo '<td>' . esc($row['pekerjaan_ayah']) . '</td>';
-                                    echo '<td>' . esc($row['nama_ibu']) . '</td>';
-                                    echo '<td>' . esc($row['pekerjaan_ibu']) . '</td>';
-                                    echo '<td>' . esc($row['nama_wali']) . '</td>';
-                                    echo '<td>' . esc($row['pekerjaan_wali']) . '</td>';
                                     echo '<td><span class="badge badge-' . $statusClass . '">' . $statusText . '</span></td>';
-                                    echo '<td class="text-center">';
-                                    if ($show_edit) {
-                                        echo '<a href="' . esc(base_url('edit_pendaftar')) . '?id=' . $row['id'] . '" class="btn btn-sm btn-warning">
-                                                <i class="fas fa-edit"></i> Edit
-                                              </a>';
-                                    } else {
-                                        echo '<span class="text-muted" style="font-size:0.8rem;"><i class="fas fa-lock"></i></span>';
-                                    }
-                                    echo '</td>';
                                     echo '</tr>';
-                                }
-                                $result->free();
                             }
                             ?>
                         </tbody>
@@ -332,12 +308,16 @@ if ($result = $mysqli->query('SELECT * FROM madrasah LIMIT 1')) {
 
     <script>
         $(document).ready(function() {
+            var hasSearch = <?= json_encode(isset($_GET['q']) && trim((string)$_GET['q']) !== ''); ?>;
             var dataPendaftarTable = $('#dataTable').DataTable({
                 autoWidth: true,
-                pageLength: 25,
-                lengthMenu: [[5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, 'Semua']],
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Indonesian.json"
+                searching: false,
+                paging: false,
+                info: false,
+                ordering: false,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Indonesian.json",
+                    emptyTable: hasSearch ? 'Nomor pendaftaran tidak ditemukan.' : 'Masukkan nomor pendaftaran lengkap untuk melihat data.'
                 }
             });
 

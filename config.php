@@ -168,6 +168,92 @@ function flash(string $key, ?string $message = null): ?string
     return null;
 }
 
+function csrf_token(): string
+{
+    if (empty($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+
+    return $_SESSION['csrf_token'];
+}
+
+function csrf_input(): string
+{
+    return '<input type="hidden" name="csrf_token" value="' . esc(csrf_token()) . '">';
+}
+
+function csrf_verify(): bool
+{
+    $sessionToken = $_SESSION['csrf_token'] ?? '';
+    $postedToken = $_POST['csrf_token'] ?? '';
+
+    return is_string($sessionToken)
+        && is_string($postedToken)
+        && $sessionToken !== ''
+        && hash_equals($sessionToken, $postedToken);
+}
+
+function require_valid_csrf(?string $redirect = null): void
+{
+    if (csrf_verify()) {
+        return;
+    }
+
+    flash('error', 'Sesi form tidak valid. Silakan ulangi tindakan Anda.');
+    header('Location: ' . ($redirect ?: base_url('admin/dashboard')));
+    exit;
+}
+
+function app_secret(): string
+{
+    $secret = get_option('app_secret', '');
+    if ($secret === '') {
+        $secret = bin2hex(random_bytes(32));
+        set_option('app_secret', $secret);
+    }
+
+    return $secret;
+}
+
+function pendaftar_access_token($id, $noPendaftaran): string
+{
+    return hash_hmac('sha256', (int)$id . '|' . (string)$noPendaftaran, app_secret());
+}
+
+function pendaftar_token_valid($id, $noPendaftaran, $token): bool
+{
+    $token = (string)$token;
+    return $token !== '' && hash_equals(pendaftar_access_token($id, $noPendaftaran), $token);
+}
+
+function mask_sensitive($value, int $visibleStart = 3, int $visibleEnd = 2): string
+{
+    $value = trim((string)$value);
+    $length = strlen($value);
+    if ($length === 0) {
+        return '';
+    }
+    if ($length <= $visibleStart + $visibleEnd) {
+        return str_repeat('*', $length);
+    }
+
+    return substr($value, 0, $visibleStart) . str_repeat('*', $length - $visibleStart - $visibleEnd) . substr($value, -$visibleEnd);
+}
+
+function ppdb_private_path(string $path = ''): string
+{
+    $base = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'ppdb_2026_private';
+    if (!is_dir($base)) {
+        @mkdir($base, 0755, true);
+    }
+    $denyFile = $base . DIRECTORY_SEPARATOR . '.htaccess';
+    if (!is_file($denyFile)) {
+        @file_put_contents($denyFile, "Require all denied\nDeny from all\n");
+    }
+
+    return $path === '' ? $base : $base . DIRECTORY_SEPARATOR . ltrim($path, '/\\');
+}
+
 function is_logged_in(): bool
 {
     return isset($_SESSION['user_id']);

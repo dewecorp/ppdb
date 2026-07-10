@@ -2,6 +2,7 @@
 require_admin();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_valid_csrf(base_url('admin/pengguna'));
     $aksi = isset($_POST['aksi']) ? $_POST['aksi'] : '';
 
     if ($aksi === 'tambah') {

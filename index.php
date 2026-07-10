@@ -610,6 +610,7 @@ $error_message = flash('error');
                     </button>
                 </div>
                 <form action="<?= esc(base_url('simpan_pendaftaran')); ?>" method="post">
+                    <?= csrf_input(); ?>
                     <div class="modal-body">
                         <h6 class="font-weight-bold text-primary mb-3">A. Identitas Calon Peserta Didik</h6>
                         <div class="form-row">

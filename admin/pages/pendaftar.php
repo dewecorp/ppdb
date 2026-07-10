@@ -98,6 +98,7 @@ if ($genderResult = $mysqli->query("SELECT jenis_kelamin, COUNT(*) AS total FROM
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_valid_csrf(base_url('admin/pendaftar'));
     $aksi = isset($_POST['aksi']) ? $_POST['aksi'] : '';
 
     if ($aksi === 'tambah') {

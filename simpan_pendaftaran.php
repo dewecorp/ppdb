@@ -6,6 +6,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+if (!csrf_verify()) {
+    flash('error', 'Sesi form tidak valid. Silakan buka ulang formulir pendaftaran.');
+    header('Location: ' . base_url());
+    exit;
+}
+
 $status_pendaftaran = get_ppdb_status();
 if ($status_pendaftaran !== 'buka') {
     flash('error', 'Pendaftaran sedang ditutup.');
@@ -166,6 +172,7 @@ $stmt->bind_param(
 
 if ($stmt->execute()) {
     $insert_id = $mysqli->insert_id;
+    $access_token = pendaftar_access_token($insert_id, $no_pendaftaran);
     
     // Insert Notification
     $notif_title = "Pendaftaran Baru";
@@ -203,7 +210,7 @@ if ($stmt->execute()) {
             text: 'Nomor pendaftaran Anda: <?= addslashes($no_pendaftaran); ?>',
             confirmButtonText: 'Cetak Kartu'
         }).then(function () {
-            var url = '<?= addslashes(base_url('cetak_kartu?id=' . $insert_id)); ?>';
+            var url = '<?= addslashes(base_url('cetak_kartu?id=' . $insert_id . '&token=' . $access_token)); ?>';
             window.open(url, '_blank');
             setTimeout(function () {
                 window.location.href = '<?= addslashes(base_url()); ?>';

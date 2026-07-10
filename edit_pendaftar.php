@@ -1,8 +1,10 @@
 <?php
 require_once dirname(__FILE__) . '/config.php';
+require_login();
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $pendaftar = null;
+$accessToken = isset($_GET['token']) ? (string)$_GET['token'] : '';
 
 // Handle Update
 function validate_name($name) {
@@ -12,6 +14,30 @@ function validate_name($name) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $id = (int)$_POST['id'];
+    $accessToken = isset($_POST['access_token']) ? (string)$_POST['access_token'] : '';
+
+    if (!csrf_verify()) {
+        $error = 'Sesi form tidak valid. Silakan buka ulang halaman edit.';
+    }
+
+    if (!isset($error)) {
+        $tokenStmt = $mysqli->prepare('SELECT no_pendaftaran FROM pendaftar WHERE id = ? LIMIT 1');
+        if ($tokenStmt) {
+            $tokenStmt->bind_param('i', $id);
+            $tokenStmt->execute();
+            $tokenResult = $tokenStmt->get_result();
+            $tokenRow = $tokenResult->fetch_assoc();
+            $tokenStmt->close();
+            if (!$tokenRow || (!is_logged_in() && !pendaftar_token_valid($id, $tokenRow['no_pendaftaran'], $accessToken))) {
+                http_response_code(403);
+                echo 'Akses edit tidak valid.';
+                exit;
+            }
+        } else {
+            $error = 'Gagal memvalidasi akses edit.';
+        }
+    }
+
     $nama = trim((string)($_POST['nama_lengkap'] ?? ''));
     $nik = trim((string)($_POST['nik'] ?? ''));
     $kk = trim((string)($_POST['kk'] ?? ''));
@@ -91,6 +117,12 @@ if ($id > 0) {
 
 if (!$pendaftar) {
     echo "<script>alert('Data tidak ditemukan!'); window.location.href='data_pendaftar';</script>";
+    exit;
+}
+
+if (!is_logged_in() && !pendaftar_token_valid($pendaftar['id'], $pendaftar['no_pendaftaran'], $accessToken)) {
+    http_response_code(403);
+    echo 'Akses edit tidak valid.';
     exit;
 }
 
@@ -191,7 +223,9 @@ if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
                         <?php endif; ?>
                         
                         <form action="" method="POST">
+                            <?= csrf_input(); ?>
                             <input type="hidden" name="id" value="<?= esc($pendaftar['id']); ?>">
+                            <input type="hidden" name="access_token" value="<?= esc($accessToken); ?>">
                             
                             <div class="form-group">
                                 <label>Nama Lengkap</label>

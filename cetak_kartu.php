@@ -25,6 +25,13 @@ if (!$data) {
     exit;
 }
 
+$token = $_GET['token'] ?? '';
+if (!is_logged_in() && !pendaftar_token_valid($data['id'], $data['no_pendaftaran'], $token)) {
+    http_response_code(403);
+    echo 'Akses kartu tidak valid.';
+    exit;
+}
+
 $madrasah = [
     'nama' => 'MI SULTAN FATTAH SUKOSONO',
     'alamat' => '',

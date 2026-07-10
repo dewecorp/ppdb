@@ -7,18 +7,10 @@ if (is_logged_in()) {
     exit;
 }
 
+$hasUsers = true;
 if ($result = $mysqli->query('SELECT COUNT(*) AS jml FROM users')) {
     $row = $result->fetch_assoc();
-    if ((int)$row['jml'] === 0) {
-        $username = 'admin';
-        $password = password_hash('admin123', PASSWORD_DEFAULT);
-        $stmtSeed = $mysqli->prepare('INSERT INTO users (username, password) VALUES (?, ?)');
-        if ($stmtSeed) {
-            $stmtSeed->bind_param('ss', $username, $password);
-            $stmtSeed->execute();
-            $stmtSeed->close();
-        }
-    }
+    $hasUsers = (int)$row['jml'] > 0;
     $result->free();
 }
 
@@ -38,6 +30,18 @@ if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
 $error_message = flash('error');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_verify()) {
+        flash('error', 'Sesi login tidak valid. Silakan coba lagi.');
+        header('Location: ' . base_url('admin/login'));
+        exit;
+    }
+
+    if (!$hasUsers) {
+        flash('error', 'Belum ada akun admin. Buat akun admin langsung melalui database atau script setup lokal, bukan dari halaman publik.');
+        header('Location: ' . base_url('admin/login'));
+        exit;
+    }
+
     $username = isset($_POST['username']) ? trim($_POST['username']) : '';
     $password = isset($_POST['password']) ? (string)$_POST['password'] : '';
 
@@ -97,7 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <h1 class="h4 text-gray-900 mb-1">Sistem PPDB</h1>
                                         <h6 class="text-gray-700 mb-4"> <?= esc($madrasah['nama']); ?></h6>
                                     </div>
-                                    <form class="user" method="post" action="">
+                                     <form class="user" method="post" action="">
+                                        <?= csrf_input(); ?>
                                         <div class="form-group">
                                             <input type="text" name="username" class="form-control form-control-user"
                                                 placeholder="Username" required>
