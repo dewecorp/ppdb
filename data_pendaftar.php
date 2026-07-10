@@ -117,6 +117,32 @@ if ($wa_number !== '' && strpos($wa_number, '0') === 0) {
             width: 100% !important;
         }
 
+        .public-tools {
+            align-items: stretch;
+        }
+        .search-panel,
+        .correction-panel {
+            min-height: 132px;
+        }
+        .search-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #ffffff;
+            border: 1px solid #edf0f7;
+            border-radius: 0.35rem;
+            padding: 1rem 1.1rem;
+        }
+        .search-panel .input-group .form-control,
+        .search-panel .input-group .btn {
+            min-height: 46px;
+        }
+        .correction-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
         /* Tetap satu tabel utuh -> header & body selalu lurus */
         .data-pendaftar-table-wrap {
             max-height: none;
@@ -184,6 +210,10 @@ if ($wa_number !== '' && strpos($wa_number, '0') === 0) {
                 font-size: 0.82rem;
                 padding: 0.8rem 0.75rem;
             }
+            .search-panel,
+            .correction-panel {
+                min-height: auto;
+            }
         }
         @media (min-width: 992px) {
             .data-pendaftar-shell {
@@ -230,27 +260,29 @@ if ($wa_number !== '' && strpos($wa_number, '0') === 0) {
             <h1 class="h3 mb-0 text-gray-800">Data Pendaftar</h1>
         </div>
 
-        <div class="row mb-4 align-items-stretch">
+        <div class="row mb-4 public-tools">
             <div class="col-lg-7 mb-3 mb-lg-0">
-                <form action="" method="GET">
-                    <div class="input-group">
-                        <input type="text" name="q" class="form-control form-control-lg bg-white border-0 small" placeholder="Cari No Pendaftaran atau Nama..." aria-label="Search" aria-describedby="basic-addon2" value="<?= isset($_GET['q']) ? esc($_GET['q']) : '' ?>">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" type="submit">
-                                <i class="fas fa-search fa-sm"></i> Cari
-                            </button>
-                            <?php if(isset($_GET['q']) && $_GET['q'] !== ''): ?>
-                                <a href="<?= esc(base_url('data_pendaftar')); ?>" class="btn btn-secondary">
-                                    Reset
-                                </a>
-                            <?php endif; ?>
+                <div class="search-panel h-100">
+                    <form action="" method="GET">
+                        <div class="input-group">
+                            <input type="text" name="q" class="form-control form-control-lg bg-white small" placeholder="Cari No Pendaftaran atau Nama..." aria-label="Search" aria-describedby="basic-addon2" value="<?= isset($_GET['q']) ? esc($_GET['q']) : '' ?>">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search fa-sm"></i> Cari
+                                </button>
+                                <?php if(isset($_GET['q']) && $_GET['q'] !== ''): ?>
+                                    <a href="<?= esc(base_url('data_pendaftar')); ?>" class="btn btn-secondary">
+                                        Reset
+                                    </a>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                    </div>
-                </form>
-                <small class="text-muted mt-2 d-block">* Data publik hanya menampilkan informasi utama untuk menjaga privasi pendaftar.</small>
+                    </form>
+                    <small class="text-muted mt-2 d-block">* Data publik hanya menampilkan informasi utama untuk menjaga privasi pendaftar.</small>
+                </div>
             </div>
             <div class="col-lg-5">
-                <div class="alert alert-warning mb-0 h-100">
+                <div class="alert alert-warning mb-0 h-100 correction-panel">
                     <div class="font-weight-bold mb-1">Perlu koreksi data?</div>
                     <div>Untuk keamanan, perubahan data hanya dilakukan oleh admin/panitia. Hubungi panitia dengan menyebutkan nomor pendaftaran dan data yang perlu diperbaiki.</div>
                     <?php if ($wa_number !== ''): ?>
