@@ -1,5 +1,15 @@
 <?php
 
+function updater_repo_url(): string
+{
+    return 'https://github.com/dewecorp/ppdb';
+}
+
+function updater_repo_api_url(): string
+{
+    return 'https://api.github.com/repos/dewecorp/ppdb/releases/latest';
+}
+
 function updater_allowed_host(string $url): bool
 {
     $host = strtolower((string)parse_url($url, PHP_URL_HOST));
@@ -58,31 +68,24 @@ function updater_http_get(string $url, ?string &$error = null): ?string
     return (string)$body;
 }
 
-function updater_manifest(?string &$error = null): ?array
+function updater_latest_release(?string &$error = null): ?array
 {
-    $url = trim(get_option('update_manifest_url', ''));
-    if ($url === '') {
-        $error = 'URL manifest update belum diatur.';
-        return null;
-    }
-
-    $body = updater_http_get($url, $error);
+    $body = updater_http_get(updater_repo_api_url(), $error);
     if ($body === null) {
         return null;
     }
 
-    $manifest = json_decode($body, true);
-    if (!is_array($manifest)) {
-        $error = 'Manifest update bukan JSON valid.';
+    $release = json_decode($body, true);
+    if (!is_array($release)) {
+        $error = 'Respons GitHub Release bukan JSON valid.';
         return null;
     }
 
-    $version = trim((string)($manifest['version'] ?? ''));
-    $zipUrl = trim((string)($manifest['zip_url'] ?? ''));
-    $sha256 = strtolower(trim((string)($manifest['sha256'] ?? '')));
+    $version = trim((string)($release['tag_name'] ?? ''));
+    $zipUrl = trim((string)($release['zipball_url'] ?? ''));
 
-    if ($version === '' || $zipUrl === '' || !preg_match('/^[a-f0-9]{64}$/', $sha256)) {
-        $error = 'Manifest harus berisi version, zip_url, dan sha256 valid.';
+    if ($version === '' || $zipUrl === '') {
+        $error = 'Repo GitHub belum memiliki release terbaru yang valid.';
         return null;
     }
     if (!filter_var($zipUrl, FILTER_VALIDATE_URL) || !updater_allowed_host($zipUrl)) {
@@ -93,25 +96,30 @@ function updater_manifest(?string &$error = null): ?array
     return [
         'version' => $version,
         'zip_url' => $zipUrl,
-        'sha256' => $sha256,
-        'notes' => trim((string)($manifest['notes'] ?? '')),
+        'release_url' => trim((string)($release['html_url'] ?? updater_repo_url())),
+        'notes' => trim((string)($release['body'] ?? '')),
     ];
 }
 
 function updater_is_open(): bool
 {
+    if (get_option('updater_dropdown_enabled', '0') !== '1') {
+        return false;
+    }
     return time() < (int)get_option('updater_enabled_until', '0');
 }
 
 function updater_open_minutes(int $minutes = 15): void
 {
     $minutes = max(1, min(60, $minutes));
+    set_option('updater_dropdown_enabled', '1');
     set_option('updater_enabled_until', (string)(time() + ($minutes * 60)));
     set_option('updater_nonce', bin2hex(random_bytes(16)));
 }
 
 function updater_close(): void
 {
+    set_option('updater_dropdown_enabled', '0');
     set_option('updater_enabled_until', '0');
     set_option('updater_nonce', '');
 }
@@ -232,7 +240,7 @@ function updater_validate_package(string $root, ?string &$error = null): bool
     return true;
 }
 
-function updater_install(array $manifest, ?string &$error = null): bool
+function updater_install(array $release, ?string &$error = null): bool
 {
     if (!class_exists('ZipArchive')) {
         $error = 'Ekstensi PHP ZipArchive belum aktif di hosting.';
@@ -243,19 +251,13 @@ function updater_install(array $manifest, ?string &$error = null): bool
     updater_rrmdir($workDir);
     mkdir($workDir, 0755, true);
 
-    $zipBody = updater_http_get($manifest['zip_url'], $error);
+    $zipBody = updater_http_get($release['zip_url'], $error);
     if ($zipBody === null) {
         return false;
     }
 
     $zipPath = $workDir . DIRECTORY_SEPARATOR . 'release.zip';
     file_put_contents($zipPath, $zipBody);
-    $actualSha = hash_file('sha256', $zipPath);
-    if (!hash_equals($manifest['sha256'], $actualSha)) {
-        $error = 'Checksum SHA256 paket update tidak cocok.';
-        updater_rrmdir($workDir);
-        return false;
-    }
 
     $extractDir = $workDir . DIRECTORY_SEPARATOR . 'extract';
     mkdir($extractDir, 0755, true);
@@ -280,10 +282,10 @@ function updater_install(array $manifest, ?string &$error = null): bool
     updater_copy_tree($appRoot, $backupDir, ['uploads', 'backups', '_release', '.git']);
 
     updater_copy_tree($packageRoot, $appRoot, ['config.php', 'uploads', 'backups', '_release', 'tools', '.git']);
-    set_option('app_version', $manifest['version']);
+    set_option('app_version', $release['version']);
     updater_close();
     updater_rrmdir($workDir);
-    log_activity('system_update', 'Update sistem ke versi ' . $manifest['version']);
+    log_activity('system_update', 'Update sistem ke versi ' . $release['version']);
 
     return true;
 }

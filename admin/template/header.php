@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../bootstrap.php';
+$updateHelperPath = __DIR__ . '/../update_helpers.php';
+if (is_file($updateHelperPath)) {
+    require_once $updateHelperPath;
+}
 require_login();
 
 $madrasah_nama = 'MI SULTAN FATTAH SUKOSONO';
@@ -16,6 +20,8 @@ if ($result = $mysqli->query('SELECT nama, logo FROM madrasah LIMIT 1')) {
 
 $user = current_user();
 $is_admin_user = is_admin();
+$updater_available = $is_admin_user && function_exists('updater_is_open');
+$updater_is_open = $updater_available && updater_is_open();
 
 // Cleanup old notifications
 $mysqli->query("DELETE FROM notifications WHERE created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)");
@@ -541,6 +547,17 @@ if ($notif_res = $mysqli->query($notif_sql)) {
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
+                                <?php if ($is_admin_user): ?>
+                                <a class="dropdown-item <?= (!$updater_available || $updater_is_open) ? 'text-gray-400 disabled' : ''; ?>" href="#" id="btnActivateUpdate" <?= (!$updater_available || $updater_is_open) ? 'aria-disabled="true" tabindex="-1"' : ''; ?>>
+                                    <i class="fas fa-toggle-<?= $updater_is_open ? 'on text-warning' : 'off text-gray-400'; ?> fa-sm fa-fw mr-2"></i>
+                                    <?= $updater_is_open ? 'Update Sistem Aktif' : 'Aktifkan Update Sistem'; ?>
+                                </a>
+                                <a class="dropdown-item <?= $updater_is_open ? '' : 'disabled text-gray-400'; ?>" href="#" id="btnSystemUpdate" <?= $updater_is_open ? '' : 'aria-disabled="true" tabindex="-1"'; ?>>
+                                    <i class="fas fa-sync-alt fa-sm fa-fw mr-2 <?= $updater_is_open ? 'text-primary' : 'text-gray-400'; ?>"></i>
+                                    Update Sistem
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <?php endif; ?>
                                 <a class="dropdown-item" href="#" id="btnLogout">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout

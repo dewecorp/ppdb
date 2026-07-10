@@ -9,6 +9,8 @@ if ($res = $mysqli->query('SELECT nama FROM madrasah LIMIT 1')) {
     $res->free();
 }
 $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
+$csrf_input_html = function_exists('csrf_input') ? csrf_input() : '';
+$csrf_token_value = function_exists('csrf_token') ? csrf_token() : '';
 ?>
             </div>
 
@@ -29,7 +31,15 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
         <i class="fas fa-angle-up"></i>
     </a>
 
-    <form id="logoutForm" action="logout.php" method="post" style="display:none;"><?= csrf_input(); ?></form>
+    <form id="logoutForm" action="logout.php" method="post" style="display:none;"><?= $csrf_input_html; ?></form>
+    <form id="activateUpdateForm" action="system_update.php" method="post" style="display:none;">
+        <?= $csrf_input_html; ?>
+        <input type="hidden" name="aksi" value="activate">
+    </form>
+    <form id="systemUpdateForm" action="system_update.php" method="post" style="display:none;">
+        <?= $csrf_input_html; ?>
+        <input type="hidden" name="aksi" value="install">
+    </form>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -55,7 +65,7 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
             var MADRASAH_NAME = <?= json_encode($madrasah_name); ?>;
             var TODAY = <?= json_encode(date('d-m-Y')); ?>;
             var ACADEMIC_YEAR = <?= json_encode($tahun_ajaran); ?>;
-            var CSRF_TOKEN = <?= json_encode(csrf_token()); ?>;
+            var CSRF_TOKEN = <?= json_encode($csrf_token_value); ?>;
             var ACADEMIC_YEAR_SLUG = (ACADEMIC_YEAR || '').replace(/[^\w-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
             $('form').filter(function () {
@@ -192,6 +202,51 @@ $tahun_ajaran = get_option('tahun_ajaran', date('Y') . '/' . (date('Y') + 1));
                 }).then(function (result) {
                     if (result.isConfirmed) {
                         $('#logoutForm').submit();
+                    }
+                });
+            });
+
+            $('#btnActivateUpdate').on('click', function (e) {
+                e.preventDefault();
+                if ($(this).hasClass('disabled')) return;
+                Swal.fire({
+                    title: 'Aktifkan Update Sistem?',
+                    text: 'Aktifkan hanya saat maintenance dan setelah backup tersedia.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Aktifkan',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#f6a400',
+                    cancelButtonColor: '#6c757d'
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        $('#activateUpdateForm').submit();
+                    }
+                });
+            });
+
+            $('#btnSystemUpdate').on('click', function (e) {
+                e.preventDefault();
+                if ($(this).hasClass('disabled')) return;
+                Swal.fire({
+                    title: 'Update Sistem Sekarang?',
+                    text: 'Sistem akan mengambil latest release dari GitHub dewecorp/ppdb dan membuat backup file terlebih dahulu.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Update',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#4e73df',
+                    cancelButtonColor: '#6c757d'
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Memproses update...',
+                            text: 'Mohon tunggu, jangan tutup halaman ini.',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: function () { Swal.showLoading(); }
+                        });
+                        $('#systemUpdateForm').submit();
                     }
                 });
             });

@@ -1,82 +1,9 @@
 <?php
 require_admin();
-require_once dirname(__DIR__) . '/update_helpers.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_valid_csrf(base_url('admin/pengaturan'));
     $aksi = isset($_POST['aksi']) ? $_POST['aksi'] : '';
-
-    if ($aksi === 'update_save_config') {
-        $manifestUrl = trim((string)($_POST['update_manifest_url'] ?? ''));
-        if ($manifestUrl === '' || (filter_var($manifestUrl, FILTER_VALIDATE_URL) && updater_allowed_host($manifestUrl))) {
-            set_option('update_manifest_url', $manifestUrl);
-            flash('success', 'Konfigurasi update sistem disimpan.');
-        } else {
-            flash('error', 'URL manifest harus URL GitHub yang valid.');
-        }
-        echo '<script>window.location.href="' . esc(base_url('admin/pengaturan')) . '";</script>';
-        exit;
-    }
-
-    if ($aksi === 'update_open') {
-        $password = (string)($_POST['admin_password'] ?? '');
-        $minutes = (int)($_POST['update_minutes'] ?? 15);
-        if (updater_current_password_valid($password)) {
-            updater_open_minutes($minutes);
-            flash('success', 'Updater sistem dibuka sementara. Tutup kembali setelah perawatan selesai.');
-            log_activity('system_update_open', 'Membuka updater sistem');
-        } else {
-            flash('error', 'Password admin tidak valid.');
-        }
-        echo '<script>window.location.href="' . esc(base_url('admin/pengaturan')) . '";</script>';
-        exit;
-    }
-
-    if ($aksi === 'update_close') {
-        updater_close();
-        flash('success', 'Updater sistem ditutup.');
-        log_activity('system_update_close', 'Menutup updater sistem');
-        echo '<script>window.location.href="' . esc(base_url('admin/pengaturan')) . '";</script>';
-        exit;
-    }
-
-    if ($aksi === 'update_check') {
-        if (!updater_is_open()) {
-            flash('error', 'Updater masih tertutup. Buka mode perawatan terlebih dahulu.');
-        } else {
-            $updateError = null;
-            $manifest = updater_manifest($updateError);
-            if ($manifest === null) {
-                flash('error', $updateError ?: 'Gagal membaca manifest update.');
-            } else {
-                flash('success', 'Rilis tersedia: versi ' . $manifest['version'] . '. SHA256: ' . $manifest['sha256']);
-            }
-        }
-        echo '<script>window.location.href="' . esc(base_url('admin/pengaturan')) . '";</script>';
-        exit;
-    }
-
-    if ($aksi === 'update_install') {
-        $password = (string)($_POST['admin_password'] ?? '');
-        if (!updater_is_open()) {
-            flash('error', 'Updater masih tertutup. Buka mode perawatan terlebih dahulu.');
-        } elseif (!updater_current_password_valid($password)) {
-            flash('error', 'Password admin tidak valid.');
-        } else {
-            $updateError = null;
-            $manifest = updater_manifest($updateError);
-            if ($manifest === null) {
-                flash('error', $updateError ?: 'Gagal membaca manifest update.');
-            } elseif (updater_install($manifest, $updateError)) {
-                flash('success', 'Update sistem berhasil ke versi ' . $manifest['version'] . '. Updater sudah ditutup otomatis.');
-            } else {
-                flash('error', $updateError ?: 'Update sistem gagal.');
-            }
-        }
-        echo '<script>window.location.href="' . esc(base_url('admin/pengaturan')) . '";</script>';
-        exit;
-    }
-
     if ($aksi === 'reset_no') {
         if (reset_no_pendaftaran()) {
             flash('success', 'Nomor pendaftaran tahun berjalan berhasil direset ke 001.');
@@ -175,10 +102,6 @@ $_start_raw = get_option('pendaftaran_start_at', '');
 $_end_raw = get_option('pendaftaran_end_at', '');
 $_start_val = $_start_raw !== '' ? date('Y-m-d\TH:i', strtotime($_start_raw)) : '';
 $_end_val = $_end_raw !== '' ? date('Y-m-d\TH:i', strtotime($_end_raw)) : '';
-$update_manifest_url = get_option('update_manifest_url', '');
-$updater_is_open = updater_is_open();
-$updater_enabled_until = (int)get_option('updater_enabled_until', '0');
-$updater_until_label = $updater_enabled_until > 0 ? date('d-m-Y H:i:s', $updater_enabled_until) . ' WIB' : '-';
 ?>
 <div class="container-fluid">
 
@@ -308,81 +231,6 @@ $updater_until_label = $updater_enabled_until > 0 ? date('d-m-Y H:i:s', $updater
 
         <button type="submit" class="btn btn-primary mb-4">Simpan Pengaturan</button>
     </form>
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex flex-wrap align-items-center justify-content-between">
-            <h6 class="m-0 font-weight-bold text-primary">Perawatan Sistem</h6>
-            <span class="badge badge-<?= $updater_is_open ? 'warning' : 'secondary'; ?>">
-                <?= $updater_is_open ? 'Updater terbuka sampai ' . esc($updater_until_label) : 'Updater tertutup'; ?>
-            </span>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-lg-6 mb-4">
-                    <form method="post" class="mb-3">
-                        <input type="hidden" name="aksi" value="update_save_config">
-                        <div class="form-group">
-                            <label>URL Manifest GitHub</label>
-                            <input type="url" name="update_manifest_url" class="form-control" value="<?= esc($update_manifest_url); ?>" placeholder="https://raw.githubusercontent.com/user/repo/main/update.json">
-                            <small class="text-muted">Manifest wajib berisi version, zip_url, dan sha256.</small>
-                        </div>
-                        <button type="submit" class="btn btn-sm btn-primary">Simpan Manifest</button>
-                    </form>
-
-                    <form method="post" class="mb-3">
-                        <input type="hidden" name="aksi" value="update_open">
-                        <div class="form-group">
-                            <label>Password Admin</label>
-                            <input type="password" name="admin_password" class="form-control" autocomplete="current-password" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Durasi Maintenance</label>
-                            <select name="update_minutes" class="form-control">
-                                <option value="15">15 menit</option>
-                                <option value="30">30 menit</option>
-                                <option value="60">60 menit</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-sm btn-warning">Buka Updater</button>
-                    </form>
-
-                    <?php if ($updater_is_open): ?>
-                    <form method="post">
-                        <input type="hidden" name="aksi" value="update_close">
-                        <button type="submit" class="btn btn-sm btn-secondary">Tutup Updater Sekarang</button>
-                    </form>
-                    <?php endif; ?>
-                </div>
-
-                <div class="col-lg-6 mb-4">
-                    <div class="alert alert-light border">
-                        <div class="font-weight-bold mb-2">Format manifest:</div>
-                        <pre class="mb-0" style="white-space:pre-wrap;font-size:0.78rem;">{
-  "version": "20260710120000",
-  "zip_url": "https://github.com/user/repo/releases/download/v1.0.0/ppdb.zip",
-  "sha256": "hash_sha256_zip_64_karakter",
-  "notes": "Ringkasan perubahan"
-}</pre>
-                    </div>
-
-                    <form method="post" class="mb-3">
-                        <input type="hidden" name="aksi" value="update_check">
-                        <button type="submit" class="btn btn-sm btn-info" <?= $updater_is_open ? '' : 'disabled'; ?>>Cek Rilis</button>
-                    </form>
-
-                    <form method="post">
-                        <input type="hidden" name="aksi" value="update_install">
-                        <div class="form-group">
-                            <label>Konfirmasi Password Admin</label>
-                            <input type="password" name="admin_password" class="form-control" autocomplete="current-password" <?= $updater_is_open ? 'required' : 'disabled'; ?>>
-                        </div>
-                        <button type="submit" class="btn btn-sm btn-danger" <?= $updater_is_open ? '' : 'disabled'; ?>>Install Update Terverifikasi</button>
-                        <small class="text-muted d-block mt-2">Sistem akan backup file terlebih dahulu, memverifikasi SHA256, lalu menutup updater otomatis setelah berhasil.</small>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
 </div>
 
