@@ -5,6 +5,9 @@ require_once __DIR__ . '/update_helpers.php';
 
 require_admin();
 
+ini_set('display_errors', '0');
+error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ' . base_url('admin/dashboard'));
     exit;

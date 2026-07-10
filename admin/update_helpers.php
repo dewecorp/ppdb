@@ -185,16 +185,26 @@ function updater_should_skip_path(string $relativePath): bool
     }
 
     $top = explode('/', $relativePath)[0];
-    return in_array($top, ['uploads', 'backups', '_release', 'tools', '.git'], true);
+    if (in_array($top, ['uploads', 'backups', '_release', 'tools', '.git'], true)) {
+        return true;
+    }
+
+    return preg_match('#^assets/vendor/#i', $relativePath) === 1;
 }
 
-function updater_copy_tree(string $source, string $target, array $skipTop = [], string $relativeBase = ''): void
+function updater_copy_tree(string $source, string $target, array $skipTop = [], string $relativeBase = '', ?array &$report = null): void
 {
+    if ($report === null) {
+        $report = ['copied' => 0, 'skipped' => 0, 'failed' => 0];
+    }
     if (!is_dir($source)) {
         return;
     }
     if (!is_dir($target)) {
-        mkdir($target, 0755, true);
+        if (!@mkdir($target, 0755, true) && !is_dir($target)) {
+            $report['failed']++;
+            return;
+        }
     }
 
     $items = scandir($source);
@@ -207,15 +217,25 @@ function updater_copy_tree(string $source, string $target, array $skipTop = [], 
         }
         $relativePath = ltrim($relativeBase . '/' . $item, '/');
         if (updater_should_skip_path($relativePath)) {
+            $report['skipped']++;
             continue;
         }
         $src = $source . DIRECTORY_SEPARATOR . $item;
         $dst = $target . DIRECTORY_SEPARATOR . $item;
         if (is_dir($src) && !is_link($src)) {
-            updater_copy_tree($src, $dst, [], $relativePath);
+            updater_copy_tree($src, $dst, [], $relativePath, $report);
         } elseif (is_file($src)) {
-            copy($src, $dst);
-            @chmod($dst, 0644);
+            $targetDir = dirname($dst);
+            if (!is_dir($targetDir) && !@mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
+                $report['failed']++;
+                continue;
+            }
+            if (@copy($src, $dst)) {
+                @chmod($dst, 0644);
+                $report['copied']++;
+            } else {
+                $report['failed']++;
+            }
         }
     }
 }
@@ -310,13 +330,15 @@ function updater_install(array $release, ?string &$error = null): bool
     $appRoot = dirname(__DIR__);
     $backupDir = ppdb_private_path('updater-backups' . DIRECTORY_SEPARATOR . 'backup-' . date('Ymd-His'));
     mkdir($backupDir, 0755, true);
-    updater_copy_tree($appRoot, $backupDir, ['uploads', 'backups', '_release', '.git']);
+    $backupReport = ['copied' => 0, 'skipped' => 0, 'failed' => 0];
+    updater_copy_tree($appRoot, $backupDir, ['uploads', 'backups', '_release', '.git'], '', $backupReport);
 
-    updater_copy_tree($packageRoot, $appRoot, ['config.php', 'uploads', 'backups', '_release', 'tools', '.git']);
+    $copyReport = ['copied' => 0, 'skipped' => 0, 'failed' => 0];
+    updater_copy_tree($packageRoot, $appRoot, ['config.php', 'uploads', 'backups', '_release', 'tools', '.git'], '', $copyReport);
     set_option('app_version', $release['version']);
     updater_close();
     updater_rrmdir($workDir);
-    log_activity('system_update', 'Update sistem ke versi ' . $release['version']);
+    log_activity('system_update', 'Update sistem ke versi ' . $release['version'] . '. File tersalin: ' . $copyReport['copied'] . ', dilewati: ' . $copyReport['skipped'] . ', gagal: ' . $copyReport['failed']);
 
     return true;
 }
