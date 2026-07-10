@@ -32,7 +32,7 @@ if ($aksi === 'install') {
     $updateError = null;
     $release = updater_latest_release($updateError);
     if ($release === null) {
-        flash('error', $updateError ?: 'Gagal membaca release GitHub.');
+        flash('error', $updateError ?: 'Gagal menyiapkan update dari branch GitHub.');
         header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? base_url('admin/dashboard')));
         exit;
     }

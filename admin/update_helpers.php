@@ -7,7 +7,17 @@ function updater_repo_url(): string
 
 function updater_repo_api_url(): string
 {
-    return 'https://api.github.com/repos/dewecorp/ppdb/releases/latest';
+    return 'https://codeload.github.com/dewecorp/ppdb/zip/refs/heads/master';
+}
+
+function updater_zip_urls(): array
+{
+    return [
+        'https://codeload.github.com/dewecorp/ppdb/zip/refs/heads/master',
+        'https://github.com/dewecorp/ppdb/archive/refs/heads/master.zip',
+        'https://codeload.github.com/dewecorp/ppdb/zip/refs/heads/main',
+        'https://github.com/dewecorp/ppdb/archive/refs/heads/main.zip',
+    ];
 }
 
 function updater_allowed_host(string $url): bool
@@ -46,7 +56,7 @@ function updater_http_get(string $url, ?string &$error = null): ?string
         curl_close($ch);
 
         if ($body === false || $status < 200 || $status >= 300) {
-            $error = $curlError !== '' ? $curlError : 'Gagal mengunduh data dari GitHub.';
+            $error = $curlError !== '' ? $curlError : 'Gagal mengunduh data dari GitHub. HTTP ' . $status . '.';
             return null;
         }
 
@@ -61,7 +71,11 @@ function updater_http_get(string $url, ?string &$error = null): ?string
     ]);
     $body = @file_get_contents($url, false, $context);
     if ($body === false) {
-        $error = 'Gagal mengunduh data dari GitHub.';
+        $statusText = '';
+        if (isset($http_response_header) && is_array($http_response_header) && isset($http_response_header[0])) {
+            $statusText = ' ' . $http_response_header[0];
+        }
+        $error = 'Gagal mengunduh data dari GitHub.' . $statusText;
         return null;
     }
 
@@ -70,34 +84,18 @@ function updater_http_get(string $url, ?string &$error = null): ?string
 
 function updater_latest_release(?string &$error = null): ?array
 {
-    $body = updater_http_get(updater_repo_api_url(), $error);
-    if ($body === null) {
-        return null;
-    }
-
-    $release = json_decode($body, true);
-    if (!is_array($release)) {
-        $error = 'Respons GitHub Release bukan JSON valid.';
-        return null;
-    }
-
-    $version = trim((string)($release['tag_name'] ?? ''));
-    $zipUrl = trim((string)($release['zipball_url'] ?? ''));
-
-    if ($version === '' || $zipUrl === '') {
-        $error = 'Repo GitHub belum memiliki release terbaru yang valid.';
-        return null;
-    }
+    $zipUrl = updater_repo_api_url();
     if (!filter_var($zipUrl, FILTER_VALIDATE_URL) || !updater_allowed_host($zipUrl)) {
         $error = 'URL paket update harus berasal dari GitHub.';
         return null;
     }
 
     return [
-        'version' => $version,
+        'version' => 'master-' . date('YmdHis'),
         'zip_url' => $zipUrl,
-        'release_url' => trim((string)($release['html_url'] ?? updater_repo_url())),
-        'notes' => trim((string)($release['body'] ?? '')),
+        'zip_fallback_urls' => updater_zip_urls(),
+        'release_url' => updater_repo_url() . '/tree/master',
+        'notes' => 'Update dari branch master.',
     ];
 }
 
@@ -168,7 +166,29 @@ function updater_rrmdir(string $dir): void
     @rmdir($dir);
 }
 
-function updater_copy_tree(string $source, string $target, array $skipTop = []): void
+function updater_should_skip_path(string $relativePath): bool
+{
+    $relativePath = trim(str_replace('\\', '/', $relativePath), '/');
+    if ($relativePath === '') {
+        return false;
+    }
+
+    $exact = [
+        'config.php',
+        'admin/update_helpers.php',
+        'admin/system_update.php',
+        'admin/template/header.php',
+        'admin/template/footer.php',
+    ];
+    if (in_array($relativePath, $exact, true)) {
+        return true;
+    }
+
+    $top = explode('/', $relativePath)[0];
+    return in_array($top, ['uploads', 'backups', '_release', 'tools', '.git'], true);
+}
+
+function updater_copy_tree(string $source, string $target, array $skipTop = [], string $relativeBase = ''): void
 {
     if (!is_dir($source)) {
         return;
@@ -185,10 +205,14 @@ function updater_copy_tree(string $source, string $target, array $skipTop = []):
         if ($item === '.' || $item === '..' || in_array($item, $skipTop, true)) {
             continue;
         }
+        $relativePath = ltrim($relativeBase . '/' . $item, '/');
+        if (updater_should_skip_path($relativePath)) {
+            continue;
+        }
         $src = $source . DIRECTORY_SEPARATOR . $item;
         $dst = $target . DIRECTORY_SEPARATOR . $item;
         if (is_dir($src) && !is_link($src)) {
-            updater_copy_tree($src, $dst);
+            updater_copy_tree($src, $dst, [], $relativePath);
         } elseif (is_file($src)) {
             copy($src, $dst);
             @chmod($dst, 0644);
@@ -216,7 +240,7 @@ function updater_validate_package(string $root, ?string &$error = null): bool
         return false;
     }
 
-    $blocked = ['.git', '.env', 'uploads', 'backups', '_release'];
+    $blocked = ['.git', '.env'];
     foreach ($blocked as $name) {
         if (file_exists($root . DIRECTORY_SEPARATOR . $name)) {
             $error = 'Paket update memuat item yang tidak boleh ditimpa: ' . $name;
@@ -227,10 +251,6 @@ function updater_validate_package(string $root, ?string &$error = null): bool
     $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS));
     foreach ($iterator as $file) {
         $path = str_replace('\\', '/', $file->getPathname());
-        if (preg_match('#/(uploads|backups|_release)/#i', $path)) {
-            $error = 'Paket update memuat folder terlarang.';
-            return false;
-        }
         if (preg_match('/\.(phtml|phar|php[0-9])$/i', $path)) {
             $error = 'Paket update memuat tipe script yang tidak diizinkan.';
             return false;
@@ -251,8 +271,19 @@ function updater_install(array $release, ?string &$error = null): bool
     updater_rrmdir($workDir);
     mkdir($workDir, 0755, true);
 
-    $zipBody = updater_http_get($release['zip_url'], $error);
+    $zipBody = null;
+    $downloadErrors = [];
+    $downloadUrls = array_values(array_unique(array_merge([(string)$release['zip_url']], $release['zip_fallback_urls'] ?? [])));
+    foreach ($downloadUrls as $downloadUrl) {
+        $tryError = null;
+        $zipBody = updater_http_get($downloadUrl, $tryError);
+        if ($zipBody !== null) {
+            break;
+        }
+        $downloadErrors[] = $downloadUrl . ' => ' . ($tryError ?: 'gagal');
+    }
     if ($zipBody === null) {
+        $error = 'Gagal mengunduh ZIP branch GitHub. ' . implode(' | ', $downloadErrors);
         return false;
     }
 
