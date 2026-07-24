@@ -2,7 +2,10 @@
 require_once dirname(dirname(__FILE__)) . '/config.php';
 require_once __DIR__ . '/bootstrap.php';
 
-if (is_logged_in()) {
+$login_success = $_SESSION['login_success'] ?? null;
+unset($_SESSION['login_success']);
+
+if (is_logged_in() && !$login_success) {
     header('Location: ' . base_url('admin/dashboard'));
     exit;
 }
@@ -54,8 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (password_verify($password, $user['password'])) {
                 $_SESSION['user_id'] = (int)$user['id'];
                 log_activity('login', 'Login oleh ' . $user['username'], (int)$user['id']);
-                flash('success', 'Selamat datang, ' . $user['username'] . '! Anda berhasil login.');
-                header('Location: ' . base_url('admin/dashboard'));
+                $_SESSION['login_success'] = 'Selamat datang, ' . $user['username'] . '! Anda berhasil login.';
+                header('Location: ' . base_url('admin/login'));
                 exit;
             }
         }
@@ -134,7 +137,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         (function () {
+            var successMessage = <?= json_encode($login_success); ?>;
             var errorMessage = <?= json_encode($error_message); ?>;
+
+            if (successMessage) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Login Berhasil',
+                    text: successMessage,
+                    timer: 2500,
+                    showConfirmButton: false
+                }).then(function () {
+                    window.location.href = <?= json_encode(base_url('admin/dashboard')); ?>;
+                });
+                setTimeout(function () {
+                    window.location.href = <?= json_encode(base_url('admin/dashboard')); ?>;
+                }, 2600);
+            }
+
             if (errorMessage) {
                 Swal.fire({
                     icon: 'error',
