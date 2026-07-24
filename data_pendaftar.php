@@ -39,7 +39,7 @@ if ($wa_number !== '' && strpos($wa_number, '0') === 0) {
     <link rel="icon" type="image/png" href="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>">
     <link rel="shortcut icon" href="<?= esc(base_url('uploads/' . $madrasah['logo'])); ?>">
     <?php endif; ?>
-    <title>Data Pendaftar - PPDB Online <?= esc($madrasah['nama']); ?></title>
+    <title>Data Pendaftar | PPDB Online <?= esc($madrasah['nama']); ?></title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">

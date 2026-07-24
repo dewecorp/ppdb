@@ -199,7 +199,7 @@ if ($stmt->execute()) {
     <html lang="id">
     <head>
         <meta charset="utf-8">
-        <title>Pendaftaran Berhasil - <?= htmlspecialchars($no_pendaftaran, ENT_QUOTES, 'UTF-8'); ?></title>
+        <title>Pendaftaran Berhasil | <?= htmlspecialchars($no_pendaftaran, ENT_QUOTES, 'UTF-8'); ?></title>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
     <body>

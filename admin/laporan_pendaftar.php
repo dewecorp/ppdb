@@ -71,7 +71,7 @@ $totalProses = count_pendaftar('proses');
 
 <head>
     <meta charset="utf-8">
-    <title>Laporan Rekap Pendaftar - TA <?= esc($tahunAjaran); ?></title>
+    <title>Laporan Rekap Pendaftar | TA <?= esc($tahunAjaran); ?></title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
