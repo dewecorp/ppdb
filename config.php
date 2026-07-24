@@ -5,6 +5,26 @@ if (session_status() === PHP_SESSION_NONE) {
 
 date_default_timezone_set('Asia/Jakarta');
 
+// Security headers
+if (!headers_sent()) {
+    // HSTS — only over HTTPS
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+    }
+
+    // Content-Security-Policy
+    $csp = "default-src 'self'; "
+        . "script-src 'self' 'unsafe-inline' https://code.jquery.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.datatables.net; "
+        . "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://cdn.datatables.net; "
+        . "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; "
+        . "img-src 'self' data:; "
+        . "connect-src 'self'; "
+        . "form-action 'self'; "
+        . "frame-ancestors 'self'; "
+        . "base-uri 'self'";
+    header('Content-Security-Policy: ' . $csp);
+}
+
 // APP_VERSION dibaca dari database, hanya berubah saat update berhasil
 function app_version(): string {
     return get_option('app_version', '00000000000000');
