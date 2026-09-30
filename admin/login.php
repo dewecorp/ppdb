@@ -110,9 +110,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <input type="text" name="username" class="form-control form-control-user"
                                                 placeholder="Username" required>
                                         </div>
-                                        <div class="form-group">
-                                            <input type="password" name="password"
-                                                class="form-control form-control-user" placeholder="Password" required>
+                                        <div class="form-group position-relative">
+                                            <input type="password" name="password" id="passwordInput"
+                                                class="form-control form-control-user" placeholder="Password" style="padding-right: 2.75rem;" required>
+                                            <button type="button" id="togglePassword" class="btn btn-link position-absolute text-secondary" style="right: 12px; top: 50%; transform: translateY(-50%); z-index: 10; text-decoration: none; padding: 0;">
+                                                <i class="far fa-eye" id="eyeIcon"></i>
+                                            </button>
                                         </div>
                                         <button type="submit" class="btn btn-primary btn-user btn-block">
                                             Login
@@ -139,6 +142,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         (function () {
             var successMessage = <?= json_encode($login_success); ?>;
             var errorMessage = <?= json_encode($error_message); ?>;
+
+            $('#togglePassword').on('click', function () {
+                var passInput = $('#passwordInput');
+                var eyeIcon = $('#eyeIcon');
+                if (passInput.attr('type') === 'password') {
+                    passInput.attr('type', 'text');
+                    eyeIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    passInput.attr('type', 'password');
+                    eyeIcon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
 
             if (successMessage) {
                 Swal.fire({
